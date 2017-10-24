@@ -9,6 +9,28 @@ logger = logging.getLogger(__name__)
 http = urllib3.PoolManager()
 
 
+class KQueenResponse:
+    status = 200
+    error = ''
+    data = {}
+
+    def __iter__(self):
+        for item in self.data:
+            yield item
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, x):
+        return self.data[x]
+
+    def get(self, item, default=None):
+        if default:
+            return self.data.get(item, default)
+        else:
+            return self.data.get(item)
+
+
 class BaseManager:
     resource_url = ''
 
@@ -48,17 +70,21 @@ class BaseManager:
         else:
             raw = http.request(method, url, headers=headers)
 
+        response = KQueenResponse()
+        response.status = raw.status
+
+        if response.status > 200:
+            response.error = raw.data.decode('utf-8')
+            logger.error('KQueen Client:: {}'.format(raw.data.decode('utf-8')))
+            return response
+
         try:
-            res = json.loads(raw.data.decode('utf-8'))
+            response.data = json.loads(raw.data.decode('utf-8'))
         except json.decoder.JSONDecodeError as e:
-            res = None
-            logger.error(repr(e))
+            response.error = 'JSONDecodeError: {}'.format(repr(e))
+            logger.error('KQueen Client:: {}'.format(repr(e)))
 
-        if raw.status == 401:
-            logger.error('KQueen Client:: Unauthorized: %s' % res.get('description', ''))
-            res = None
-
-        return res
+        return response
 
     def request(self, *args, **kwargs):
         if not self.client.token:
@@ -66,10 +92,10 @@ class BaseManager:
         return self._request(*args, **kwargs)
 
     def list(self):
-        return self.request('') or []
+        return self.request('')
 
     def get(self, uuid):
-        return self.request(uuid) or {}
+        return self.request(uuid)
 
     def create(self, body):
         return self.request('', method='POST', body=body)
@@ -82,13 +108,13 @@ class ClusterManager(BaseManager):
     resource_url = 'clusters/'
 
     def status(self, uuid):
-        return self.request('%s/status' % uuid) or {}
+        return self.request('%s/status' % uuid)
 
     def topology_data(self, uuid):
-        return self.request('%s/topology-data' % uuid) or {}
+        return self.request('%s/topology-data' % uuid)
 
     def kubeconfig(self, uuid):
-        return self.request('%s/kubeconfig' % uuid) or {}
+        return self.request('%s/kubeconfig' % uuid)
 
 
 class ProvisionerManager(BaseManager):
@@ -105,7 +131,7 @@ class UserManager(BaseManager):
 
 class KQueenAPIClient:
     base_url = 'http://localhost:5000/api/v1/'
-    auth_url = 'http://localhost:5000/api/v1/auth'
+    auth_url = base_url + 'auth'
 
     def __init__(self, username=None, password=None, token=None):
         # Save credentials

@@ -19,6 +19,19 @@ logger = logging.getLogger(__name__)
 ui = Blueprint('ui', __name__, template_folder='templates')
 
 
+##############
+# Interceptors
+##############
+
+@ui.before_request
+def test_token():
+    if session.get('user', None):
+        client = KQueenAPIClient(token=session['user']['token'])
+        response = client.user.get(session['user']['user_id'])
+        if response.status == 401:
+            flash('Session expired, please log in again.', 'warning')
+            del session['user']
+
 #############
 # Table Views
 #############
@@ -35,8 +48,10 @@ def index():
 
     if session.get('user', {}).get('token', None):
         client = KQueenAPIClient(token=session['user']['token'])
-        clusters = client.cluster.list()
-        provisioners = client.provisioner.list()
+        _clusters = client.cluster.list()
+        clusters = _clusters.data
+        _provisioners = client.provisioner.list()
+        provisioners = _provisioners.data
 
     for cluster in clusters:
         # TODO: remove this when API returns related object
@@ -80,13 +95,15 @@ def index():
 def organization_manage():
     try:
         client = KQueenAPIClient(token=session['user']['token'])
-        organization = client.organization.get(session['user']['organization_id'])
-        users = client.user.list()
+        _organization = client.organization.get(session['user']['organization_id'])
+        organization = _organization.data
+        _users = client.user.list()
+        users = _users.data
         members = [
             u
             for u
             in users
-            if u['organization'] == session['user']['organization_id'] and u['id'] != session['user_id']
+            if u['organization'] == session['user']['organization_id'] and u['id'] != session['user']['user_id']
         ]
         # Patch members until we actually have these data for realsies
         for member in members:
@@ -115,25 +132,27 @@ def cluster_detail(cluster_id):
         abort(404)
 
     client = KQueenAPIClient(token=session['user']['token'])
-    cluster = client.cluster.get(cluster_id)
+    _cluster = client.cluster.get(cluster_id)
+    cluster = _cluster.data
     if not cluster:
         logger.warning('cluster_detail view: {} not found'.format(str(cluster_id)))
         abort(404)
 
-    _status = {}
+    _status_data = {}
     state_class = 'info'
     state = cluster['state']
     if state == app.config['CLUSTER_OK_STATE']:
         state_class = 'success'
         try:
             _status = client.cluster.status(cluster_id)
+            _status_data = _status.data
         except Exception as e:
             logger.error('cluster_detail view: {}'.format(repr(e)))
             flash('Unable to get information about cluster', 'danger')
     elif state == app.config['CLUSTER_ERROR_STATE']:
         state_class = 'danger'
 
-    status = status_for_cluster_detail(_status)
+    status = status_for_cluster_detail(_status_data)
 
     form = ClusterApplyForm()
     if form.validate_on_submit():
@@ -185,7 +204,7 @@ def login():
 def logout():
     del session['user']
     flash('You were logged out', 'success')
-    return redirect(url_for('.index'))
+    return redirect(url_for('ui.index'))
 
 
 #
@@ -227,7 +246,8 @@ def user_delete(user_id):
 
     try:
         client = KQueenAPIClient(token=session['user']['token'])
-        user = client.user.get(user_id)
+        _user = client.user.get(user_id)
+        user = _user.data
         if not user:
             logger.warning('user_delete view: user {} not found'.format(str(user_id)))
             abort(404)
@@ -296,8 +316,10 @@ def provisioner_delete(provisioner_id):
     try:
         # TODO: block deletion of used provisioner on backend, not here
         client = KQueenAPIClient(token=session['user']['token'])
-        clusters = client.cluster.list()
-        provisioner = client.provisioner.get(provisioner_id)
+        _clusters = client.cluster.list()
+        clusters = _clusters.data
+        _provisioner = client.provisioner.get(provisioner_id)
+        provisioner = _provisioner.data
         if not provisioner:
             logger.warning('provisioner_delete view: {} not found'.format(str(provisioner_id)))
             abort(404)
@@ -322,7 +344,9 @@ def provisioner_delete(provisioner_id):
 def cluster_create():
     form = ClusterCreateForm()
     client = KQueenAPIClient(token=session['user']['token'])
-    form.provisioner.choices = [(p['id'], p['name']) for p in client.provisioner.list()]
+    _provisioners = client.provisioner.list()
+    provisioners = _provisioners.data
+    form.provisioner.choices = [(p['id'], p['name']) for p in provisioners]
     if request.method == 'POST':
         if form.validate_on_submit():
             try:
@@ -373,7 +397,8 @@ def cluster_kubeconfig(cluster_id):
 
     try:
         client = KQueenAPIClient(token=session['user']['token'])
-        cluster = client.cluster.get(cluster_id)
+        _cluster = client.cluster.get(cluster_id)
+        cluster = _cluster.data
         if not cluster:
             logger.warning('cluster_kubeconfig view: {} not found'.format(str(cluster_id)))
             abort(404)
@@ -396,7 +421,8 @@ def cluster_topology_data(cluster_id):
     topology = {}
     try:
         client = KQueenAPIClient(token=session['user']['token'])
-        topology = client.cluster.topology_data(cluster_id)
+        _topology = client.cluster.topology_data(cluster_id)
+        topology = _topology.data
         if not topology:
             logger.warning('cluster_topology_data view: {} not found'.format(str(cluster_id)))
             abort(404)

@@ -7,3 +7,4 @@ def authenticate(username, password):
     if token:
         users = client.user.list()
         return ([u for u in users if u['username'] == username][0], token)
+    return ({}, '')
