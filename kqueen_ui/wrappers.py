@@ -8,7 +8,7 @@ from functools import wraps
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not session.get('user_id', False):
+        if not session.get('user', {}).get('user_id', None):
             return redirect(url_for('ui.login', next=request.url))
         return f(*args, **kwargs)
     return decorated_function

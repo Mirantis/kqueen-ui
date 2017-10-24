@@ -5,8 +5,8 @@ from wtforms.fields.html5 import EmailField
 from wtforms.validators import DataRequired, Email
 
 PROVISIONER_ENGINES = [
-    ('kqueen_ui.engines.JenkinsEngine', 'Jenkins'),
-    ('kqueen_ui.engines.ManualEngine', 'Manual'),
+    ('kqueen.engines.JenkinsEngine', 'Jenkins'),
+    ('kqueen.engines.ManualEngine', 'Manual'),
 ]
 
 

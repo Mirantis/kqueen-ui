@@ -24,7 +24,7 @@ class ClusterTable(Table):
         url_kwargs=dict(cluster_id='id')
     )
     # name = Col('Name')
-    provisioner = Col('Provider')
+    provisioner = Col('Provisioner')
     state = StatusCol('Status')
     delete = DeleteCol(
         'Delete',

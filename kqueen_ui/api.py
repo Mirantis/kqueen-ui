@@ -42,6 +42,8 @@ class BaseManager:
             url = override_url
 
         if method in ['POST', 'CREATE']:
+            if isinstance(body, dict):
+                body = json.dumps(body)
             raw = http.request(method, url, body=body, headers=headers)
         else:
             raw = http.request(method, url, headers=headers)
@@ -70,7 +72,7 @@ class BaseManager:
         return self.request(uuid) or {}
 
     def create(self, body):
-        return self.request('', method='CREATE', body=body)
+        return self.request('', method='POST', body=body)
 
     def delete(self, uuid):
         return self.request(uuid, method='DELETE')
