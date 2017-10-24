@@ -1,13 +1,14 @@
-from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
-                    ChangePasswordForm, UserCreateForm)
-from .tables import ClusterTable, OrganizationMembersTable, ProvisionerTable
-from .utils import status_for_cluster_detail
 from flask import (current_app as app, abort, Blueprint, flash, jsonify, redirect,
                    render_template, request, session, url_for)
 from kqueen_ui.api import KQueenAPIClient
 from kqueen_ui.auth import authenticate
 from kqueen_ui.wrappers import login_required
 from uuid import UUID
+
+from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
+                    ChangePasswordForm, UserCreateForm)
+from .tables import ClusterTable, OrganizationMembersTable, ProvisionerTable
+from .utils import status_for_cluster_detail
 
 import yaml
 import logging
@@ -18,7 +19,12 @@ logger = logging.getLogger(__name__)
 ui = Blueprint('ui', __name__, template_folder='templates')
 
 
-# logins
+#############
+# Table Views
+#############
+
+# Main
+
 @ui.route('/')
 @login_required
 def index():
@@ -69,99 +75,6 @@ def index():
                            provisionertable=provisionertable)
 
 
-@ui.route('/login', methods=['GET', 'POST'])
-def login():
-    error = None
-    if request.method == 'POST':
-        user, token = authenticate(request.form['username'], request.form['password'])
-        if user and token:
-            session['user'] = {
-                'user_id': user['id'],
-                'username': user['username'],
-                'organization_id': user['organization'],
-                'token': token
-            }
-            flash('You were logged in', 'success')
-            next_url = request.form.get('next', '')
-            if next_url:
-                return redirect(next_url)
-            return redirect(url_for('ui.index'))
-        else:
-            error = 'Invalid credentials'
-    return render_template('ui/login.html', error=error)
-
-
-@ui.route('/logout')
-@login_required
-def logout():
-    del session['user']
-    flash('You were logged out', 'success')
-    return redirect(url_for('.index'))
-
-
-@ui.route('/users/changepw', methods=['GET', 'POST'])
-@login_required
-def change_password():
-    form = ChangePasswordForm()
-    if form.validate_on_submit():
-        try:
-            #TODO: implement this after API supports change_password call
-            #user = User.load(session['user_id'])
-            #user.password = form.password_1.data
-            #user.save()
-            flash('Password successfully updated. Please log in again.', 'success')
-            return redirect(url_for('ui.logout'))
-        except Exception as e:
-            logger.error('change_password view: {}'.format(repr(e)))
-            flash('Password update failed.', 'danger')
-    return render_template('ui/change_password.html', form=form)
-
-
-@ui.route('/users/create', methods=['GET', 'POST'])
-@login_required
-def user_create():
-    form = UserCreateForm()
-    if form.validate_on_submit():
-        try:
-            user = {
-                'username': form.username.data,
-                'password': form.password_1.data,
-                'email': form.email.data or None,
-                'organization': session['user']['organization_id']
-            }
-            client = KQueenAPIClient(token=session['user']['token'])
-            client.user.create(user)
-            flash('User {} successfully created.'.format(user['username']), 'success')
-        except Exception as e:
-            logger.error('user_create view: {}'.format(repr(e)))
-            flash('Could not create user.', 'danger')
-        return redirect(url_for('ui.organization_manage'))
-    return render_template('ui/user_create.html', form=form)
-
-
-@ui.route('/users/<user_id>/delete')
-@login_required
-def user_delete(user_id):
-    try:
-        object_id = UUID(user_id, version=4)
-    except ValueError:
-        logger.warning('user_delete view: invalid uuid {}'.format(str(user_id)))
-        abort(404)
-
-    try:
-        client = KQueenAPIClient(token=session['user']['token'])
-        user = client.user.get(user_id)
-        if not user:
-            logger.warning('user_delete view: user {} not found'.format(str(user_id)))
-            abort(404)
-        client.user.delete(user_id)
-        flash('User {} successfully deleted.'.format(user['username']), 'success')
-        return redirect(request.environ['HTTP_REFERER'])
-    except Exception as e:
-        logger.error('user_delete view: {}'.format(repr(e)))
-        abort(500)
-
-
 @ui.route('/organizations/manage')
 @login_required
 def organization_manage():
@@ -192,14 +105,160 @@ def organization_manage():
                            membertable=membertable)
 
 
-# catalog
+@ui.route('/clusters/<cluster_id>/detail', methods=['GET', 'POST'])
+@login_required
+def cluster_detail(cluster_id):
+    try:
+        UUID(cluster_id, version=4)
+    except ValueError:
+        logger.warning('cluster_detail view: invalid uuid {}'.format(str(cluster_id)))
+        abort(404)
+
+    client = KQueenAPIClient(token=session['user']['token'])
+    cluster = client.cluster.get(cluster_id)
+    if not cluster:
+        logger.warning('cluster_detail view: {} not found'.format(str(cluster_id)))
+        abort(404)
+
+    _status = {}
+    state_class = 'info'
+    state = cluster['state']
+    if state == app.config['CLUSTER_OK_STATE']:
+        state_class = 'success'
+        try:
+            _status = client.cluster.status(cluster_id)
+        except Exception as e:
+            logger.error('cluster_detail view: {}'.format(repr(e)))
+            flash('Unable to get information about cluster', 'danger')
+    elif state == app.config['CLUSTER_ERROR_STATE']:
+        state_class = 'danger'
+
+    status = status_for_cluster_detail(_status)
+
+    form = ClusterApplyForm()
+    if form.validate_on_submit():
+        # TODO: implement this after API supports apply call
+        # obj.apply(form.apply.data)
+        pass
+
+    return render_template(
+        'ui/cluster_detail.html',
+        cluster=cluster,
+        status=status,
+        state_class=state_class,
+        form=form
+    )
+
+
 @ui.route('/catalog')
 @login_required
 def catalog():
     return render_template('ui/catalog.html')
 
 
-# provisioner
+# Auth
+
+@ui.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        user, token = authenticate(request.form['username'], request.form['password'])
+        if user and token:
+            session['user'] = {
+                'user_id': user['id'],
+                'username': user['username'],
+                'organization_id': user['organization'],
+                'token': token
+            }
+            flash('You were logged in', 'success')
+            next_url = request.form.get('next', '')
+            if next_url:
+                return redirect(next_url)
+            return redirect(url_for('ui.index'))
+        else:
+            error = 'Invalid credentials'
+    return render_template('ui/login.html', error=error)
+
+
+@ui.route('/logout')
+@login_required
+def logout():
+    del session['user']
+    flash('You were logged out', 'success')
+    return redirect(url_for('.index'))
+
+
+#
+# Form Views
+#
+
+# User
+
+@ui.route('/users/create', methods=['GET', 'POST'])
+@login_required
+def user_create():
+    form = UserCreateForm()
+    if form.validate_on_submit():
+        try:
+            user = {
+                'username': form.username.data,
+                'password': form.password_1.data,
+                'email': form.email.data or None,
+                'organization': session['user']['organization_id']
+            }
+            client = KQueenAPIClient(token=session['user']['token'])
+            client.user.create(user)
+            flash('User {} successfully created.'.format(user['username']), 'success')
+        except Exception as e:
+            logger.error('user_create view: {}'.format(repr(e)))
+            flash('Could not create user.', 'danger')
+        return redirect(url_for('ui.organization_manage'))
+    return render_template('ui/user_create.html', form=form)
+
+
+@ui.route('/users/<user_id>/delete')
+@login_required
+def user_delete(user_id):
+    try:
+        UUID(user_id, version=4)
+    except ValueError:
+        logger.warning('user_delete view: invalid uuid {}'.format(str(user_id)))
+        abort(404)
+
+    try:
+        client = KQueenAPIClient(token=session['user']['token'])
+        user = client.user.get(user_id)
+        if not user:
+            logger.warning('user_delete view: user {} not found'.format(str(user_id)))
+            abort(404)
+        client.user.delete(user_id)
+        flash('User {} successfully deleted.'.format(user['username']), 'success')
+        return redirect(request.environ['HTTP_REFERER'])
+    except Exception as e:
+        logger.error('user_delete view: {}'.format(repr(e)))
+        abort(500)
+
+
+@ui.route('/users/changepw', methods=['GET', 'POST'])
+@login_required
+def user_change_password():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        try:
+            # TODO: implement this after API supports user_change_password call
+            # user = User.load(session['user_id'])
+            # user.password = form.password_1.data
+            # user.save()
+            flash('Password successfully updated. Please log in again.', 'success')
+            return redirect(url_for('ui.logout'))
+        except Exception as e:
+            logger.error('user_change_password view: {}'.format(repr(e)))
+            flash('Password update failed.', 'danger')
+    return render_template('ui/user_change_password.html', form=form)
+
+
+# Provisioner
+
 @ui.route('/provisioners/create', methods=['GET', 'POST'])
 @login_required
 def provisioner_create():
@@ -229,7 +288,7 @@ def provisioner_create():
 @login_required
 def provisioner_delete(provisioner_id):
     try:
-        object_id = UUID(provisioner_id, version=4)
+        UUID(provisioner_id, version=4)
     except ValueError:
         logger.warning('provisioner_delete view: invalid uuid {}'.format(str(provisioner_id)))
         abort(404)
@@ -256,10 +315,11 @@ def provisioner_delete(provisioner_id):
         abort(500)
 
 
-# cluster
+# Cluster
+
 @ui.route('/clusters/deploy', methods=['GET', 'POST'])
 @login_required
-def cluster_deploy():
+def cluster_create():
     form = ClusterCreateForm()
     client = KQueenAPIClient(token=session['user']['token'])
     form.provisioner.choices = [(p['id'], p['name']) for p in client.provisioner.list()]
@@ -273,8 +333,8 @@ def cluster_deploy():
                 if kubeconfig_file:
                     try:
                         kubeconfig = yaml.load(kubeconfig_file.stream)
-                    except:
-                        logger.error('cluster_deploy view: {}'.format(sys.exc_info()))
+                    except Exception:
+                        logger.error('cluster_create view: {}'.format(sys.exc_info()))
 
                 cluster = {
                     'name': form.name.data,
@@ -285,62 +345,28 @@ def cluster_deploy():
                 client.cluster.create(cluster)
                 flash('Provisioning of cluster {} is in progress.'.format(form.name.data), 'success')
             except Exception as e:
-                logger.error('cluster_deploy view: {}'.format(repr(e)))
+                logger.error('cluster_create view: {}'.format(repr(e)))
                 flash('Could not create cluster {}.'.format(form.name.data), 'danger')
             return redirect('/')
-    return render_template('ui/cluster_deploy.html', form=form)
+    return render_template('ui/cluster_create.html', form=form)
 
 
-@ui.route('/clusters/<cluster_id>/detail', methods=['GET', 'POST'])
+@ui.route('/clusters/<cluster_id>/delete')
 @login_required
-def cluster_detail(cluster_id):
-    try:
-        object_id = UUID(cluster_id, version=4)
-    except ValueError:
-        logger.warning('cluster_detail view: invalid uuid {}'.format(str(cluster_id)))
-        abort(404)
+def cluster_delete(cluster_id):
+    # TODO: actually deprovision cluster
+    return redirect('/')
 
-    client = KQueenAPIClient(token=session['user']['token'])
-    cluster = client.cluster.get(cluster_id)
-    if not cluster:
-        logger.warning('cluster_detail view: {} not found'.format(str(cluster_id)))
-        abort(404)
 
-    _status = {}
-    state_class = 'info'
-    state = cluster['state']
-    if state == app.config['CLUSTER_OK_STATE']:
-        state_class = 'success'
-        try:
-            _status = client.cluster.status(cluster_id)
-        except:
-            logger.error('cluster_detail view: {}'.format(repr(e)))
-            flash('Unable to get information about cluster', 'danger')
-    elif state == app.config['CLUSTER_ERROR_STATE']:
-        state_class = 'danger'
-
-    status = status_for_cluster_detail(_status)
-
-    form = ClusterApplyForm()
-    if form.validate_on_submit():
-        #TODO: implement this after API supports apply call
-        #obj.apply(form.apply.data)
-        pass
-
-    return render_template(
-        'ui/cluster_detail.html',
-        cluster=cluster_dict,
-        status=status,
-        state_class=state_class,
-        form=form
-    )
-
+############
+# JSON Views
+############
 
 @ui.route('/clusters/<cluster_id>/kubeconfig')
 @login_required
 def cluster_kubeconfig(cluster_id):
     try:
-        object_id = UUID(cluster_id, version=4)
+        UUID(cluster_id, version=4)
     except ValueError:
         logger.warning('cluster_kubeconfig view: invalid uuid {}'.format(str(cluster_id)))
         abort(400)
@@ -361,9 +387,8 @@ def cluster_kubeconfig(cluster_id):
 @ui.route('/clusters/<cluster_id>/topology-data')
 @login_required
 def cluster_topology_data(cluster_id):
-
     try:
-        object_id = UUID(cluster_id, version=4)
+        UUID(cluster_id, version=4)
     except ValueError:
         logger.error('cluster_topology_data view: invalid uuid {}'.format(str(cluster_id)))
         abort(400)
@@ -382,18 +407,11 @@ def cluster_topology_data(cluster_id):
     return jsonify(topology)
 
 
-@ui.route('/clusters/<cluster_id>/delete')
-@login_required
-def cluster_delete(cluster_id):
-    # TODO: actually deprovision cluster
-    return redirect('/')
-
-
 @ui.route('/clusters/<cluster_id>/deployment-status')
 @login_required
 def cluster_deployment_status(cluster_id):
     try:
-        object_id = UUID(cluster_id, version=4)
+        UUID(cluster_id, version=4)
     except ValueError:
         logger.warning('cluster_deployment_status view: invalid uuid {}'.format(str(cluster_id)))
         abort(404)

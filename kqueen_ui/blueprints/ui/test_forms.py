@@ -34,7 +34,7 @@ class TestKubeconfigUpload:
         provisioner.save()
         cluster.name = 'test_cluster'
 
-        url = url_for('ui.cluster_deploy')
+        url = url_for('ui.cluster_create')
         print(url)
 
         response = client_login.post(url, data={
