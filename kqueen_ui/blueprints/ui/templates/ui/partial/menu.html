@@ -1,7 +1,7 @@
-{% if session.user_id %}
+{% if session.get('user', None) %}
 	<ul class="nav navbar-nav navbar-right">
           <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown" href="#">{{ session.username }}<span class="caret"></span></a>
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">{{ session.user.username }}<span class="caret"></span></a>
             <ul class="dropdown-menu">
               <li><a href="{{ url_for('ui.user_change_password') }}">Change Password</a></li>
               <li><a href="{{ url_for('ui.organization_manage') }}">Manage Organization</a></li>
