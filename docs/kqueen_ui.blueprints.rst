@@ -6,13 +6,12 @@ Subpackages
 
 .. toctree::
 
-    kqueen.blueprints.api
-    kqueen.blueprints.ui
+    kqueen_ui.blueprints.ui
 
 Module contents
 ---------------
 
-.. automodule:: kqueen.blueprints
+.. automodule:: kqueen_ui.blueprints
     :members:
     :undoc-members:
     :show-inheritance:

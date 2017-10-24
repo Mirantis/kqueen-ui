@@ -15,8 +15,8 @@ var path        = require('path');
 var os          = require('os');
 
 // Enviroment variables
-var folderAsset = 'kqueen/asset';
-var folderTemplate = 'kqueen/templates';
+var folderAsset = 'kqueen_ui/asset';
+var folderTemplate = 'kqueen_ui/templates';
 var bootstrapDir = './node_modules/bootstrap-sass';
 
 // Other variables
@@ -187,7 +187,7 @@ gulp.task('favicon-update', function(done) {
 var runningServer;
 gulp.task('run-server', function(cb) {
         if (runningServer) runningServer.kill()
-        runningServer = child.exec('. venv/bin/activate; export PYTHONPATH=`pwd`; python -m kqueen', {maxBuffer: 1024 * 10000}, function(err, stdout, stderr) {
+        runningServer = child.exec('. venv/bin/activate; export PYTHONPATH=`pwd`; python -m kqueen_ui', {maxBuffer: 1024 * 10000}, function(err, stdout, stderr) {
                 console.log(stdout);
                 console.log(stderr);
                 cb(err);
@@ -196,15 +196,15 @@ gulp.task('run-server', function(cb) {
 
 // Monitor files for changes
 gulp.task('watch', function () {
-    watch('./kqueen/asset/dynamic/**/*.scss', function() {
+    watch('./kqueen_ui/asset/dynamic/**/*.scss', function() {
     	gulp.start('sass');
         gulp.start('run-server');
     });
-    watch('./kqueen/asset/dynamic/**/*.js', function() {
+    watch('./kqueen_ui/asset/dynamic/**/*.js', function() {
         gulp.start('javascript-all');
         gulp.start('run-server');
     });
-    watch('./kqueen/**/**/*.py', function() {
+    watch('./kqueen_ui/**/**/*.py', function() {
         gulp.start('run-server');
     });
 });

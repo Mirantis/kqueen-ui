@@ -1,7 +1,7 @@
-kqueen
-======
+kqueen_ui
+=========
 
 .. toctree::
    :maxdepth: 4
 
-   kqueen
+   kqueen_ui

@@ -4,7 +4,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
-SPHINXPROJ    = kqueen
+SPHINXPROJ    = kqueen_ui
 SOURCEDIR     = .
 BUILDDIR      = _build
 

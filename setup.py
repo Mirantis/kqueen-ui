@@ -14,7 +14,7 @@ setup(
     author_email='atengler@mirantis.com',
     license='MIT',
     url='https://github.com/atengler/kqueen-ui/',
-    download_url='https://github.com/Mirantis/atengler/archive/v{}.tar.gz'.format(version),
+    download_url='https://github.com/atengler/archive/v{}.tar.gz'.format(version),
     packages=find_packages(),
     zip_safe=False,
     install_requires=[

@@ -1,1 +1,1 @@
-recursive-include kqueen/blueprints/ *.html
+recursive-include kqueen_ui/blueprints/ *.html

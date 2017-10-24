@@ -1,37 +1,37 @@
-kqueen\.blueprints\.ui package
+kqueen_ui\.blueprints\.ui package
 ==============================
 
 Submodules
 ----------
 
-kqueen\.blueprints\.ui\.forms module
+kqueen_ui\.blueprints\.ui\.forms module
 ------------------------------------
 
-.. automodule:: kqueen.blueprints.ui.forms
+.. automodule:: kqueen_ui.blueprints.ui.forms
     :members:
     :undoc-members:
     :show-inheritance:
 
-kqueen\.blueprints\.ui\.tables module
+kqueen_ui\.blueprints\.ui\.tables module
 -------------------------------------
 
-.. automodule:: kqueen.blueprints.ui.tables
+.. automodule:: kqueen_ui.blueprints.ui.tables
     :members:
     :undoc-members:
     :show-inheritance:
 
-kqueen\.blueprints\.ui\.tests module
+kqueen_ui\.blueprints\.ui\.tests module
 ------------------------------------
 
-.. automodule:: kqueen.blueprints.ui.tests
+.. automodule:: kqueen_ui.blueprints.ui.tests
     :members:
     :undoc-members:
     :show-inheritance:
 
-kqueen\.blueprints\.ui\.views module
+kqueen_ui\.blueprints\.ui\.views module
 ------------------------------------
 
-.. automodule:: kqueen.blueprints.ui.views
+.. automodule:: kqueen_ui.blueprints.ui.views
     :members:
     :undoc-members:
     :show-inheritance:
@@ -40,7 +40,7 @@ kqueen\.blueprints\.ui\.views module
 Module contents
 ---------------
 
-.. automodule:: kqueen.blueprints.ui
+.. automodule:: kqueen_ui.blueprints.ui
     :members:
     :undoc-members:
     :show-inheritance:
