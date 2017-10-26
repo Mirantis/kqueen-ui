@@ -37,19 +37,21 @@ class BaseManager:
     def __init__(self, client):
         self.client = client
 
-    def _login(self):
-        body = json.dumps({
+    def login(self):
+        payload = json.dumps({
             'username': self.client.username,
             'password': self.client.password
         })
 
-        r = self._request('', override_url=self.client.auth_url, method='POST', body=body, auth=False)
-        if r.get('access_token', None):
-            self.client.token = r['access_token']
-        else:
-            logger.warning('KQueen Client:: Could not get access token')
+        r = self._request('', override_url=self.client.auth_url, method='POST', payload=payload, auth=False)
+        token = r.data.get('access_token', None)
+        error = r.error
+        self.client.token = token
+        if error:
+            logger.warning('KQueen Client:: Could not get access token: {}'.format(error))
+        return token, error
 
-    def _request(self, url_suffix, method='GET', body=None, override_url=None, auth=True):
+    def _request(self, url_suffix, method='GET', payload=None, override_url=None, auth=True):
         headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -63,14 +65,23 @@ class BaseManager:
         if override_url:
             url = override_url
 
+        body = None
         if method in ['POST', 'CREATE']:
-            if isinstance(body, dict):
-                body = json.dumps(body)
-            raw = http.request(method, url, body=body, headers=headers)
-        else:
-            raw = http.request(method, url, headers=headers)
+            if isinstance(payload, dict):
+                body = json.dumps(payload)
+            else:
+                body = payload
 
         response = KQueenResponse()
+
+        try:
+            raw = http.request(method, url, body=body, headers=headers)
+        except Exception as e:
+            response.error = repr(e)
+            response.status = -1
+            logger.error('KQueen Client:: {}'.format(repr(e)))
+            return response
+
         response.status = raw.status
 
         if response.status > 200:
@@ -97,8 +108,8 @@ class BaseManager:
     def get(self, uuid):
         return self.request(uuid)
 
-    def create(self, body):
-        return self.request('', method='POST', body=body)
+    def create(self, payload):
+        return self.request('', method='POST', payload=payload)
 
     def delete(self, uuid):
         return self.request(uuid, method='DELETE')
@@ -139,10 +150,8 @@ class KQueenAPIClient:
         self.password = password
         self.token = token
         # Register managers
+        self.base = BaseManager(self)
         self.cluster = ClusterManager(self)
         self.provisioner = ProvisionerManager(self)
         self.organization = OrganizationManager(self)
         self.user = UserManager(self)
-        # Call for token on any manager if there is no token
-        if not self.token:
-            self.cluster._login()

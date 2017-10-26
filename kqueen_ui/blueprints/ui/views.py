@@ -27,10 +27,12 @@ ui = Blueprint('ui', __name__, template_folder='templates')
 def test_token():
     if session.get('user', None):
         client = KQueenAPIClient(token=session['user']['token'])
-        response = client.user.get(session['user']['user_id'])
+        response = client.user.get(session['user']['id'])
         if response.status == 401:
             flash('Session expired, please log in again.', 'warning')
             del session['user']
+        if response.status == -1:
+            flash('Backend is unavailable at this time, please try again later.', 'danger')
 
 #############
 # Table Views
@@ -55,7 +57,7 @@ def index():
 
     for cluster in clusters:
         # TODO: remove this when API returns related object
-        cluster_prv = [p for p in provisioners if p['id'] == cluster['provisioner']]
+        cluster_prv = [p for p in provisioners if p['id'] in cluster['provisioner']]
         cluster['provisioner'] = cluster_prv[0]['name'] if cluster_prv else '-'
         if 'state' in cluster:
             if app.config['CLUSTER_ERROR_STATE'] not in cluster['state']:
@@ -96,7 +98,7 @@ def index():
 def organization_manage():
     try:
         client = KQueenAPIClient(token=session['user']['token'])
-        _organization = client.organization.get(session['user']['organization_id'])
+        _organization = client.organization.get(session['user']['organization'])
         organization = _organization.data
         _users = client.user.list()
         users = _users.data
@@ -104,7 +106,7 @@ def organization_manage():
             u
             for u
             in users
-            if u['organization'] == session['user']['organization_id'] and u['id'] != session['user']['user_id']
+            if u['organization'] == session['user']['organization'] and u['id'] != session['user']['id']
         ]
         # Patch members until we actually have these data for realsies
         for member in members:
@@ -182,19 +184,16 @@ def catalog():
 def login():
     error = None
     if request.method == 'POST':
-        user, token = authenticate(request.form['username'], request.form['password'])
-        if user and token:
-            session['user'] = {
-                'user_id': user['id'],
-                'username': user['username'],
-                'organization_id': user['organization'],
-                'token': token
-            }
+        user, _error = authenticate(request.form['username'], request.form['password'])
+        if user:
+            session['user'] = user
             flash('You were logged in', 'success')
             next_url = request.form.get('next', '')
             if next_url:
                 return redirect(next_url)
             return redirect(url_for('ui.index'))
+        elif _error:
+            error = 'Could not contact authentication backend, please try again later.'
         else:
             error = 'Invalid credentials'
     return render_template('ui/login.html', error=error)
@@ -224,7 +223,7 @@ def user_create():
                 'username': form.username.data,
                 'password': form.password_1.data,
                 'email': form.email.data or None,
-                'organization': session['user']['organization_id']
+                'organization': session['user']['organization']
             }
             client = KQueenAPIClient(token=session['user']['token'])
             client.user.create(user)
@@ -267,7 +266,7 @@ def user_change_password():
     if form.validate_on_submit():
         try:
             # TODO: implement this after API supports user_change_password call
-            # user = User.load(session['user_id'])
+            # user = User.load(session['user']['id'])
             # user.password = form.password_1.data
             # user.save()
             flash('Password successfully updated. Please log in again.', 'success')

@@ -6,12 +6,12 @@ logger = logging.getLogger(__name__)
 
 
 def authenticate(username, password):
+    user = {}
     client = KQueenAPIClient(username=username, password=password)
-    token = client.token
+    token, error = client.base.login()
     if token:
         _users = client.user.list()
         users = _users.data
-        if not _users.error:
-            return ([u for u in users if u['username'] == username][0], token)
-        logger.error(_users.error)
-    return ({}, '')
+        user = [u for u in users if u['username'] == username][0]
+        user['token'] = token
+    return user, error
