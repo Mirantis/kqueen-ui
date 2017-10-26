@@ -105,6 +105,7 @@ ENV/
 
 # NPM asset dir
 node_modules/
+package-lock.json
 
 # DO NOT COMMIT LOCAL CONFIG
 kqueen_ui/config_local.py
