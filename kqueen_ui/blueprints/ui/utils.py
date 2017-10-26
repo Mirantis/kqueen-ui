@@ -1,3 +1,7 @@
+from flask import current_app as app
+from kqueen_ui.api import KQueenAPIClient
+
+
 def status_for_cluster_detail(_status):
     status = {}
     podcount = 0
@@ -141,3 +145,9 @@ def prettify_engine_name(engine):
     if engine.endswith('Engine'):
         engine = engine[:-6]
     return engine
+
+
+def get_kqueen_client(username=None, password=None, token=None):
+    base_url = app.config['KQUEEN_API_URL']
+    auth_url = app.config['KQUEEN_AUTH_URL']
+    return KQueenAPIClient(username, password, token, base_url, auth_url)

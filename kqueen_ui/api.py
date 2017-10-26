@@ -141,14 +141,21 @@ class UserManager(BaseManager):
 
 
 class KQueenAPIClient:
-    base_url = 'http://localhost:5000/api/v1/'
-    auth_url = base_url + 'auth'
 
-    def __init__(self, username=None, password=None, token=None):
+    def __init__(
+        self,
+        username=None,
+        password=None,
+        token=None,
+        base_url='http://localhost:5000/api/v1/',
+        auth_url='http://localhost:5000/api/v1/auth'
+    ):
         # Save credentials
         self.username = username
         self.password = password
         self.token = token
+        self.base_url = base_url
+        self.auth_url = auth_url
         # Register managers
         self.base = BaseManager(self)
         self.cluster = ClusterManager(self)

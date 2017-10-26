@@ -1,0 +1,8 @@
+version: '2'
+services:
+  kqueen_ui:
+    image: kqueen-ui
+    ports:
+      - 127.0.0.1:5080:5080
+    environment:
+      KQUEEN_CONFIG_FILE: 'config/prod.py'

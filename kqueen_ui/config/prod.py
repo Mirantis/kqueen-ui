@@ -2,8 +2,8 @@ DEBUG = True
 
 # App secret
 SECRET_KEY = 'secret'
-KQUEEN_API_URL = 'http://localhost:5000/api/v1/'
-KQUEEN_AUTH_URL = 'http://localhost:5000/api/v1/auth'
+KQUEEN_API_URL = 'http://kqueen:5000/api/v1/'
+KQUEEN_AUTH_URL = 'http://kqueen:5000/api/v1/auth'
 
 # Cluster statuses
 CLUSTER_ERROR_STATE = 'Error'

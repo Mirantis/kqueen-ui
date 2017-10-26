@@ -1,0 +1,9 @@
+coveralls
+flake8
+ipython
+pytest
+pytest-cov
+pytest-flask
+sphinx
+sphinx-autobuild
+sphinx_rtd_theme
