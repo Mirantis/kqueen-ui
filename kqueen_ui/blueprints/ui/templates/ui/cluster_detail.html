@@ -6,29 +6,9 @@
 Cluster {{ cluster.name }} detail
 {% endblock %}
 
-
 {% block content %}
-<div class="box overview_detail_top">
-  <div class="col-sm-4">
-    <a href="{{ url_for('ui.cluster_kubeconfig', cluster_id=cluster.id) }}" class="btn btn-primary btn-xs">Download kubeconfig</a>
-  </div>
-  <div class="col-sm-4" id="state">
-    <a class="btn btn-{{ state_class }} btn-xs" style="pointer-events: none;">State: {{ cluster.state }}</a>
-  </div>
-  <div class="col-sm-4" id="progress">
-    {% if cluster.state == config.CLUSTER_PROVISIONING_STATE %}
-      {% set initial_progress = 1 %}
-    {% else %}
-      {% set initial_progress = 100 %}
-    {% endif %}
-    <div class="progress-bar-background">
-      <span>{% if cluster.state == config.CLUSTER_PROVISIONING_STATE %}{{ initial_progress }}%{% else %}Done{% endif %}</span>
-      <div class="progress-bar" style="width: {{ initial_progress }}%;"></div>
-    </div>
-  </div>
-</div>
 
-<div class="box overview_detail_bot">
+<div class="overview">
   <div class="col-sm-2 col-sm-offset-1 clearfix">
     <div class="pie_progress" role="progressbar" data-goal="{{ status.overview.namespaces }}" aria-valuemax="{{ status.overview.namespaces }}">
       <div class="pie_progress__number">0</div>
@@ -59,6 +39,26 @@ Cluster {{ cluster.name }} detail
     <div class="pie_progress" role="progressbar" data-goal="{{ status.overview.services }}" aria-valuemax="{{ status.overview.services }}"> 
       <div class="pie_progress__number">0</div>
       <div class="pie_progress__label">Services</div>
+    </div>
+  </div>
+</div>
+
+<div class="overview-actions">
+  <div class="col-sm-4">
+    <a href="{{ url_for('ui.cluster_kubeconfig', cluster_id=cluster.id) }}" class="btn btn-primary btn-xs">Download kubeconfig</a>
+  </div>
+  <div class="col-sm-4" id="state">
+    <a class="btn btn-{{ state_class }} btn-xs" style="pointer-events: none;">State: {{ cluster.state }}</a>
+  </div>
+  <div class="col-sm-4" id="progress">
+    {% if cluster.state == config.CLUSTER_PROVISIONING_STATE %}
+      {% set initial_progress = 1 %}
+    {% else %}
+      {% set initial_progress = 100 %}
+    {% endif %}
+    <div class="progress-bar-background">
+      <span>{% if cluster.state == config.CLUSTER_PROVISIONING_STATE %}{{ initial_progress }}%{% else %}Done{% endif %}</span>
+      <div class="progress-bar" style="width: {{ initial_progress }}%;"></div>
     </div>
   </div>
 </div>

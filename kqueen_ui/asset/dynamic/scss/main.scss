@@ -38,7 +38,8 @@ ul.link-list {
   @extend .well;
 }
 
-.overview {
+.overview-box {
+  @extend .box;
   @extend .text-center;
   .btn {
     width: 100%;
@@ -48,13 +49,13 @@ ul.link-list {
   }
 }
 
-.overview_detail_top {
-  @extend .overview;
-  margin-bottom: 20px;
+.overview-actions {
+  margin-top: -30px;
+  @extend .overview-box;
 }
 
-.overview_detail_bot {
-  @extend .overview;
+.overview {
+  @extend .overview-box;
   min-height: 160px;
   padding: 10px;
 }
@@ -339,12 +340,8 @@ footer {
 // Radial progress bar
 
 .pie_progress {
-  width: 160px;
-  margin: 10px auto;
-}
-
-.overview_detail_bot .pie_progress {
   width: 120px;
+  margin: 10px auto;
 }
 
 @media all and (max-width: 768px) {
