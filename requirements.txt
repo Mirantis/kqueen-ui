@@ -2,3 +2,5 @@ Flask==0.12.2
 Flask-Table
 Flask-WTF
 gunicorn
+pyyaml
+urllib3
