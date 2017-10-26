@@ -8,7 +8,7 @@ from uuid import UUID
 from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
                     ChangePasswordForm, UserCreateForm)
 from .tables import ClusterTable, OrganizationMembersTable, ProvisionerTable
-from .utils import status_for_cluster_detail
+from .utils import prettify_engine_name, status_for_cluster_detail
 
 import yaml
 import logging
@@ -64,6 +64,7 @@ def index():
     clustertable = ClusterTable(clusters)
 
     for provisioner in provisioners:
+        provisioner['engine_name'] = prettify_engine_name(provisioner['engine'])
         if 'state' in provisioner:
             if app.config['PROVISIONER_ERROR_STATE'] not in provisioner['state']:
                 healthy_provisioners = healthy_provisioners + 1

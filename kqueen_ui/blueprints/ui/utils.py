@@ -133,3 +133,11 @@ def status_for_cluster_detail(_status):
     }
 
     return status
+
+
+def prettify_engine_name(engine):
+    if '.' in engine:
+        engine = engine.split('.')[-1]
+    if engine.endswith('Engine'):
+        engine = engine[:-6]
+    return engine
