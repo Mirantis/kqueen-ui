@@ -25,6 +25,13 @@ def create_app(config_file=config_file):
     else:
         raise Exception('Config file {} could not be loaded.'.format(config_file))
 
+    # allow override of backend urls from env variables
+    kqueen_api_url = os.getenv('KQUEEN_API_URL', app.config['KQUEEN_API_URL'])
+    kqueen_auth_url = os.getenv('KQUEEN_AUTH_URL', app.config['KQUEEN_AUTH_URL'])
+    app.config.update(
+        KQUEEN_API_URL=kqueen_api_url,
+        KQUEEN_AUTH_URL=kqueen_auth_url
+    )
     return app
 
 
