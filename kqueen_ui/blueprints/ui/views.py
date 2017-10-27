@@ -97,7 +97,7 @@ def index():
 def organization_manage():
     try:
         client = get_kqueen_client(token=session['user']['token'])
-        _organization = client.organization.get(session['user']['organization'])
+        _organization = client.organization.get(session['user']['organization']['id'])
         organization = _organization.data
         _users = client.user.list()
         users = _users.data
@@ -105,7 +105,7 @@ def organization_manage():
             u
             for u
             in users
-            if u['organization'] == session['user']['organization'] and u['id'] != session['user']['id']
+            if u['organization']['id'] == session['user']['organization']['id'] and u['id'] != session['user']['id']
         ]
         # Patch members until we actually have these data for realsies
         for member in members:
@@ -218,11 +218,12 @@ def user_create():
     form = UserCreateForm()
     if form.validate_on_submit():
         try:
+            organization = 'Organization:{}'.format(session['user']['organization']['id'])
             user = {
                 'username': form.username.data,
                 'password': form.password_1.data,
                 'email': form.email.data or None,
-                'organization': session['user']['organization']
+                'organization': organization
             }
             client = get_kqueen_client(token=session['user']['token'])
             client.user.create(user)

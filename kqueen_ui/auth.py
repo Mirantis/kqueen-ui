@@ -1,4 +1,4 @@
-from kqueen_ui.api import KQueenAPIClient
+from kqueen_ui.blueprints.ui.utils import get_kqueen_client
 
 import logging
 
@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 def authenticate(username, password):
     user = {}
-    client = KQueenAPIClient(username=username, password=password)
+    client = get_kqueen_client(username=username, password=password)
     token, error = client.base.login()
     if token:
         _users = client.user.list()
