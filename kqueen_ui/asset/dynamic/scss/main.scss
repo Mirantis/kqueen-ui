@@ -29,6 +29,10 @@ ul.link-list {
   margin: 12px 0px 18px 0px;
 }
 
+.clickable {
+  cursor: pointer;
+}
+
 .box {
   margin-bottom: 50px;
   @include prefix(box-shadow, 1px 1px 4px 0px rgba(187,187,187,1), webkit moz);

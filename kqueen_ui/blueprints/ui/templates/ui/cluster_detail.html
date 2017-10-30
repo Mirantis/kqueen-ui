@@ -224,6 +224,84 @@ Cluster {{ cluster.name }} detail
           {% else %}
           <tr style="pointer-events: none;"><td colspan="6" class="text-center">No Items</td></tr>
           {% endfor %}
+
+    <h3>Persistent Volumes and Claims</h3>
+    <div class="table-container">
+      <table class="table table-hover no-actions" id="table-pvc">
+        <thead>
+          <th>Name</th>
+          <th>Namespace</th>
+          <th>Requested Capacity</th>
+          <th>Storage Class</th>
+          <th>Status</th>
+          <th>Created At</th>
+          <th>Deleted At</th>
+        </thead>
+        <tbody>
+          {% for pvc in status.persistent_volume_claims %}
+          <tr{% if pvc.volume %} data-toggle="collapse" data-target="#pvc-{{ loop.index }}" class="clickable"{% endif %}>
+            <td>{{ pvc.name }}</td>
+            <td>{{ pvc.namespace }}</td>
+            <td>{{ pvc.requested_capacity }}</td>
+            <td>{{ pvc.storage_class }}</td>
+            <td>{{ pvc.status }}</td>
+            <td>{{ pvc.creation_timestamp }}</td>
+            <td>{{ pvc.deletion_timestamp }}</td>
+          </tr>
+          {% if pvc.volume %}
+          <tr>
+            <td colspan="7" style="padding: 0px;">
+              <div style="margin: 8px;"id="pvc-{{ loop.index }}" class="collapse">
+                <table class="table table-hover no-actions" id="table-pv">
+                  <tbody>
+                    <tr>
+                      <th>Name</th>
+                      <td>{{ pvc.volume.name }}</td>
+                    </tr>
+                    <tr>
+                      <th>Capacity</th>
+                      <td>{{ pvc.volume.capacity }}</td>
+                    </tr>
+                    <tr>
+                      <th>Storage Class</th>
+                      <td>{{ pvc.volume.storage_class }}</td>
+                    </tr>
+                    <tr>
+                      <th>Driver</th>
+                      <td>
+                        <span title="Driver Metadata"
+                              style="cursor: help; color: #4bbfaf;"
+                              data-html="true"
+                              data-toggle="popover"
+                              data-trigger="hover"
+                              data-content="<ul>{% for key, value in pvc.volume.driver.metadata.items() %}<li>{{ key }}: {{value}}</li>{% endfor %}</ul>">
+                          {{ pvc.volume.driver.name }}
+                        </span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Access Modes</th>
+                      <td>{{ pvc.volume.access_modes }}</td>
+                    </tr>
+                    <tr>
+                      <th>Status</th>
+                      <td>{{ pvc.volume.status }}</td>
+                    </tr>
+                    <tr>
+                      <th>Created At</th>
+                      <td>{{ pvc.volume.creation_timestamp }}</td>
+                    </tr>
+                    <tr>
+                      <th>Deleted At</th>
+                      <td>{{ pvc.volume.deletion_timestamp }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+          {% endif %}
+          {% endfor %}
         </tbody>
       </table>
     </div>
@@ -348,7 +426,11 @@ Cluster {{ cluster.name }} detail
 
 {% block extrajs %}
 <script>
+<<<<<<< a4e0e94f6fcd7e192b63589c388b2c1cdf41358a
   $('[data-toggle="popover"]').popover();
+=======
+  $('[data-toggle="popover"]').popover(); 
+>>>>>>> Add PVC table with collapsible PV detail
   K8SVisualisations.init("{{ url_for('ui.cluster_topology_data', cluster_id=cluster.id) }}");
 </script>
 {% if cluster.state == config.CLUSTER_PROVISIONING_STATE %}
