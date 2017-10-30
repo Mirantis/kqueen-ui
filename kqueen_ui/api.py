@@ -75,7 +75,7 @@ class BaseManager:
             url = override_url
 
         body = None
-        if method in ['POST', 'CREATE']:
+        if method in ['POST', 'PATCH']:
             if isinstance(payload, dict):
                 body = json.dumps(payload)
             else:
@@ -123,6 +123,9 @@ class BaseManager:
     def delete(self, uuid):
         return self.request(uuid, method='DELETE')
 
+    def update(self, uuid, payload):
+        return self.request(uuid, method='PATCH', payload=payload)
+
 
 class ClusterManager(BaseManager):
     resource_url = 'clusters/'
@@ -147,6 +150,12 @@ class OrganizationManager(BaseManager):
 
 class UserManager(BaseManager):
     resource_url = 'users/'
+
+    def update(self, uuid, payload):
+        organization = payload.get('organization', None)
+        if organization and isinstance(organization, dict):
+            payload['organization'] = 'Organization:{}'.format(payload['organization']['id'])
+        return self.request(uuid, method='PATCH', payload=payload)
 
 
 class KQueenAPIClient:

@@ -266,12 +266,16 @@ def user_change_password():
     form = ChangePasswordForm()
     if form.validate_on_submit():
         try:
-            # TODO: implement this after API supports user_change_password call
-            # user = User.load(session['user']['id'])
-            # user.password = form.password_1.data
-            # user.save()
-            flash('Password successfully updated. Please log in again.', 'success')
-            return redirect(url_for('ui.logout'))
+            client = get_kqueen_client(token=session['user']['token'])
+            _user = client.user.get(session['user']['id'])
+            if _user.status == 200:
+                user = _user.data
+                user['password'] = form.password_1.data
+                update = client.user.update(user['id'], user)
+                if update.status == 200:
+                    flash('Password successfully updated. Please log in again.', 'success')
+                    return redirect(url_for('ui.logout'))
+            flash('Could not change password. Please try again later.', 'danger')
         except Exception as e:
             logger.error('user_change_password view: {}'.format(repr(e)))
             flash('Password update failed.', 'danger')
