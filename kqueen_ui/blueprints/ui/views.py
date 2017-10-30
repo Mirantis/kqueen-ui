@@ -192,9 +192,10 @@ def login():
                 return redirect(next_url)
             return redirect(url_for('ui.index'))
         elif _error:
-            error = 'Could not contact authentication backend, please try again later.'
-        else:
-            error = 'Invalid credentials'
+            if _error['status'] == 401:
+                error = 'Invalid credentials.'
+            else:
+                error = 'Could not contact authentication backend, please try again later.'
     return render_template('ui/login.html', error=error)
 
 

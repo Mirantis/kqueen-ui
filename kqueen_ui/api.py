@@ -45,10 +45,19 @@ class BaseManager:
 
         r = self._request('', override_url=self.client.auth_url, method='POST', payload=payload, auth=False)
         token = r.data.get('access_token', None)
-        error = r.error
+        error = None
         self.client.token = token
-        if error:
-            logger.warning('KQueen Client:: Could not get access token: {}'.format(error))
+        if r.error:
+            try:
+                _msg = json.loads(r.error)
+                msg = _msg['description']
+            except Exception:
+                msg = r.error
+            error = {
+                'status': r.status,
+                'description': msg
+            }
+            logger.warning('KQueen Client:: Could not get access token: {}'.format(r.error))
         return token, error
 
     def _request(self, url_suffix, method='GET', payload=None, override_url=None, auth=True):
