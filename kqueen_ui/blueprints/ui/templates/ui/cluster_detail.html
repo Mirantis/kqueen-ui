@@ -221,6 +221,8 @@ Cluster {{ cluster.name }} detail
             <td><span data-toggle="popover" data-trigger="hover" data-content="{{ image.names[0] }}">{{ image.names[-1] }}</span></td>
             <td>{{ image.size_bytes }}</td>
           </tr>
+          {% else %}
+          <tr style="pointer-events: none;"><td colspan="6" class="text-center">No Items</td></tr>
           {% endfor %}
         </tbody>
       </table>
