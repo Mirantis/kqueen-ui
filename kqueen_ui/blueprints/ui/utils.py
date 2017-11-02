@@ -8,6 +8,77 @@ def status_for_cluster_detail(_status):
     podcount = 0
     images = []
 
+    _persistent_volumes = {}
+    if 'persistent_volumes' in _status:
+        for pv in _status['persistent_volumes']:
+            pv_storage_class = pv['spec'].pop('storage_class_name', '-')
+            pv_host_path = pv['spec'].pop('host_path', '-')
+            pv_capacity = pv['spec'].pop('capacity', {}).get('storage', '-')
+            pv_access_modes = ', '.join(pv['spec'].pop('access_modes', []))
+            pv_reclaim_policy = pv['spec'].pop('persistent_volume_reclaim_policy', '-')
+            pv_claim_ref = pv['spec'].pop('claim_ref', {})
+            # deduce storage driver from the remaining spec keys
+            pv_driver = {
+                'name': '-',
+                'metadata': {}
+            }
+            for spec_name, spec in pv['spec'].items():
+                if spec and isinstance(spec, dict):
+                    pv_driver['name'] = spec_name
+                    pv_driver['metadata'] = spec
+            pv_name = pv['metadata']['name']
+            pv_creation_timestamp = pv['metadata']['creation_timestamp']
+            pv_deletion_timestamp = pv['metadata']['deletion_timestamp']
+            pv_status = pv['status']['phase']
+            _persistent_volumes[pv_name] = {
+                'storage_class': pv_storage_class,
+                'host_path': pv_host_path or '-',
+                'capacity': pv_capacity,
+                'access_modes': pv_access_modes,
+                'reclaim_policy': pv_reclaim_policy,
+                'claim_ref': pv_claim_ref,
+                'driver': pv_driver,
+                'name': pv_name,
+                'creation_timestamp': pv_creation_timestamp,
+                'deletion_timestamp': pv_deletion_timestamp or '-',
+                'status': pv_status
+            }
+
+    persistent_volume_claims = []
+    if 'persistent_volume_claims' in _status:
+        for pvc in _status['persistent_volume_claims']:
+            pvc_requested_capacity = pvc['spec'].get('resources', {}).get('requests', {}).get('storage', '-')
+            pvc_storage_class = pvc['spec']['storage_class_name']
+            pvc_access_modes = ', '.join(pvc['spec'].get('access_modes', []))
+            pvc_name = pvc['metadata']['name']
+            pvc_namespace = pvc['metadata']['namespace']
+            pvc_creation_timestamp = pvc['metadata']['creation_timestamp']
+            pvc_deletion_timestamp = pvc['metadata']['deletion_timestamp']
+            pvc_status = pvc['status']['phase']
+            # deduce related volume
+            pvc_volume = {}
+            volume_name = pvc['spec']['volume_name']
+            if volume_name:
+                pvc_volume = _persistent_volumes.pop(volume_name, {})
+            persistent_volume_claims.append({
+                'requested_capacity': pvc_requested_capacity,
+                'storage_class': pvc_storage_class,
+                'access_modes': pvc_access_modes,
+                'name': pvc_name,
+                'namespace': pvc_namespace,
+                'creation_timestamp': pvc_creation_timestamp,
+                'deletion_timestamp': pvc_deletion_timestamp or '-',
+                'status': pvc_status,
+                'volume': pvc_volume
+            })
+        status['persistent_volume_claims'] = persistent_volume_claims
+
+    persistent_volumes = []
+    for name, volume in _persistent_volumes.items():
+        volume['name'] = name
+        persistent_volumes.append(volume)
+    status['persistent_volumes'] = persistent_volumes
+
     nodes = []
     if 'nodes' in _status:
         for node in _status['nodes']:

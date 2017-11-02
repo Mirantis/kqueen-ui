@@ -218,11 +218,137 @@ Cluster {{ cluster.name }} detail
         <tbody>
           {% for image in status.images %}
           <tr>
-            <td><span data-toggle="popover" data-trigger="hover" data-content="{{ image.names[0] }}">{{ image.names[-1] }}</span></td>
+            <td>
+              <span data-toggle="popover" data-trigger="hover" data-content="{{ image.names[0] }}" style="cursor: help; color: #4bbfaf;">{{ image.names[-1] }}</span>
+            </td>
             <td>{{ image.size_bytes }}</td>
           </tr>
           {% else %}
           <tr style="pointer-events: none;"><td colspan="6" class="text-center">No Items</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Claims and bound Persistent Volumes</h3>
+    <div class="table-container">
+      <table class="table table-hover no-actions" id="table-pvc">
+        <thead>
+          <th>Name</th>
+          <th>Namespace</th>
+          <th>Requested Capacity</th>
+          <th>Storage Class</th>
+          <th>Status</th>
+          <th>Created At</th>
+          <th>Deleted At</th>
+        </thead>
+        <tbody>
+          {% for pvc in status.persistent_volume_claims %}
+          <tr{% if pvc.volume %} data-toggle="collapse" data-target="#pvc-{{ loop.index }}" class="clickable"{% endif %}>
+            <td>{{ pvc.name }}</td>
+            <td>{{ pvc.namespace }}</td>
+            <td>{{ pvc.requested_capacity }}</td>
+            <td>{{ pvc.storage_class }}</td>
+            <td>{{ pvc.status }}</td>
+            <td>{{ pvc.creation_timestamp }}</td>
+            <td>{{ pvc.deletion_timestamp }}</td>
+          </tr>
+          {% if pvc.volume %}
+          <tr>
+            <td colspan="7" style="padding: 0px;">
+              <div style="margin: 8px;"id="pvc-{{ loop.index }}" class="collapse">
+                <table class="table table-hover no-actions" id="table-pv">
+                  <tbody>
+                    <tr>
+                      <th>Name</th>
+                      <td>{{ pvc.volume.name }}</td>
+                    </tr>
+                    <tr>
+                      <th>Capacity</th>
+                      <td>{{ pvc.volume.capacity }}</td>
+                    </tr>
+                    <tr>
+                      <th>Storage Class</th>
+                      <td>{{ pvc.volume.storage_class }}</td>
+                    </tr>
+                    <tr>
+                      <th>Driver</th>
+                      <td>
+                        <span title="Driver Metadata"
+                              style="cursor: help; color: #4bbfaf;"
+                              data-html="true"
+                              data-toggle="popover"
+                              data-trigger="hover"
+                              data-content="<ul>{% for key, value in pvc.volume.driver.metadata.items() %}<li>{{ key }}: {{value}}</li>{% endfor %}</ul>">
+                          {{ pvc.volume.driver.name }}
+                        </span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Access Modes</th>
+                      <td>{{ pvc.volume.access_modes }}</td>
+                    </tr>
+                    <tr>
+                      <th>Status</th>
+                      <td>{{ pvc.volume.status }}</td>
+                    </tr>
+                    <tr>
+                      <th>Created At</th>
+                      <td>{{ pvc.volume.creation_timestamp }}</td>
+                    </tr>
+                    <tr>
+                      <th>Deleted At</th>
+                      <td>{{ pvc.volume.deletion_timestamp }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+          {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Unbound Persistent Volumes</h3>
+    <div class="table-container">
+      <table class="table table-hover no-actions" id="table-pv">
+        <thead>
+          <th>Name</th>
+          <th>Capacity</th>
+          <th>Storage Class</th>
+          <th>Driver</th>
+          <th>Access Modes</th>
+          <th>Status</th>
+          <th>Created At</th>
+          <th>Deleted At</th>
+        </thead>
+        <tbody>
+          {% for volume in status.persistent_volumes %}
+          <tr>
+            <td>{{ volume.name }}</td>
+            <td>{{ volume.capacity }}</td>
+            <td>{{ volume.storage_class }}</td>
+            <td>
+              {% if volume.driver.name == '-' %}
+              {{ volume.driver.name }}
+              {% else %}
+              <span title="Driver Metadata"
+                    style="cursor: help; color: #4bbfaf;"
+                    data-html="true"
+                    data-toggle="popover"
+                    data-trigger="hover"
+                    data-content="<ul>{% for key, value in volume.driver.metadata.items() %}<li>{{ key }}: {{value}}</li>{% endfor %}</ul>">
+                {{ volume.driver.name }}
+              </span>
+              {% endif %}
+            </td>
+            <td>{{ volume.access_mode }}</td>
+            <td>{{ volume.status }}</td>
+            <td>{{ volume.creation_timestamp }}</td>
+            <td>{{ volume.deletion_timestamp }}</td>
+          </tr>
           {% endfor %}
         </tbody>
       </table>
