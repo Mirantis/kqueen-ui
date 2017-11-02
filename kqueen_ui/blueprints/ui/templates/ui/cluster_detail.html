@@ -7,7 +7,6 @@ Cluster {{ cluster.name }} detail
 {% endblock %}
 
 {% block content %}
-
 <div class="overview">
   <div class="col-sm-2 col-sm-offset-1 clearfix">
     <div class="pie_progress" role="progressbar" data-goal="{{ status.overview.namespaces }}" aria-valuemax="{{ status.overview.namespaces }}">
@@ -200,6 +199,34 @@ Cluster {{ cluster.name }} detail
         </tbody>
       </table>
     </div>
+
+    <style>
+      .popover-content {
+        word-wrap: break-word;
+      }
+    </style>
+
+    <h3>Images</h3>
+    <div class="table-container">
+      <table class="table table-hover no-actions" id="table-images">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Size</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for image in status.images %}
+          <tr>
+            <td><span data-toggle="popover" data-trigger="hover" data-content="{{ image.names[0] }}">{{ image.names[-1] }}</span></td>
+            <td>{{ image.size_bytes }}</td>
+          </tr>
+          {% else %}
+          <tr style="pointer-events: none;"><td colspan="6" class="text-center">No Items</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
   {# TOPOLOGY TAB #}
   <div class="tab-pane" id="topology">
@@ -321,6 +348,7 @@ Cluster {{ cluster.name }} detail
 
 {% block extrajs %}
 <script>
+  $('[data-toggle="popover"]').popover();
   K8SVisualisations.init("{{ url_for('ui.cluster_topology_data', cluster_id=cluster.id) }}");
 </script>
 {% if cluster.state == config.CLUSTER_PROVISIONING_STATE %}

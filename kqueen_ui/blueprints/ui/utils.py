@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from flask import current_app as app
 from kqueen_ui.api import KQueenAPIClient
 
@@ -5,6 +6,7 @@ from kqueen_ui.api import KQueenAPIClient
 def status_for_cluster_detail(_status):
     status = {}
     podcount = 0
+    images = []
 
     nodes = []
     if 'nodes' in _status:
@@ -32,7 +34,7 @@ def status_for_cluster_detail(_status):
                         'icon': icon
                     })
             _ram = int(node['status']['allocatable']['memory'].replace('Ki', '')) / 1000000
-            ram = '{:10.2f}'.format(_ram)
+            ram = '{:.2f}'.format(_ram)
             cpu = node['status']['allocatable']['cpu']
             node_size = cpu + '/' + ram
             pods = int(_status.get('nodes_pods', {}).get(node['metadata']['name']))
@@ -44,6 +46,13 @@ def status_for_cluster_detail(_status):
                 'maxpods': maxpods,
                 'percentage': percentage
             }
+
+            for image in node['status']['images']:
+                image['names'] = tuple(image['names'])
+                mib_size = int(image['size_bytes']) / 1024 / 1024
+                image['size_bytes'] = '{:.2f} MiB'.format(mib_size)
+            images.extend(node['status']['images'])
+
             nodes.append({
                 'name': node_name,
                 'ip': node_ip,
@@ -53,6 +62,8 @@ def status_for_cluster_detail(_status):
                 'pods': node_pods,
             })
     status['nodes'] = nodes
+    # filter out duplicate images and sort them by verbose name
+    status['images'] = [OrderedDict(t) for t in sorted(set([tuple(d.items()) for d in images]), key=lambda k: k[-1])]
 
     deployments = []
     if 'deployments' in _status:
