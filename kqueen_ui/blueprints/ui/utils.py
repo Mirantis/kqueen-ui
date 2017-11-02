@@ -8,7 +8,7 @@ def status_for_cluster_detail(_status):
     podcount = 0
     images = []
 
-    persistent_volumes = {}
+    _persistent_volumes = {}
     if 'persistent_volumes' in _status:
         for pv in _status['persistent_volumes']:
             pv_storage_class = pv['spec'].pop('storage_class_name', '-')
@@ -30,7 +30,7 @@ def status_for_cluster_detail(_status):
             pv_creation_timestamp = pv['metadata']['creation_timestamp']
             pv_deletion_timestamp = pv['metadata']['deletion_timestamp']
             pv_status = pv['status']['phase']
-            persistent_volumes[pv_name] = {
+            _persistent_volumes[pv_name] = {
                 'storage_class': pv_storage_class,
                 'host_path': pv_host_path or '-',
                 'capacity': pv_capacity,
@@ -59,7 +59,7 @@ def status_for_cluster_detail(_status):
             pvc_volume = {}
             volume_name = pvc['spec']['volume_name']
             if volume_name:
-                pvc_volume = persistent_volumes.get(volume_name, {})
+                pvc_volume = _persistent_volumes.pop(volume_name, {})
             persistent_volume_claims.append({
                 'requested_capacity': pvc_requested_capacity,
                 'storage_class': pvc_storage_class,
@@ -72,6 +72,12 @@ def status_for_cluster_detail(_status):
                 'volume': pvc_volume
             })
         status['persistent_volume_claims'] = persistent_volume_claims
+
+    persistent_volumes = []
+    for name, volume in _persistent_volumes.items():
+        volume['name'] = name
+        persistent_volumes.append(volume)
+    status['persistent_volumes'] = persistent_volumes
 
     nodes = []
     if 'nodes' in _status:

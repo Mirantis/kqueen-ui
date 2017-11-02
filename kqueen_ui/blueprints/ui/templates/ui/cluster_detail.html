@@ -218,14 +218,19 @@ Cluster {{ cluster.name }} detail
         <tbody>
           {% for image in status.images %}
           <tr>
-            <td><span data-toggle="popover" data-trigger="hover" data-content="{{ image.names[0] }}">{{ image.names[-1] }}</span></td>
+            <td>
+              <span data-toggle="popover" data-trigger="hover" data-content="{{ image.names[0] }}" style="cursor: help; color: #4bbfaf;">{{ image.names[-1] }}</span>
+            </td>
             <td>{{ image.size_bytes }}</td>
           </tr>
           {% else %}
           <tr style="pointer-events: none;"><td colspan="6" class="text-center">No Items</td></tr>
           {% endfor %}
+        </tbody>
+      </table>
+    </div>
 
-    <h3>Persistent Volumes and Claims</h3>
+    <h3>Claims and bound Persistent Volumes</h3>
     <div class="table-container">
       <table class="table table-hover no-actions" id="table-pvc">
         <thead>
@@ -301,6 +306,49 @@ Cluster {{ cluster.name }} detail
             </td>
           </tr>
           {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Unbound Persistent Volumes</h3>
+    <div class="table-container">
+      <table class="table table-hover no-actions" id="table-pv">
+        <thead>
+          <th>Name</th>
+          <th>Capacity</th>
+          <th>Storage Class</th>
+          <th>Driver</th>
+          <th>Access Modes</th>
+          <th>Status</th>
+          <th>Created At</th>
+          <th>Deleted At</th>
+        </thead>
+        <tbody>
+          {% for volume in status.persistent_volumes %}
+          <tr>
+            <td>{{ volume.name }}</td>
+            <td>{{ volume.capacity }}</td>
+            <td>{{ volume.storage_class }}</td>
+            <td>
+              {% if volume.driver.name == '-' %}
+              {{ volume.driver.name }}
+              {% else %}
+              <span title="Driver Metadata"
+                    style="cursor: help; color: #4bbfaf;"
+                    data-html="true"
+                    data-toggle="popover"
+                    data-trigger="hover"
+                    data-content="<ul>{% for key, value in volume.driver.metadata.items() %}<li>{{ key }}: {{value}}</li>{% endfor %}</ul>">
+                {{ volume.driver.name }}
+              </span>
+              {% endif %}
+            </td>
+            <td>{{ volume.access_mode }}</td>
+            <td>{{ volume.status }}</td>
+            <td>{{ volume.creation_timestamp }}</td>
+            <td>{{ volume.deletion_timestamp }}</td>
+          </tr>
           {% endfor %}
         </tbody>
       </table>
@@ -426,11 +474,7 @@ Cluster {{ cluster.name }} detail
 
 {% block extrajs %}
 <script>
-<<<<<<< a4e0e94f6fcd7e192b63589c388b2c1cdf41358a
   $('[data-toggle="popover"]').popover();
-=======
-  $('[data-toggle="popover"]').popover(); 
->>>>>>> Add PVC table with collapsible PV detail
   K8SVisualisations.init("{{ url_for('ui.cluster_topology_data', cluster_id=cluster.id) }}");
 </script>
 {% if cluster.state == config.CLUSTER_PROVISIONING_STATE %}
