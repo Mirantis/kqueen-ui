@@ -26,7 +26,7 @@ ui = Blueprint('ui', __name__, template_folder='templates')
 def test_token():
     if session.get('user', None):
         client = get_kqueen_client(token=session['user']['token'])
-        response = client.user.get(session['user']['id'])
+        response = client.user.whoami()
         if response.status == 401:
             flash('Session expired, please log in again.', 'warning')
             del session['user']
@@ -328,7 +328,7 @@ def provisioner_delete(provisioner_id):
         if not provisioner:
             logger.warning('provisioner_delete view: {} not found'.format(str(provisioner_id)))
             abort(404)
-        used_provisioners = [c['provisioner'] for c in clusters]
+        used_provisioners = [p['id'] for p in [c['provisioner'] for c in clusters]]
 
         if provisioner_id not in used_provisioners:
             client.provisioner.delete(provisioner_id)
@@ -368,7 +368,7 @@ def cluster_create():
                 cluster = {
                     'name': form.name.data,
                     'state': app.config['CLUSTER_PROVISIONING_STATE'],
-                    'provisioner': form.provisioner.data,
+                    'provisioner': 'Provisioner:{}'.format(form.provisioner.data),
                     'kubeconfig': kubeconfig
                 }
                 client.cluster.create(cluster)
@@ -447,8 +447,10 @@ def cluster_deployment_status(cluster_id):
         logger.warning('cluster_deployment_status view: invalid uuid {}'.format(str(cluster_id)))
         abort(404)
 
-    # TODO: implement this after APi supports deployment_status call
-    # cluster = Cluster.load(object_id)
-    # status = cluster.engine.get_progress()
+    dummy = {
+        'response': 0,
+        'progress': 1,
+        'result': 'Deploying'
+    }
 
-    return jsonify({})
+    return jsonify(dummy)
