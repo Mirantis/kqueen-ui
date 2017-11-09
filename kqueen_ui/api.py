@@ -67,7 +67,7 @@ class BaseManager:
         }
 
         if auth:
-            headers['Authorization'] = 'JWT %s' % self.client.token
+            headers['Authorization'] = 'Bearer %s' % self.client.token
 
         _url = reduce(urljoin, [self.client.base_url, self.resource_url, url_suffix])
         url = _url[:-1] if _url.endswith('/') else _url
@@ -108,7 +108,7 @@ class BaseManager:
 
     def request(self, *args, **kwargs):
         if not self.client.token:
-            self._login()
+            self.login()
         return self._request(*args, **kwargs)
 
     def list(self):
