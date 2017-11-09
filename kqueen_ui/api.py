@@ -157,6 +157,9 @@ class UserManager(BaseManager):
             payload['organization'] = 'Organization:{}'.format(payload['organization']['id'])
         return self.request(uuid, method='PATCH', payload=payload)
 
+    def whoami(self):
+        return self.request('whoami')
+
 
 class KQueenAPIClient:
 
