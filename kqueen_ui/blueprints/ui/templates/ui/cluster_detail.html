@@ -45,11 +45,10 @@ Cluster {{ cluster.name }} detail
 <div class="overview-actions">
   <div class="col-sm-4">
     {% if cluster.state == config.CLUSTER_PROVISIONING_STATE %}
-      {% set kubeconfig_url = "#" %}
+      <a href="#" class="btn btn-primary btn-xs disabled">kubeconfig N/A</a>
     {% else %}
-      {% set kubeconfig_url = url_for('ui.cluster_kubeconfig', cluster_id=cluster.id) %}
+      <a href="{{ url_for('ui.cluster_kubeconfig', cluster_id=cluster.id) }}" class="btn btn-primary btn-xs">Download kubeconfig</a>
     {% endif %}
-    <a href="{{ kubeconfig_url }}" class="btn btn-primary btn-xs">Download kubeconfig</a>
   </div>
   <div class="col-sm-4" id="state">
     <a class="btn btn-{{ state_class }} btn-xs" style="pointer-events: none;">State: {{ cluster.state }}</a>
