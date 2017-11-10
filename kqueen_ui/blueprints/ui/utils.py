@@ -134,7 +134,9 @@ def status_for_cluster_detail(_status):
             })
     status['nodes'] = nodes
     # filter out duplicate images and sort them by verbose name
-    status['images'] = [OrderedDict(t) for t in sorted(set([tuple(d.items()) for d in images]), key=lambda k: k[-1])]
+    images_set = set([tuple(d.items()) for d in images])
+    images_sorted = sorted(list(images_set), key=lambda k: [i for i in k if 'names' in i][0][1][-1])
+    status['images'] = [OrderedDict(t) for t in images_sorted]
 
     deployments = []
     if 'deployments' in _status:
