@@ -310,6 +310,8 @@ Cluster {{ cluster.name }} detail
             </td>
           </tr>
           {% endif %}
+          {% else %}
+          <tr style="pointer-events: none;"><td colspan="7" class="text-center">No Items</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -353,6 +355,8 @@ Cluster {{ cluster.name }} detail
             <td>{{ volume.creation_timestamp }}</td>
             <td>{{ volume.deletion_timestamp }}</td>
           </tr>
+          {% else %}
+          <tr style="pointer-events: none;"><td colspan="8" class="text-center">No Items</td></tr>
           {% endfor %}
         </tbody>
       </table>
