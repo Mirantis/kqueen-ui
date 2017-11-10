@@ -371,7 +371,9 @@ def cluster_create():
                     'provisioner': 'Provisioner:{}'.format(form.provisioner.data),
                     'kubeconfig': kubeconfig
                 }
-                client.cluster.create(cluster)
+                response = client.cluster.create(cluster)
+                if response.status > 200:
+                    lash('Could not create cluster {}.'.format(form.name.data), 'danger')
                 flash('Provisioning of cluster {} is in progress.'.format(form.name.data), 'success')
             except Exception as e:
                 logger.error('cluster_create view: {}'.format(repr(e)))
