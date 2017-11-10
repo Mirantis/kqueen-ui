@@ -631,22 +631,6 @@ var K8SVisualisations = function (K8SVisualisations) {
       });
     });
     $(function () {
-      // init Clipboard
-      new Clipboard('.clipboard');
-      // init asPieProgress
-      $('.pie_progress').asPieProgress({
-        namespace: 'pieProgress',
-        barsize: '1',
-        size: '120',
-        min: 0,
-        trackcolor: '#ececea',
-        barcolor: '#4bbfaf',
-        numberCallback: function numberCallback(n) {
-          return n;
-        }
-      });
-      $('.pie_progress').asPieProgress('start');
-
       // bind click actions
       $("#ForcedLayoutGraphBtn").on("click", function (e) {
         $("#HiveGraphContainer").css("z-index", "1").css("pointer-events", "none");

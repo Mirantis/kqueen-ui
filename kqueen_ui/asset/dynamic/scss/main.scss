@@ -24,9 +24,16 @@ ul.link-list {
   padding-left: 0px;
 }
 
+h1, h2 {
+  font-weight: 700;
+}
+
 .page-header {
   padding-bottom: 8px;
   margin: 12px 0px 18px 0px;
+  h2 {
+    margin-top: 0px;
+  }
 }
 
 .clickable {
@@ -62,6 +69,10 @@ ul.link-list {
   @extend .overview-box;
   min-height: 160px;
   padding: 10px;
+}
+
+.pop-help {
+  cursor: help; color: $brand-primary;
 }
 
 // *****************************************************************************
@@ -101,12 +112,16 @@ ul.link-list {
       padding: 0 10px;
       margin: 0;
       display: block;
-          line-height: 56px;
+      line-height: 50px;
       img {
-        padding: 15px 0px;
+        padding: 3px;
         display: inline-block;
         max-height: 46px;
         vertical-align: middle;
+      }
+      span {
+        font-family: 'Exo 2';
+        padding-left: 10px;
       }
     }
   }
@@ -116,7 +131,7 @@ ul.link-list {
 }
 
 .navbar-nav > li .dropdown-menu {
-  background-color: $gray-mira-dark;
+  background-color: $mira-purple;
   border: 0px;
   border-radius: 0px;
   > .dropdown-header {
@@ -126,11 +141,12 @@ ul.link-list {
   > li > a {
     color: #fff;
     font-size: 14px;
+    padding: 5px 20px;
     &:hover,
     &:focus,
     &:active {
-      color: $mira-green;
-      background-color: transparent;
+      color: #fff;
+      background-color: $mira-purple-dark;
     }
   }
 }
@@ -220,7 +236,7 @@ ul.link-list {
 .table-container {
   margin: 20px 0px 50px 0px;
   .table-actions {
-    padding: 12px 0px 24px 0px;
+    padding-bottom: 24px;
     text-align: right;
   }
   .table {
@@ -320,20 +336,24 @@ footer {
 // *****************************************************************************
 
 .progress-bar-background {
-  height: 20px;
+  height: 25px;
   width: 100%;
   text-align: center;
   position: relative;
   background-color: lighten($brand-primary, 15%);
   z-index: 1;
   > span {
+    font-weight: 700;
+    text-transform: uppercase;
     position: relative;
     color: #fff;
     z-index: 3;
+    font-size: 14px;
   }
 }
 
 .progress-bar {
+  background-color: $brand-primary;
   height: 100%;
   position: absolute;
   left: 0px;
@@ -357,6 +377,7 @@ footer {
 
 .pie_progress__number {
   font-size: 38px;
+  font-family: 'Exo 2';
 }
 
 // *****************************************************************************
@@ -446,3 +467,34 @@ footer {
   text-align: center;
 }
 
+// *****************************************************************************
+// Buttons
+// *****************************************************************************
+
+.btn {
+  text-transform: uppercase;
+}
+
+.btn-default {
+  @include mirantis-button-variant($btn-default-color, $btn-default-bg, $btn-default-border);
+  border-width: 2px;
+}
+.btn-primary {
+  @include mirantis-button-variant($btn-primary-color, $btn-primary-bg, $btn-primary-border);
+}
+// Success appears as green
+.btn-success {
+  @include mirantis-button-variant($btn-success-color, $btn-success-bg, $btn-success-border);
+}
+// Info appears as blue-green
+.btn-info {
+  @include mirantis-button-variant($btn-info-color, $btn-info-bg, $btn-info-border);
+}
+// Warning appears as orange
+.btn-warning {
+  @include mirantis-button-variant($btn-warning-color, $btn-warning-bg, $btn-warning-border);
+}
+// Danger and error appear as red
+.btn-danger {
+  @include mirantis-button-variant($btn-danger-color, $btn-danger-bg, $btn-danger-border);
+}

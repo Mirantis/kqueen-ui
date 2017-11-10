@@ -34,7 +34,7 @@
 
 <div class="table-container">
   <div class="table-actions">
-    <a href="{{ url_for('ui.cluster_create') }}" role="button" class="btn btn-primary">Deploy cluster</a>
+    <a href="{{ url_for('ui.cluster_create') }}" role="button" class="btn btn-primary btn-sm">Deploy cluster</a>
   </div>
   {{ clustertable }}
 </div>
@@ -43,7 +43,7 @@
 
 <div class="table-container">
   <div class="table-actions">
-    <a href="{{ url_for('ui.provisioner_create') }}" role="button" class="btn btn-primary">Create provisioner</a>
+    <a href="{{ url_for('ui.provisioner_create') }}" role="button" class="btn btn-primary btn-sm">Create provisioner</a>
   </div>
   {{ provisionertable }}
 </div>
@@ -55,7 +55,7 @@
 jQuery(document).ready(function($){
   $('.pie_progress_static').asPieProgress({
     namespace: 'pieProgress',
-    barsize: '1',
+    barsize: '2',
     size: '120',
     trackcolor: '#ececea',
     barcolor: '#83d3c8',
@@ -68,7 +68,7 @@ jQuery(document).ready(function($){
 jQuery(document).ready(function($){
   $('.pie_progress').asPieProgress({
     namespace: 'pieProgress',
-    barsize: '1',
+    barsize: '2',
     size: '120',
     trackcolor: '#ececea',
     barcolor: '#83d3c8'
