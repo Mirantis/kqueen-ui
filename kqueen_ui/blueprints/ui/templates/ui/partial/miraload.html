@@ -5,8 +5,8 @@
   <script src="{{ url_for('static', filename='js/particles.min.js') }}"></script>
   <script>
     $(window).bind('beforeunload', function(){
+      $('body').css('overflow', 'hidden');
       $('.miraload').css('display', 'initial');
       particlesJS.load('particles', "{{ url_for('static', filename='js/particles.json') }}");
     });
   </script>
-

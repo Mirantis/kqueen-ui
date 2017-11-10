@@ -77,6 +77,12 @@ gulp.task('vendor-css', function() {
         .pipe(gulp.dest(folderAsset + '/static/css/'));
 });
 
+// Vendor CSS Task
+gulp.task('images', function() {
+	return gulp.src(folderAsset + '/dynamic/img/*')
+                .pipe(gulp.dest(folderAsset + '/static/img/'));
+});
+
 // Particles Task
 gulp.task('particles', function() {
         gulp.src(folderAsset + '/dynamic/js/particles.json')

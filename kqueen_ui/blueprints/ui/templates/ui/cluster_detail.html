@@ -223,7 +223,7 @@ Cluster {{ cluster.name }} detail
           {% for image in status.images %}
           <tr>
             <td>
-              <span data-toggle="popover" data-trigger="hover" data-content="{{ image.names[0] }}" style="cursor: help; color: #4bbfaf;">{{ image.names[-1] }}</span>
+              <span data-toggle="popover" data-trigger="hover" data-content="{{ image.names[0] }}" class="pop-help">{{ image.names[-1] }}</span>
             </td>
             <td>{{ image.size_bytes }}</td>
           </tr>
@@ -374,7 +374,7 @@ Cluster {{ cluster.name }} detail
     </div>
     <div class="col-xs-3 topology-tooltip">
       <h3>Topology Layout</h3>
-      <div class="btn-group">
+      <div class="btn-group btn-group-sm">
         <button id="ForcedLayoutGraphBtn" type="button" class="btn btn-primary active" disabled>Force-directed</button>
         <button id="HiveGraphBtn" type="button" class="btn btn-primary" disabled>Hive Plot</button>
       </div>
@@ -428,7 +428,7 @@ Cluster {{ cluster.name }} detail
   <div class="tab-pane" id="addons">
     <h3>Active Addons</h3>
     <div class="filter-box clearfix">
-      <div id="filters" class="btn-group" role="group">
+      <div id="filters" class="btn-group btn-group-sm" role="group">
         <a class="btn btn-default" data-filter="*">All</a>
         {% set tags = ['-'] %}
         {% for addon in status.addons if addon.get(tag, '-') not in tags %}
@@ -482,7 +482,24 @@ Cluster {{ cluster.name }} detail
 
 {% block extrajs %}
 <script>
+  // init Clipboard
+  new Clipboard('.clipboard');
+  // init asPieProgress
+  $('.pie_progress').asPieProgress({
+    namespace: 'pieProgress',
+    barsize: '2',
+    size: '120',
+    min: 0,
+    trackcolor: '#ececea',
+    barcolor: '#4bbfaf',
+    numberCallback(n) {
+      return n;
+    }
+  });
+  $('.pie_progress').asPieProgress('start');
+  // init Popover
   $('[data-toggle="popover"]').popover();
+  // init Visualisation
   K8SVisualisations.init("{{ url_for('ui.cluster_topology_data', cluster_id=cluster.id) }}");
 </script>
 {% if cluster.state == config.CLUSTER_PROVISIONING_STATE %}
