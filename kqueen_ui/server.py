@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import redirect
 from flask import url_for
+from flask.ext.babel import Babel
 from kqueen_ui.blueprints.ui.views import ui
 from werkzeug.contrib.cache import SimpleCache
 
@@ -32,6 +33,7 @@ def create_app(config_file=config_file):
         KQUEEN_API_URL=kqueen_api_url,
         KQUEEN_AUTH_URL=kqueen_auth_url
     )
+    Babel(app)
     return app
 
 

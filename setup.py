@@ -19,9 +19,13 @@ setup(
     zip_safe=False,
     install_requires=[
         'Flask==0.12.2',
+        'Flask-Babel==0.11.2',
         'Flask-Table',
         'Flask-WTF',
-        'gunicorn'
+        'gunicorn',
+        'python-dateutil',
+        'pyyaml',
+        'urllib3'
     ],
     classifiers=[
         'Operating System :: POSIX :: Linux',
