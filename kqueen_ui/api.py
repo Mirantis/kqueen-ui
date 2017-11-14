@@ -1,3 +1,7 @@
+from datetime import datetime
+from dateutil.parser import parse as dateutil_parse
+from flask import current_app as app
+from flask.ext.babel import format_datetime, to_utc
 from functools import reduce
 from urllib.parse import urljoin
 
@@ -31,7 +35,47 @@ class KQueenResponse:
             return self.data.get(item)
 
 
-class BaseManager:
+class ParserMixin:
+    DATETIME_FIELDS = ['created_at']
+
+    def _parse_response_datetime(self, _dict):
+        for key, value in _dict.items():
+            if key in self.DATETIME_FIELDS and value:
+                dt = dateutil_parse(value)
+                _dict[key] = format_datetime(dt)
+            elif isinstance(value, dict):
+                self._parse_response_datetime(value)
+
+    def _parse_request_payload_datetime(self, _dict):
+        for key, value in _dict.items():
+            if key in self.DATETIME_FIELDS:
+                if isinstance(value, datetime):
+                    _dict[key] = value.timestamp()
+                elif isinstance(value, six.string_types):
+                    fmt_dt = dateutil_parse(value)
+                    dt = to_utc(fmt_dt)
+                    _dict[key] = dt.timestamp()
+            elif isinstance(value, dict):
+                 self._parse_request_payload_datetime(value)
+
+    def _parse_response(self, response):
+        if isinstance(response, list):
+           for item in response:
+               self._parse_response_datetime(item)
+        elif isinstance(response, dict):
+            self._parse_response_datetime(response)
+        return response
+
+    def _parse_request_payload(self, payload):
+        if isinstance(payload, list):
+           for item in payload:
+               self._parse_request_payload_datetime(item)
+        elif isinstance(payload, dict):
+            self._parse_request_payload_datetime(payload)
+        return payload
+
+
+class BaseManager(ParserMixin):
     resource_url = ''
 
     def __init__(self, client):
@@ -77,7 +121,8 @@ class BaseManager:
         body = None
         if method in ['POST', 'PATCH']:
             if isinstance(payload, dict):
-                body = json.dumps(payload)
+                parsed_payload = _parse_request_payload(payload)
+                body = json.dumps(parsed_payload)
             else:
                 body = payload
 
@@ -99,7 +144,8 @@ class BaseManager:
             return response
 
         try:
-            response.data = json.loads(raw.data.decode('utf-8'))
+            data = json.loads(raw.data.decode('utf-8'))
+            response.data = self._parse_response(data)
         except json.decoder.JSONDecodeError as e:
             response.error = 'JSONDecodeError: {}'.format(repr(e))
             logger.error('KQueen Client:: {}'.format(repr(e)))
