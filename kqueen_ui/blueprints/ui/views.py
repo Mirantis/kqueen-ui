@@ -55,9 +55,6 @@ def index():
         provisioners = _provisioners.data
 
     for cluster in clusters:
-        # TODO: remove this when API returns related object
-        cluster_prv = [p for p in provisioners if p['id'] in cluster['provisioner']]
-        cluster['provisioner'] = cluster_prv[0]['name'] if cluster_prv else '-'
         if 'state' in cluster:
             if app.config['CLUSTER_ERROR_STATE'] not in cluster['state']:
                 healthy_clusters = healthy_clusters + 1
