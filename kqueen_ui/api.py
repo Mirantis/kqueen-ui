@@ -8,6 +8,7 @@ from urllib.parse import urljoin
 import json
 import logging
 import urllib3
+import six
 
 logger = logging.getLogger(__name__)
 http = urllib3.PoolManager()
@@ -121,7 +122,7 @@ class BaseManager(ParserMixin):
         body = None
         if method in ['POST', 'PATCH']:
             if isinstance(payload, dict):
-                parsed_payload = _parse_request_payload(payload)
+                parsed_payload = self._parse_request_payload(payload)
                 body = json.dumps(parsed_payload)
             else:
                 body = payload
