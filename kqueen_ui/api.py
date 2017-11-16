@@ -1,7 +1,7 @@
 from datetime import datetime
 from dateutil.parser import parse as dateutil_parse
 from flask import current_app as app
-from flask.ext.babel import format_datetime, to_utc
+from flask.ext.babel import to_utc
 from functools import reduce
 from urllib.parse import urljoin
 
@@ -42,8 +42,7 @@ class ParserMixin:
     def _parse_response_datetime(self, _dict):
         for key, value in _dict.items():
             if key in self.DATETIME_FIELDS and value:
-                dt = dateutil_parse(value)
-                _dict[key] = format_datetime(dt)
+                _dict[key] = dateutil_parse(value)
             elif isinstance(value, dict):
                 self._parse_response_datetime(value)
 
@@ -51,11 +50,11 @@ class ParserMixin:
         for key, value in _dict.items():
             if key in self.DATETIME_FIELDS:
                 if isinstance(value, datetime):
-                    _dict[key] = value.timestamp()
+                    _dict[key] = value.isoformat()
                 elif isinstance(value, six.string_types):
                     fmt_dt = dateutil_parse(value)
                     dt = to_utc(fmt_dt)
-                    _dict[key] = dt.timestamp()
+                    _dict[key] = dt.isoformat()
             elif isinstance(value, dict):
                  self._parse_request_payload_datetime(value)
 
