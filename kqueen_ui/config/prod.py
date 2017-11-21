@@ -5,6 +5,10 @@ SECRET_KEY = 'secret'
 KQUEEN_API_URL = 'http://kqueen:5000/api/v1/'
 KQUEEN_AUTH_URL = 'http://kqueen:5000/api/v1/auth'
 
+# Babel
+BABEL_DEFAULT_TIMEZONE = 'UTC'
+BABEL_DEFAULT_LOCALE = 'en'
+
 # Cluster statuses
 CLUSTER_ERROR_STATE = 'Error'
 CLUSTER_OK_STATE = 'OK'

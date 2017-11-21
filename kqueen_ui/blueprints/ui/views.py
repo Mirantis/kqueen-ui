@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import (current_app as app, abort, Blueprint, flash, jsonify, redirect,
                    render_template, request, session, url_for)
 from kqueen_ui.auth import authenticate
@@ -221,7 +222,8 @@ def user_create():
                 'username': form.username.data,
                 'password': form.password_1.data,
                 'email': form.email.data or None,
-                'organization': organization
+                'organization': organization,
+                'created_at': datetime.utcnow()
             }
             client = get_kqueen_client(token=session['user']['token'])
             client.user.create(user)
@@ -295,7 +297,8 @@ def provisioner_create():
                 'parameters': {
                     'username': form.username.data,
                     'password': form.password.data
-                }
+                },
+                'created_at': datetime.utcnow()
             }
             client.provisioner.create(provisioner)
             flash('Provisioner {} successfully created.'.format(provisioner['name']), 'success')
@@ -366,7 +369,8 @@ def cluster_create():
                     'name': form.name.data,
                     'state': app.config['CLUSTER_PROVISIONING_STATE'],
                     'provisioner': 'Provisioner:{}'.format(form.provisioner.data),
-                    'kubeconfig': kubeconfig
+                    'kubeconfig': kubeconfig,
+                    'created_at': datetime.utcnow()
                 }
                 response = client.cluster.create(cluster)
                 if response.status > 200:

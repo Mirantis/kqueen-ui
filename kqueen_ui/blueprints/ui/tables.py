@@ -1,4 +1,13 @@
-from flask_table import Table, Col, LinkCol
+from flask.ext.babel import format_datetime
+from flask_table import Table, Col, DatetimeCol as BaseDatetimeCol, LinkCol
+
+
+class DatetimeCol(BaseDatetimeCol):
+    def td_format(self, content):
+        if content:
+            return format_datetime(content, self.datetime_format)
+        else:
+            return ''
 
 
 class DeleteCol(LinkCol):
@@ -26,6 +35,7 @@ class ClusterTable(Table):
     # name = Col('Name')
     provisioner = Col('Provisioner', attr='provisioner.name')
     state = StatusCol('Status')
+    created_at = DatetimeCol('Created')
     delete = DeleteCol(
         'Delete',
         'ui.cluster_delete',
@@ -42,6 +52,7 @@ class OrganizationMembersTable(Table):
     # name = Col('Name')
     role = Col('Role')
     state = StatusCol('Status')
+    created_at = DatetimeCol('Created')
     delete = DeleteCol(
         'Delete',
         'ui.user_delete',
@@ -56,6 +67,7 @@ class ProvisionerTable(Table):
     name = Col('Name')
     engine_name = Col('Engine')
     state = StatusCol('Status')
+    created_at = DatetimeCol('Created')
     delete = DeleteCol(
         'Delete',
         'ui.provisioner_delete',
