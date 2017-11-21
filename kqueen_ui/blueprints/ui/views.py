@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask import (current_app as app, abort, Blueprint, flash, jsonify, redirect,
                    render_template, request, session, url_for)
+from kqueen_ui.api import get_kqueen_client 
 from kqueen_ui.auth import authenticate
 from kqueen_ui.wrappers import login_required
 from uuid import UUID
@@ -8,7 +9,7 @@ from uuid import UUID
 from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
                     ChangePasswordForm, UserCreateForm)
 from .tables import ClusterTable, OrganizationMembersTable, ProvisionerTable
-from .utils import get_kqueen_client, prettify_engine_name, status_for_cluster_detail
+from .utils import prettify_engine_name, status_for_cluster_detail
 
 import yaml
 import logging

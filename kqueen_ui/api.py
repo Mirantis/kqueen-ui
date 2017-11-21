@@ -232,3 +232,9 @@ class KQueenAPIClient:
         self.provisioner = ProvisionerManager(self)
         self.organization = OrganizationManager(self)
         self.user = UserManager(self)
+
+
+def get_kqueen_client(username=None, password=None, token=None):
+    base_url = app.config['KQUEEN_API_URL']
+    auth_url = app.config['KQUEEN_AUTH_URL']
+    return KQueenAPIClient(username, password, token, base_url, auth_url)

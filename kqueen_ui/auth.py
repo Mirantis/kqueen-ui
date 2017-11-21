@@ -1,4 +1,4 @@
-from kqueen_ui.blueprints.ui.utils import get_kqueen_client
+from kqueen_ui.api import get_kqueen_client
 
 import logging
 
