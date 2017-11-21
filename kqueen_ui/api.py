@@ -207,6 +207,10 @@ class UserManager(BaseManager):
         return self.request('whoami')
 
 
+class EngineManager(BaseManager):
+    resource_url = 'engines/'
+
+
 class KQueenAPIClient:
 
     def __init__(
@@ -229,3 +233,4 @@ class KQueenAPIClient:
         self.provisioner = ProvisionerManager(self)
         self.organization = OrganizationManager(self)
         self.user = UserManager(self)
+        self.engine = EngineManager(self)

@@ -286,18 +286,34 @@ def user_change_password():
 @ui.route('/provisioners/create', methods=['GET', 'POST'])
 @login_required
 def provisioner_create():
-    form = ProvisionerCreateForm()
+    # Get engines with parameters
+    client = get_kqueen_client(token=session['user']['token'])
+    _engines = client.engine.list()
+    engines = _engines.data
+
+    # Append tagged parameter fields to form
+    form_cls = ProvisionerCreateForm
+    for engine in engines:
+        form_cls.append_fields(engine['parameters'], switchtag=engine['name'])
+
+    # Instantiate form and populate engine choices
+    form = form_cls()
+    form.engine.choices = [(e['name'], prettify_engine_name(e['name'])) for e in engines]
+
     if form.validate_on_submit():
         try:
-            client = get_kqueen_client(token=session['user']['token'])
+            # Filter out populated tagged fields and get their data
+            parameters = {
+                k: v.data
+                for (k, v)
+                in form._fields.items()
+                if (hasattr(v, 'switchtag') and v.switchtag) and v.data
+            }
             provisioner = {
                 'name': form.name.data,
                 'engine': form.engine.data,
                 'state': app.config['PROVISIONER_UNKNOWN_STATE'],
-                'parameters': {
-                    'username': form.username.data,
-                    'password': form.password.data
-                },
+                'parameters': parameters,
                 'created_at': datetime.utcnow()
             }
             client.provisioner.create(provisioner)
