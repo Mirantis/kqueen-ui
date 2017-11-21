@@ -5,4 +5,5 @@ Flask-WTF
 gunicorn
 python-dateutil
 pyyaml
+python-slugify
 urllib3
