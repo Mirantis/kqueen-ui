@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask import (current_app as app, abort, Blueprint, flash, jsonify, redirect,
                    render_template, request, session, url_for)
+from flask_mail import Mail, Message
 from kqueen_ui.api import get_kqueen_client 
 from kqueen_ui.auth import authenticate
 from kqueen_ui.wrappers import login_required
@@ -9,13 +10,14 @@ from uuid import UUID
 from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
                     ChangePasswordForm, UserCreateForm)
 from .tables import ClusterTable, OrganizationMembersTable, ProvisionerTable
-from .utils import prettify_engine_name, status_for_cluster_detail
+from .utils import generate_password, prettify_engine_name, status_for_cluster_detail
 
 import yaml
 import logging
 import sys
 
 logger = logging.getLogger(__name__)
+mail = Mail()
 
 ui = Blueprint('ui', __name__, template_folder='templates')
 
@@ -219,15 +221,36 @@ def user_create():
     if form.validate_on_submit():
         try:
             organization = 'Organization:{}'.format(session['user']['organization']['id'])
+            password = generate_password()
             user = {
-                'username': form.username.data,
-                'password': form.password_1.data,
-                'email': form.email.data or None,
+                'username': form.email.data,
+                'password': password,
+                'email': form.email.data,
                 'organization': organization,
-                'created_at': datetime.utcnow()
+                'created_at': datetime.utcnow(),
+                'active': True
             }
             client = get_kqueen_client(token=session['user']['token'])
             client.user.create(user)
+
+            # Init mail handler
+            mail.init_app(app)
+            html = render_template('ui/email/user_invitation.html',
+                username=form.email.data,
+                password=password,
+                organization=session['user']['organization']['name'])
+            msg = Message(
+                '[KQueen] Organization invitation',
+                recipients=[form.email.data],
+                html=html
+            )
+            try:
+                mail.send(msg)
+            except Exception as e:
+                logger.error('user_create view: {}'.format(repr(e)))
+                flash('Could not send invitation e-mail, please try again later.', 'danger')
+                return render_template('ui/user_create.html', form=form)
+
             flash('User {} successfully created.'.format(user['username']), 'success')
         except Exception as e:
             logger.error('user_create view: {}'.format(repr(e)))

@@ -1,6 +1,13 @@
 from collections import OrderedDict
 from flask import current_app as app
 
+try:
+    from secrets import choice
+except ImportError:
+    from random import choice
+
+import string
+
 
 def status_for_cluster_detail(_status):
     status = {}
@@ -228,3 +235,8 @@ def prettify_engine_name(engine):
     if engine.endswith('Engine'):
         engine = engine[:-6]
     return engine
+
+
+def generate_password(length=20):
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(choice(alphabet) for _ in range(length))

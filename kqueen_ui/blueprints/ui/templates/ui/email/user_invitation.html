@@ -2,7 +2,7 @@
 
 {% block content %}
 <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">Hi there,</p>
-<p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">click the link provided in this email message to finish verifying your email address.</p>
+<p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">you were invited to organization {{ organization }} in KQueen OpenKaaS application which you can find <a href="{{ url_for('ui.index', _external=True) }}" target="_blank" style="color: #E02D3A;">here</a>. </p>
 <table border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; box-sizing: border-box;">
   <tbody>
     <tr>
@@ -10,7 +10,10 @@
         <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: auto;">
           <tbody>
             <tr>
-              <td style="font-family: sans-serif; font-size: 14px; vertical-align: top; background-color: #E02D3A; text-align: center;"> <a href="{{ url_for('registration.verify_email', token=token, _external=True) }}" target="_blank" style="display: inline-block; color: #ffffff; background-color: #E02D3A; border: solid 1px #E02D3A; box-sizing: border-box; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; margin: 0; padding: 12px 25px; border-color: #E02D3A;">Verify e-mail address</a> </td>
+              <td style="font-family: sans-serif; font-size: 14px; vertical-align: top; background-color: #E02D3A; text-align: center; padding: 12px 25px;">
+                <p style="color: #fff; font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">Username: {{ username }}</p>
+                <p style="color: #fff; font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0;">Password: {{ password }}</p>
+              </td>
             </tr>
           </tbody>
         </table>

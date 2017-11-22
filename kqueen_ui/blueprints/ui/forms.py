@@ -95,16 +95,7 @@ class ChangePasswordForm(FlaskForm):
 
 
 class UserCreateForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
     email = EmailField('Email', validators=[Email()])
-    password_1 = PasswordField('Password', validators=[DataRequired()])
-    password_2 = PasswordField(
-        'Repeat Password',
-        validators=[
-            DataRequired(),
-            EqualTo('password_1', message='Passwords does not match.')
-        ]
-    )
 
 
 class ProvisionerCreateForm(FlaskForm):
