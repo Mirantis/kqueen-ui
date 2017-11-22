@@ -189,6 +189,9 @@ class ClusterManager(BaseManager):
 class ProvisionerManager(BaseManager):
     resource_url = 'provisioners/'
 
+    def engines(self):
+        return self.request('engines')
+
 
 class OrganizationManager(BaseManager):
     resource_url = 'organizations/'

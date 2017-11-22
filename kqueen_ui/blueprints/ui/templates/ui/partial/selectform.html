@@ -1,0 +1,71 @@
+{% macro render_selectform(form, action='') %}
+<form id="switchableForm" method="post" action="{{ action }}" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    {% set tagged_fields = [] %}
+    {% set switch_fields = [] %}
+    {% for field in form %}
+      {% if not field.flags.hidden %}
+        {% if field|attr('switchtag') %}
+          {% set _do = tagged_fields.append(field) %}
+          {{ render_switchable_field(field) }}
+        {% else %}
+          {{ render_field(field) }}
+        {% endif %}
+        {% if field|attr('switch') %}
+          {% set _do = switch_fields.append(field) %}
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+    <input type="submit" value="Submit" class="btn btn-primary btn-sm">
+</form>
+{% if switch_fields|length > 0 %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+{% for field in switch_fields %}
+  selectSwitch('select#{{ field.id }}');
+{% endfor %}
+});
+</script>
+{% endif %}
+{% if tagged_fields|length > 0 %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  $("#switchableForm").validate({
+    rules: {
+      {%- for field in tagged_fields %}
+      {{ field.id }}: {{ field.jsvalidators|tojson|safe }},
+      {%- endfor %}
+    }
+  });
+});
+</script>
+{% endif %}
+{% endmacro %}
+
+{% macro render_field(field) %}
+  <div class="form-group{% if field.errors %} has-error{% endif %}">
+    <label for="{{ field.id }}" class="control-label">{{ field.label }}</label>
+    {{ field(class_="form-control")|safe }}
+  {% if field.errors %}
+    <span class="help-block">
+    {% for error in field.errors %}
+      {{ error }}
+    {% endfor %}
+    </span>
+  {% endif %}
+  </div>
+{% endmacro %}
+
+{% macro render_switchable_field(field) %}
+  <div class="form-group{% if field.errors %} has-error{% endif %} hidden" data-switchtag="{{ field.switchtag }}">
+    <label for="{{ field.id }}" class="control-label">{{ field.label }}</label>
+    {{ field(class_="form-control")|safe }}
+  {% if field.errors %}
+    <span class="help-block">
+    {% for error in field.errors %}
+      {{ error }}
+    {% endfor %}
+    </span>
+  {% endif %}
+  </div>
+{% endmacro %}

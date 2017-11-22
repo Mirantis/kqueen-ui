@@ -10,6 +10,19 @@ Math.degrees = function(radians) {
     return radians * 180 / Math.PI;
 };
 
+// Switchable form fields
+function selectSwitch(selector) {
+  var select = $(selector),
+      init_field_selector = '*[data-switchtag="' + select.val() + '"]';
+  $(init_field_selector).removeClass('hidden');
+  select.change(function() {
+    var all_field_selector = '*[data-switchtag]',
+        cur_field_selector = '*[data-switchtag="' + select.val() + '"]';
+    $(all_field_selector).addClass('hidden');
+    $(cur_field_selector).removeClass('hidden');
+  });
+};
+
 $(document).ready(function() {
     if (location.hash) {
         $("a[data-tabcode='" + location.hash + "']").tab("show");
