@@ -288,7 +288,7 @@ def user_change_password():
 def provisioner_create():
     # Get engines with parameters
     client = get_kqueen_client(token=session['user']['token'])
-    _engines = client.engine.list()
+    _engines = client.provisioner.engines()
     engines = _engines.data
 
     # Append tagged parameter fields to form

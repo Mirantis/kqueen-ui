@@ -189,6 +189,9 @@ class ClusterManager(BaseManager):
 class ProvisionerManager(BaseManager):
     resource_url = 'provisioners/'
 
+    def engines(self):
+        return self.request('engines')
+
 
 class OrganizationManager(BaseManager):
     resource_url = 'organizations/'
@@ -205,10 +208,6 @@ class UserManager(BaseManager):
 
     def whoami(self):
         return self.request('whoami')
-
-
-class EngineManager(BaseManager):
-    resource_url = 'engines/'
 
 
 class KQueenAPIClient:
@@ -233,4 +232,3 @@ class KQueenAPIClient:
         self.provisioner = ProvisionerManager(self)
         self.organization = OrganizationManager(self)
         self.user = UserManager(self)
-        self.engine = EngineManager(self)
