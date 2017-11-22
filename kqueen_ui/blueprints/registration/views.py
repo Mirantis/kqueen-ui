@@ -1,7 +1,7 @@
 from flask import (current_app as app, abort, Blueprint, flash, jsonify, redirect,
                    render_template, request, session, url_for)
 from flask_mail import Mail, Message
-from kqueen_ui.api import get_kqueen_client
+from kqueen_ui.api import get_service_client
 from slugify import slugify
 
 from .forms import UserRegistrationForm
@@ -15,17 +15,11 @@ mail = Mail()
 registration = Blueprint('registration', __name__, template_folder='templates')
 
 
-def _get_client():
-    username = app.config['KQUEEN_SERVICE_USER_NAME']
-    password = app.config['KQUEEN_SERVICE_USER_PASSWORD']
-    return get_kqueen_client(username=username, password=password)
-
-
 @registration.route('/register', methods=['GET', 'POST'])
 def register():
     form = UserRegistrationForm()
     if form.validate_on_submit():
-        client = _get_client()
+        client = get_service_client()
 
         try:
             organization = {
@@ -95,7 +89,7 @@ def verify_email(token):
         flash('The confirmation link is invalid or has expired.', 'danger')
         return redirect(url_for('ui.index'))
 
-    client = _get_client()
+    client = get_service_client()
     _users = client.user.list()
     users = _users.data
 

@@ -238,3 +238,9 @@ def get_kqueen_client(username=None, password=None, token=None):
     base_url = app.config['KQUEEN_API_URL']
     auth_url = app.config['KQUEEN_AUTH_URL']
     return KQueenAPIClient(username, password, token, base_url, auth_url)
+
+
+def get_service_client():
+    username = app.config['KQUEEN_SERVICE_USER_NAME']
+    password = app.config['KQUEEN_SERVICE_USER_PASSWORD']
+    return get_kqueen_client(username=username, password=password)
