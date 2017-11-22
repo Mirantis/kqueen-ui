@@ -2,7 +2,7 @@ from datetime import datetime
 from flask import (current_app as app, abort, Blueprint, flash, jsonify, redirect,
                    render_template, request, session, url_for)
 from flask_mail import Mail, Message
-from kqueen_ui.api import get_kqueen_client 
+from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.auth import authenticate
 from kqueen_ui.wrappers import login_required
 from uuid import UUID
@@ -28,7 +28,7 @@ ui = Blueprint('ui', __name__, template_folder='templates')
 
 @ui.before_request
 def test_token():
-    if session.get('user', None):
+    if session.get('user', None) and not app.testing:
         client = get_kqueen_client(token=session['user']['token'])
         response = client.user.whoami()
         if response.status == 401:
@@ -36,6 +36,7 @@ def test_token():
             del session['user']
         if response.status == -1:
             flash('Backend is unavailable at this time, please try again later.', 'danger')
+
 
 #############
 # Table Views
@@ -235,10 +236,12 @@ def user_create():
 
             # Init mail handler
             mail.init_app(app)
-            html = render_template('ui/email/user_invitation.html',
+            html = render_template(
+                'ui/email/user_invitation.html',
                 username=form.email.data,
                 password=password,
-                organization=session['user']['organization']['name'])
+                organization=session['user']['organization']['name']
+            )
             msg = Message(
                 '[KQueen] Organization invitation',
                 recipients=[form.email.data],
@@ -414,7 +417,7 @@ def cluster_create():
                 }
                 response = client.cluster.create(cluster)
                 if response.status > 200:
-                    lash('Could not create cluster {}.'.format(form.name.data), 'danger')
+                    flash('Could not create cluster {}.'.format(form.name.data), 'danger')
                 flash('Provisioning of cluster {} is in progress.'.format(form.name.data), 'success')
             except Exception as e:
                 logger.error('cluster_create view: {}'.format(repr(e)))

@@ -1,5 +1,4 @@
 from collections import OrderedDict
-from flask import current_app as app
 
 try:
     from secrets import choice

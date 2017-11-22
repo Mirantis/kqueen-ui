@@ -1,4 +1,3 @@
-from flask import current_app as app
 from flask_wtf import FlaskForm
 from kqueen_ui.api import get_service_client
 from wtforms import PasswordField, StringField

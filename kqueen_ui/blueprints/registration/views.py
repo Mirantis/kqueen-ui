@@ -1,5 +1,4 @@
-from flask import (current_app as app, abort, Blueprint, flash, jsonify, redirect,
-                   render_template, request, session, url_for)
+from flask import Blueprint, current_app as app, flash, redirect, render_template, url_for
 from flask_mail import Mail, Message
 from kqueen_ui.api import get_service_client
 from slugify import slugify
