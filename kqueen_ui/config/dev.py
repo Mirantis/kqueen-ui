@@ -27,7 +27,7 @@ MAIL_USE_TLS = False
 MAIL_USE_SSL = False
 MAIL_USERNAME = None
 MAIL_PASSWORD = None
-MAIL_DEFAULT_SENDER = 'noreply@kqueen.com'
+MAIL_DEFAULT_SENDER = 'kqueen@mirantis.com'
 MAIL_MAX_EMAILS = None
 MAIL_ASCII_ATTACHMENTS = False
 
