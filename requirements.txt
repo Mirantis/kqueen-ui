@@ -1,5 +1,6 @@
 Flask==0.12.2
 Flask-Babel==0.11.2
+Flask-Mail
 Flask-Table
 Flask-WTF
 gunicorn
