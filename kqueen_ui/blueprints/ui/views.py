@@ -345,8 +345,8 @@ def user_password_reset(token):
 
 @ui.route('/users/requestresetpw', methods=['GET', 'POST'])
 def user_request_password_reset():
-   form = RequestPasswordResetForm()
-   if form.validate_on_submit():
+    form = RequestPasswordResetForm()
+    if form.validate_on_submit():
         # Init mail handler
         mail.init_app(app)
         token = generate_confirmation_token(form.email.data)
@@ -363,7 +363,7 @@ def user_request_password_reset():
             flash('Could not send password reset e-mail, please try again later.', 'danger')
         flash('Password reset link was sent to your e-mail address.', 'success')
         return redirect(url_for('ui.index'))
-   return render_template('ui/user_request_password_reset.html', form=form)
+    return render_template('ui/user_request_password_reset.html', form=form)
 
 
 # Provisioner
