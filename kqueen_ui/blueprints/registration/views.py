@@ -2,10 +2,10 @@ from datetime import datetime
 from flask import Blueprint, current_app as app, flash, redirect, render_template, url_for
 from flask_mail import Mail, Message
 from kqueen_ui.api import get_service_client
+from kqueen_ui.auth import confirm_token, generate_confirmation_token
 from slugify import slugify
 
 from .forms import UserRegistrationForm
-from .utils import confirm_token, generate_confirmation_token
 
 import logging
 
@@ -17,6 +17,9 @@ registration = Blueprint('registration', __name__, template_folder='templates')
 
 @registration.route('/register', methods=['GET', 'POST'])
 def register():
+    if not app.config['ENABLE_PUBLIC_REGISTRATION']:
+        flash('Public registration is disabled.', 'warning')
+        return redirect(url_for('ui.index'))
     form = UserRegistrationForm()
     if form.validate_on_submit():
         client = get_service_client()
@@ -92,7 +95,7 @@ def register():
 def verify_email(token):
     email = confirm_token(token)
     if not email:
-        flash('The confirmation link is invalid or has expired.', 'danger')
+        flash('Verification link is invalid or has expired.', 'danger')
         return redirect(url_for('ui.index'))
 
     client = get_service_client()
@@ -101,7 +104,7 @@ def verify_email(token):
 
     # TODO: this logic realies heavily on unique emails, this is not the case on backend right now
     filtered = [u for u in users if u.get('email', None) == email]
-    if filtered:
+    if len(filtered) == 1:
         user = filtered[0]
         if user.get('active', None):
             flash('Account already verified. Please login.', 'success')

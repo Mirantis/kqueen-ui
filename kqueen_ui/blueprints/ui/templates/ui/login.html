@@ -37,13 +37,14 @@
       </form>
     </div>
   </div>
-  {% if config.ENABLE_PUBLIC_REGISTRATION %}
   <div class="panel panel-default text-center">
-    <div class="panel-body">
-      <span>Not registered yet? Click <a href="{{ url_for('registration.register') }}">here</a> to set up your user account.</span>
+    <div class="panel-body" style="font-size: 0.9em;">
+      {% if config.ENABLE_PUBLIC_REGISTRATION %}
+      <span>Not registered yet? Click <a href="{{ url_for('registration.register') }}">here</a> to set up your user account.</span><br>
+      {% endif %}
+      <span>Forgot your password? <a href="{{ url_for('ui.user_request_password_reset') }}">Request password reset</a>.</span>
     </div>
   </div>
-  {% endif %}
 </div>
 
 {% endblock %}

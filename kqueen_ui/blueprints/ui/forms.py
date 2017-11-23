@@ -95,7 +95,7 @@ class ChangePasswordForm(FlaskForm):
     )
 
 
-class UserCreateForm(FlaskForm):
+class UserInviteForm(FlaskForm):
     email = EmailField('Email', validators=[Email()])
 
     def validate(self):
@@ -114,6 +114,41 @@ class UserCreateForm(FlaskForm):
         user_emails = [u['email'] for u in users if 'email' in u]
         if self.email.data in user_emails:
             self.email.errors.append('This e-mail is already registered.')
+            return False
+
+        return True
+
+
+class PasswordResetForm(FlaskForm):
+    password_1 = PasswordField('New Password', validators=[DataRequired()])
+    password_2 = PasswordField(
+        'Repeat Password',
+        validators=[
+            DataRequired(),
+            EqualTo('password_1', message='Passwords does not match.')
+        ]
+    )
+
+
+class RequestPasswordResetForm(FlaskForm):
+    email = EmailField('Email', validators=[Email()])
+
+    def validate(self):
+        if not FlaskForm.validate(self):
+            return False
+
+        # TODO: remove these uniqueness checks after introduction of unique constraint
+        # in ETCD storage class on backend
+        client = get_service_client()
+        # Check if e-mail exists on backend
+        response = client.user.list()
+        if response.status > 200:
+            self.email.errors.append('Can not contact backend at this time.')
+            return False
+        users = response.data
+        user_emails = [u['email'] for u in users if 'email' in u]
+        if self.email.data not in user_emails:
+            self.email.errors.append('This e-mail is not registered.')
             return False
 
         return True
