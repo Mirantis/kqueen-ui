@@ -240,10 +240,11 @@ def user_invite():
 
         # Init mail handler
         mail.init_app(app)
+        token = generate_confirmation_token(form.email.data)
         html = render_template(
             'ui/email/user_invitation.html',
             username=form.email.data,
-            password=password,
+            token=token,
             organization=session['user']['organization']['name']
         )
         msg = Message(

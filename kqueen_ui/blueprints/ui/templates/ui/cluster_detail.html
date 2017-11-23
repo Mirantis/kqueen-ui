@@ -61,7 +61,7 @@ Cluster {{ cluster.name }} detail
     {% endif %}
     <div class="progress-bar-background">
       <span>{% if cluster.state == config.CLUSTER_PROVISIONING_STATE %}{{ initial_progress }}%{% else %}Done{% endif %}</span>
-      <div class="progress-bar" style="width: {{ initial_progress }}%;"></div>
+      <div class="ui-progress-bar" style="width: {{ initial_progress }}%;"></div>
     </div>
   </div>
 </div>
@@ -111,7 +111,7 @@ Cluster {{ cluster.name }} detail
             <td class="action_column">
               <div class="progress-bar-background">
                 <span>{{ node.pods.pods }}/{{ node.pods.maxpods }}</span>
-                <div class="progress-bar" style="width: {{ node.pods.percentage }}%;"></div>
+                <div class="ui-progress-bar" style="width: {{ node.pods.percentage }}%;"></div>
               </div>
             </td>
           </tr>
@@ -141,7 +141,7 @@ Cluster {{ cluster.name }} detail
             <td>
               <div class="progress-bar-background">
                 <span>{{ deployment.replicas.ready }}/{{ deployment.replicas.desired }}</span>
-                <div class="progress-bar" style="width: {{ deployment.replicas.percentage }}%;"></div>
+                <div class="ui-progress-bar" style="width: {{ deployment.replicas.percentage }}%;"></div>
               </div>
             </td>
             <td>
@@ -508,7 +508,7 @@ Cluster {{ cluster.name }} detail
   var progressRefreshFn = function(){
     $.get("{{ url_for('ui.cluster_deployment_status', cluster_id=cluster.id) }}", function(res){
       console.log(JSON.stringify(res));
-      $('#progress .progress-bar').css('width', res.progress + '%')
+      $('#progress .ui-progress-bar').css('width', res.progress + '%')
       $('#progress .progress-bar-background > span').html(res.progress + '%');
       if(res.result != '{{ config.CLUSTER_PROVISIONING_STATE }}'){
         clearInterval(interval);

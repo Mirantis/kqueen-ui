@@ -358,13 +358,24 @@ footer {
   }
 }
 
-.progress-bar {
+.ui-progress-bar {
   background-color: $brand-primary;
   height: 100%;
   position: absolute;
   left: 0px;
   top: 0px;
   z-index: 2;
+}
+
+.form-group .progress {
+  margin-bottom: 0px;
+}
+
+.password-verdict {
+  float: right;
+  font-size: 12px;
+  margin-top: -20px;
+  margin-right: 10px;
 }
 
 // Radial progress bar

@@ -28,6 +28,7 @@
     "os": "^0.1.1",
     "particles.js": "^2.0.0",
     "path": "^0.12.7",
+    "pwstrength-bootstrap": "^2.1.1",
     "run-sequence": "^1.2.2"
   }
 }
