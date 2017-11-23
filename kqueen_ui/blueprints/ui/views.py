@@ -216,9 +216,9 @@ def logout():
 
 # User
 
-@ui.route('/users/create', methods=['GET', 'POST'])
+@ui.route('/users/invite', methods=['GET', 'POST'])
 @login_required
-def user_create():
+def user_invite():
     form = UserInviteForm()
     if form.validate_on_submit():
         organization = 'Organization:{}'.format(session['user']['organization']['id'])
