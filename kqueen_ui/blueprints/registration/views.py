@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Blueprint, current_app as app, flash, redirect, render_template, url_for
 from flask_mail import Mail, Message
 from kqueen_ui.api import get_service_client
@@ -23,7 +24,8 @@ def register():
         try:
             organization = {
                 'name': form.organization_name.data,
-                'namespace': slugify(form.organization_name.data)
+                'namespace': slugify(form.organization_name.data),
+                'created_at': datetime.utcnow()
             }
             response = client.organization.create(organization)
 
@@ -44,6 +46,7 @@ def register():
                 'password': form.password_1.data,
                 'email': form.email.data,
                 'organization': organization_ref,
+                'created_at': datetime.utcnow(),
                 'active': False
             }
             response = client.user.create(user)
@@ -52,6 +55,8 @@ def register():
                 flash('Could not create user.', 'danger')
                 client.organization.delete(organization_id)
                 return render_template('registration/register.html', form=form)
+
+            user_id = response.data['id']
         except Exception as e:
             logger.error('register view: {}'.format(repr(e)))
             client.organization.delete(organization_id)
@@ -73,6 +78,8 @@ def register():
             mail.send(msg)
         except Exception as e:
             logger.error('register view: {}'.format(repr(e)))
+            client.organization.delete(organization_id)
+            client.user.delete(user_id)
             flash('Could not send verification e-mail, please try again later.', 'danger')
             return render_template('registration/register.html', form=form)
 

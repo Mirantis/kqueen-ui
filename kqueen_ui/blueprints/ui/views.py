@@ -220,44 +220,45 @@ def logout():
 def user_create():
     form = UserCreateForm()
     if form.validate_on_submit():
+        organization = 'Organization:{}'.format(session['user']['organization']['id'])
+        password = generate_password()
+        user = {
+            'username': form.email.data,
+            'password': password,
+            'email': form.email.data,
+            'organization': organization,
+            'created_at': datetime.utcnow(),
+            'active': True
+        }
+        client = get_kqueen_client(token=session['user']['token'])
+        response = client.user.create(user)
+        if response.status > 200:
+            flash('Could not create user.', 'danger')
+            return render_template('ui/user_create.html', form=form)
+        user_id = response.data['id']
+
+        # Init mail handler
+        mail.init_app(app)
+        html = render_template(
+            'ui/email/user_invitation.html',
+            username=form.email.data,
+            password=password,
+            organization=session['user']['organization']['name']
+        )
+        msg = Message(
+            '[KQueen] Organization invitation',
+            recipients=[form.email.data],
+            html=html
+        )
         try:
-            organization = 'Organization:{}'.format(session['user']['organization']['id'])
-            password = generate_password()
-            user = {
-                'username': form.email.data,
-                'password': password,
-                'email': form.email.data,
-                'organization': organization,
-                'created_at': datetime.utcnow(),
-                'active': True
-            }
-            client = get_kqueen_client(token=session['user']['token'])
-            client.user.create(user)
-
-            # Init mail handler
-            mail.init_app(app)
-            html = render_template(
-                'ui/email/user_invitation.html',
-                username=form.email.data,
-                password=password,
-                organization=session['user']['organization']['name']
-            )
-            msg = Message(
-                '[KQueen] Organization invitation',
-                recipients=[form.email.data],
-                html=html
-            )
-            try:
-                mail.send(msg)
-            except Exception as e:
-                logger.error('user_create view: {}'.format(repr(e)))
-                flash('Could not send invitation e-mail, please try again later.', 'danger')
-                return render_template('ui/user_create.html', form=form)
-
-            flash('User {} successfully created.'.format(user['username']), 'success')
+            mail.send(msg)
         except Exception as e:
             logger.error('user_create view: {}'.format(repr(e)))
-            flash('Could not create user.', 'danger')
+            client.user.delete(user_id)
+            flash('Could not send invitation e-mail, please try again later.', 'danger')
+            return render_template('ui/user_create.html', form=form)
+
+        flash('User {} successfully created.'.format(user['username']), 'success')
         return redirect(url_for('ui.organization_manage'))
     return render_template('ui/user_create.html', form=form)
 
