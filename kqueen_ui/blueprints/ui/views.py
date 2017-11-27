@@ -380,7 +380,7 @@ def provisioner_create():
     # Append tagged parameter fields to form
     form_cls = ProvisionerCreateForm
     for engine in engines:
-        form_cls.append_fields(engine['parameters'], switchtag=engine['name'])
+        form_cls.append_fields(engine['parameters']['provisioner'], switchtag=engine['name'])
 
     # Instantiate form and populate engine choices
     form = form_cls()
@@ -449,30 +449,48 @@ def provisioner_delete(provisioner_id):
 @ui.route('/clusters/deploy', methods=['GET', 'POST'])
 @login_required
 def cluster_create():
-    form = ClusterCreateForm()
+    # Get all necessary objects from backend
     client = get_kqueen_client(token=session['user']['token'])
     _provisioners = client.provisioner.list()
     provisioners = _provisioners.data
+    _engines = client.provisioner.engines()
+    engines = _engines.data
+    engine_dict = dict([(e.pop('name'), e) for e in engines])
+
+    # Append tagged parameter fields to form
+    form_cls = ClusterCreateForm
+    for provisioner in provisioners:
+        engine = engine_dict.get(provisioner['engine'], {})
+        _parameters = engine.get('parameters', {}).get('cluster', {})
+        # Append provisioner ID to parameter name to make it unique
+        parameters = {
+            k + '__' + provisioner['id']: v
+            for [k, v]
+            in _parameters.items()
+        }
+        form_cls.append_fields(parameters, switchtag=provisioner['id'])
+
+    # Instantiate form and populate provisioner choices
+    form = form_cls()
     form.provisioner.choices = [(p['id'], p['name']) for p in provisioners]
+
     if request.method == 'POST':
         if form.validate_on_submit():
             try:
-                # load kubeconfig
-                kubeconfig = {}
-                kubeconfig_file = form.kubeconfig.data
-
-                if kubeconfig_file:
-                    try:
-                        kubeconfig = yaml.load(kubeconfig_file.stream)
-                    except Exception:
-                        logger.error('cluster_create view: {}'.format(sys.exc_info()))
+                # Filter out populated tagged fields and get their data
+                metadata = {
+                    k.split('__')[0]: v.data
+                    for (k, v)
+                    in form._fields.items()
+                    if (hasattr(v, 'switchtag') and v.switchtag) and form.provisioner.data in k
+                }
 
                 cluster = {
                     'name': form.name.data,
                     'state': app.config['CLUSTER_PROVISIONING_STATE'],
                     'provisioner': 'Provisioner:{}'.format(form.provisioner.data),
-                    'kubeconfig': kubeconfig,
-                    'created_at': datetime.utcnow()
+                    'created_at': datetime.utcnow(),
+                    'metadata': metadata
                 }
                 response = client.cluster.create(cluster)
                 if response.status > 200:

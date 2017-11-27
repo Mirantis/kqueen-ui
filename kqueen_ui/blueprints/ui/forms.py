@@ -1,9 +1,19 @@
 from flask_wtf import FlaskForm as WTFlaskForm
-from flask_wtf.file import FileField
+from flask_wtf.file import FileField as WTFileField
 from kqueen_ui.api import get_service_client
-from wtforms import PasswordField as WTPasswordField, SelectField as WTSelectField, StringField as WTStringField, TextAreaField as WTTextAreaField
+from werkzeug.datastructures import FileStorage
+from wtforms import (
+    IntegerField as WTIntegerField,
+    PasswordField as WTPasswordField,
+    SelectField as WTSelectField,
+    StringField as WTStringField,
+    TextAreaField as WTTextAreaField
+)
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import DataRequired, Email, EqualTo
+
+import json
+import yaml
 
 
 #
@@ -18,6 +28,36 @@ class SelectableMixin:
         self.switchtag = kwargs.pop('switchtag', None)
         self.jsvalidators = kwargs.pop('jsvalidators', None)
         super(SelectableMixin, self).__init__(*args, **kwargs)
+
+
+class IntegerField(SelectableMixin, WTIntegerField):
+    pass
+
+
+class FileField(SelectableMixin, WTFileField):
+    pass
+
+
+class JsonFileField(FileField):
+
+    def process_formdata(self, valuelist):
+        super(JsonFileField, self).process_formdata(valuelist)
+        if self.data and isinstance(self.data, FileStorage):
+            try:
+                self.data = json.loads(self.data)
+            except Exception as e:
+                logger.error('Could not load JSON file: {}'.format(repr(e)))
+
+
+class YamlFileField(FileField):
+
+    def process_formdata(self, valuelist):
+        super(YamlFileField, self).process_formdata(valuelist)
+        if self.data and isinstance(self.data, FileStorage):
+            try:
+                self.data = yaml.load(self.data)
+            except Exception as e:
+                logger.error('Could not load YAML file: {}'.format(repr(e)))
 
 
 class PasswordField(SelectableMixin, WTPasswordField):
@@ -68,6 +108,14 @@ class FlaskForm(WTFlaskForm):
                 field_class = StringField
             elif field_params['type'] == 'password':
                 field_class = PasswordField
+            elif field_params['type'] == 'integer':
+                field_class = IntegerField
+            elif field_params['type'] == 'file':
+                field_class = FileField
+            elif field_params['type'] == 'json_file':
+                field_class = JsonFileField
+            elif field_params['type'] == 'yaml_file':
+                field_class = YamlFileField
             if field_class:
                 label = field_params['label'] if 'label' in field_params else field_name
                 jsvalidators = field_params['validators'] if 'validators' in field_params else {}
@@ -161,8 +209,7 @@ class ProvisionerCreateForm(FlaskForm):
 
 class ClusterCreateForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
-    kubeconfig = FileField()
-    provisioner = SelectField('Provisioner', validators=[DataRequired()], choices=[])
+    provisioner = SelectField('Provisioner', validators=[DataRequired()], choices=[], switch=True)
 
 
 class ClusterApplyForm(FlaskForm):
