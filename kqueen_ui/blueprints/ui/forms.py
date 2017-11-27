@@ -13,7 +13,10 @@ from wtforms.fields.html5 import EmailField
 from wtforms.validators import DataRequired, Email, EqualTo
 
 import json
+import logging
 import yaml
+
+logger = logging.getLogger(__name__)
 
 
 #
@@ -44,8 +47,10 @@ class JsonFileField(FileField):
         super(JsonFileField, self).process_formdata(valuelist)
         if self.data and isinstance(self.data, FileStorage):
             try:
-                self.data = json.loads(self.data)
+                data = self.data.read()
+                self.data = json.loads(data.decode('utf-8'))
             except Exception as e:
+                self.data = {}
                 logger.error('Could not load JSON file: {}'.format(repr(e)))
 
 
@@ -55,8 +60,9 @@ class YamlFileField(FileField):
         super(YamlFileField, self).process_formdata(valuelist)
         if self.data and isinstance(self.data, FileStorage):
             try:
-                self.data = yaml.load(self.data)
+                self.data = yaml.load(self.data.stream)
             except Exception as e:
+                self.data = {}
                 logger.error('Could not load YAML file: {}'.format(repr(e)))
 
 
