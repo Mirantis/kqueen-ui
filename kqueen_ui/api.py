@@ -56,20 +56,20 @@ class ParserMixin:
                     dt = to_utc(fmt_dt)
                     _dict[key] = dt.isoformat()
             elif isinstance(value, dict):
-                 self._parse_request_payload_datetime(value)
+                self._parse_request_payload_datetime(value)
 
     def _parse_response(self, response):
         if isinstance(response, list):
-           for item in response:
-               self._parse_response_datetime(item)
+            for item in response:
+                self._parse_response_datetime(item)
         elif isinstance(response, dict):
             self._parse_response_datetime(response)
         return response
 
     def _parse_request_payload(self, payload):
         if isinstance(payload, list):
-           for item in payload:
-               self._parse_request_payload_datetime(item)
+            for item in payload:
+                self._parse_request_payload_datetime(item)
         elif isinstance(payload, dict):
             self._parse_request_payload_datetime(payload)
         return payload
@@ -232,3 +232,15 @@ class KQueenAPIClient:
         self.provisioner = ProvisionerManager(self)
         self.organization = OrganizationManager(self)
         self.user = UserManager(self)
+
+
+def get_kqueen_client(username=None, password=None, token=None):
+    base_url = app.config['KQUEEN_API_URL']
+    auth_url = app.config['KQUEEN_AUTH_URL']
+    return KQueenAPIClient(username, password, token, base_url, auth_url)
+
+
+def get_service_client():
+    username = app.config['KQUEEN_SERVICE_USER_NAME']
+    password = app.config['KQUEEN_SERVICE_USER_PASSWORD']
+    return get_kqueen_client(username=username, password=password)

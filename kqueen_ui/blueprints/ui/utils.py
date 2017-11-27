@@ -1,6 +1,11 @@
 from collections import OrderedDict
-from flask import current_app as app
-from kqueen_ui.api import KQueenAPIClient
+
+try:
+    from secrets import choice
+except ImportError:
+    from random import choice
+
+import string
 
 
 def status_for_cluster_detail(_status):
@@ -231,7 +236,6 @@ def prettify_engine_name(engine):
     return engine
 
 
-def get_kqueen_client(username=None, password=None, token=None):
-    base_url = app.config['KQUEEN_API_URL']
-    auth_url = app.config['KQUEEN_AUTH_URL']
-    return KQueenAPIClient(username, password, token, base_url, auth_url)
+def generate_password(length=20):
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(choice(alphabet) for _ in range(length))

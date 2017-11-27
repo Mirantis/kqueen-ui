@@ -1,20 +1,24 @@
 from datetime import datetime
 from flask import (current_app as app, abort, Blueprint, flash, jsonify, redirect,
                    render_template, request, session, url_for)
-from kqueen_ui.auth import authenticate
+from flask_mail import Mail, Message
+from kqueen_ui.api import get_kqueen_client, get_service_client
+from kqueen_ui.auth import authenticate, confirm_token, generate_confirmation_token
 from kqueen_ui.wrappers import login_required
 from uuid import UUID
 
 from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
-                    ChangePasswordForm, UserCreateForm)
+                    ChangePasswordForm, UserInviteForm, RequestPasswordResetForm,
+                    PasswordResetForm)
 from .tables import ClusterTable, OrganizationMembersTable, ProvisionerTable
-from .utils import get_kqueen_client, prettify_engine_name, status_for_cluster_detail
+from .utils import generate_password, prettify_engine_name, status_for_cluster_detail
 
 import yaml
 import logging
 import sys
 
 logger = logging.getLogger(__name__)
+mail = Mail()
 
 ui = Blueprint('ui', __name__, template_folder='templates')
 
@@ -25,7 +29,7 @@ ui = Blueprint('ui', __name__, template_folder='templates')
 
 @ui.before_request
 def test_token():
-    if session.get('user', None):
+    if session.get('user', None) and not app.testing:
         client = get_kqueen_client(token=session['user']['token'])
         response = client.user.whoami()
         if response.status == 401:
@@ -33,6 +37,7 @@ def test_token():
             del session['user']
         if response.status == -1:
             flash('Backend is unavailable at this time, please try again later.', 'danger')
+
 
 #############
 # Table Views
@@ -211,26 +216,51 @@ def logout():
 
 # User
 
-@ui.route('/users/create', methods=['GET', 'POST'])
+@ui.route('/users/invite', methods=['GET', 'POST'])
 @login_required
-def user_create():
-    form = UserCreateForm()
+def user_invite():
+    form = UserInviteForm()
     if form.validate_on_submit():
+        organization = 'Organization:{}'.format(session['user']['organization']['id'])
+        password = generate_password()
+        user = {
+            'username': form.email.data,
+            'password': password,
+            'email': form.email.data,
+            'organization': organization,
+            'created_at': datetime.utcnow(),
+            'active': True
+        }
+        client = get_kqueen_client(token=session['user']['token'])
+        response = client.user.create(user)
+        if response.status > 200:
+            flash('Could not create user.', 'danger')
+            return render_template('ui/user_create.html', form=form)
+        user_id = response.data['id']
+
+        # Init mail handler
+        mail.init_app(app)
+        token = generate_confirmation_token(form.email.data)
+        html = render_template(
+            'ui/email/user_invitation.html',
+            username=form.email.data,
+            token=token,
+            organization=session['user']['organization']['name']
+        )
+        msg = Message(
+            '[KQueen] Organization invitation',
+            recipients=[form.email.data],
+            html=html
+        )
         try:
-            organization = 'Organization:{}'.format(session['user']['organization']['id'])
-            user = {
-                'username': form.username.data,
-                'password': form.password_1.data,
-                'email': form.email.data or None,
-                'organization': organization,
-                'created_at': datetime.utcnow()
-            }
-            client = get_kqueen_client(token=session['user']['token'])
-            client.user.create(user)
-            flash('User {} successfully created.'.format(user['username']), 'success')
+            mail.send(msg)
         except Exception as e:
             logger.error('user_create view: {}'.format(repr(e)))
-            flash('Could not create user.', 'danger')
+            client.user.delete(user_id)
+            flash('Could not send invitation e-mail, please try again later.', 'danger')
+            return render_template('ui/user_create.html', form=form)
+
+        flash('User {} successfully created.'.format(user['username']), 'success')
         return redirect(url_for('ui.organization_manage'))
     return render_template('ui/user_create.html', form=form)
 
@@ -279,6 +309,62 @@ def user_change_password():
             logger.error('user_change_password view: {}'.format(repr(e)))
             flash('Password update failed.', 'danger')
     return render_template('ui/user_change_password.html', form=form)
+
+
+@ui.route('/users/resetpw/<token>', methods=['GET', 'POST'])
+def user_password_reset(token):
+    email = confirm_token(token)
+    if not email:
+        flash('Password reset link is invalid or has expired.', 'danger')
+        return redirect(url_for('ui.index'))
+
+    client = get_service_client()
+    _users = client.user.list()
+    users = _users.data
+
+    # TODO: this logic realies heavily on unique emails, this is not the case on backend right now
+    filtered = [u for u in users if u.get('email', None) == email]
+    if len(filtered) == 1:
+        user = filtered[0]
+        form = PasswordResetForm()
+        if form.validate_on_submit():
+            try:
+                user['password'] = form.password_1.data
+                update = client.user.update(user['id'], user)
+                if update.status == 200:
+                    flash('Password successfully updated. Please log in again.', 'success')
+                    return redirect(url_for('ui.login'))
+                flash('Could not change password. Please try again later.', 'danger')
+            except Exception as e:
+                logger.error('user_password_reset view: {}'.format(repr(e)))
+                flash('Could not change password. Please try again later.', 'danger')
+        return render_template('ui/user_reset_password.html', form=form)
+    else:
+        flash('No user found based on given e-mail.', 'danger')
+    return redirect(url_for('ui.index'))
+
+
+@ui.route('/users/requestresetpw', methods=['GET', 'POST'])
+def user_request_password_reset():
+    form = RequestPasswordResetForm()
+    if form.validate_on_submit():
+        # Init mail handler
+        mail.init_app(app)
+        token = generate_confirmation_token(form.email.data)
+        html = render_template('ui/email/user_request_password_reset.html', token=token)
+        msg = Message(
+            '[KQueen] Password reset',
+            recipients=[form.email.data],
+            html=html
+        )
+        try:
+            mail.send(msg)
+        except Exception as e:
+            logger.error('request_password_reset view: {}'.format(repr(e)))
+            flash('Could not send password reset e-mail, please try again later.', 'danger')
+        flash('Password reset link was sent to your e-mail address.', 'success')
+        return redirect(url_for('ui.index'))
+    return render_template('ui/user_request_password_reset.html', form=form)
 
 
 # Provisioner
@@ -390,7 +476,7 @@ def cluster_create():
                 }
                 response = client.cluster.create(cluster)
                 if response.status > 200:
-                    lash('Could not create cluster {}.'.format(form.name.data), 'danger')
+                    flash('Could not create cluster {}.'.format(form.name.data), 'danger')
                 flash('Provisioning of cluster {} is in progress.'.format(form.name.data), 'success')
             except Exception as e:
                 logger.error('cluster_create view: {}'.format(repr(e)))

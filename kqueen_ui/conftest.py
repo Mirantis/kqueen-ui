@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import url_for
 from kqueen_ui.server import create_app
 from unittest.mock import Mock, patch
@@ -11,6 +12,7 @@ config_file = 'config/test.py'
 @pytest.fixture
 def app():
     app = create_app(config_file=config_file)
+    app.testing = True
     return app
 
 
@@ -31,7 +33,10 @@ def user():
         'username': 'pytest',
         'password': 'pytest',
         'email': 'pytest@python.org',
-        'organization': organization()['id']
+        'organization': organization(),
+        'active': True,
+        'created_at': datetime.utcnow(),
+        'token': token()
     }
     return user
 
@@ -44,8 +49,7 @@ def token():
 @patch('kqueen_ui.blueprints.ui.views.authenticate')
 def _login(client, mock_get):
     _user = user()
-    _token = token()
-    mock_get.return_value = (_user, _token)
+    mock_get.return_value = (_user, None)
     client.post(url_for('ui.login'), data={
         'username': _user['username'],
         'password': _user['password']

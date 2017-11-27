@@ -1,13 +1,35 @@
 DEBUG = True
 
+# External endpoint
+SERVER_NAME = 'localhost:5080'
+
 # App secret
 SECRET_KEY = 'secret'
+SECURITY_PASSWORD_SALT = 'secret_salt'
+
+# KQueen API
 KQUEEN_API_URL = 'http://kqueen:5000/api/v1/'
 KQUEEN_AUTH_URL = 'http://kqueen:5000/api/v1/auth'
 
 # Babel
 BABEL_DEFAULT_TIMEZONE = 'UTC'
 BABEL_DEFAULT_LOCALE = 'en'
+
+# Registration
+ENABLE_PUBLIC_REGISTRATION = True
+KQUEEN_SERVICE_USER_NAME = 'admin'
+KQUEEN_SERVICE_USER_PASSWORD = 'default'
+
+# Mail
+MAIL_SERVER = 'localhost'
+MAIL_PORT = 25
+MAIL_USE_TLS = False
+MAIL_USE_SSL = False
+MAIL_USERNAME = None
+MAIL_PASSWORD = None
+MAIL_DEFAULT_SENDER = 'kqueen@mirantis.com'
+MAIL_MAX_EMAILS = None
+MAIL_ASCII_ATTACHMENTS = False
 
 # Cluster statuses
 CLUSTER_ERROR_STATE = 'Error'

@@ -2,6 +2,7 @@ from flask import Flask
 from flask import redirect
 from flask import url_for
 from flask.ext.babel import Babel
+from kqueen_ui.blueprints.registration.views import registration
 from kqueen_ui.blueprints.ui.views import ui
 from werkzeug.contrib.cache import SimpleCache
 
@@ -19,6 +20,7 @@ def create_app(config_file=config_file):
     app = Flask(__name__, static_folder='./asset/static')
 
     app.register_blueprint(ui, url_prefix='/ui')
+    app.register_blueprint(registration, url_prefix='/registration')
 
     # load configuration
     if app.config.from_pyfile(config_file):

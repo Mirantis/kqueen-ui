@@ -1,0 +1,11 @@
+version: '2'
+services:
+  kqueen_mail:
+    image: modularitycontainers/postfix
+    ports:
+      - 127.0.0.1:25:10025
+    volumes:
+      - /var/spool/postfix:/var/spool/postfix
+      - /var/spool/mail:/var/spool/mail
+    environment:
+      MYHOSTNAME: 'localhost'
