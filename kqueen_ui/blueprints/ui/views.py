@@ -378,7 +378,13 @@ def provisioner_create():
     # Append tagged parameter fields to form
     form_cls = ProvisionerCreateForm
     for engine in engines:
-        form_cls.append_fields(engine['parameters']['provisioner'], switchtag=engine['name'])
+        _parameters = engine['parameters']['provisioner']
+        parameters = {
+            k + '__' + prettify_engine_name(engine['name']): v
+            for (k, v)
+            in _parameters.items()
+        }
+        form_cls.append_fields(parameters, switchtag=engine['name'])
 
     # Instantiate form and populate engine choices
     form = form_cls()
@@ -388,10 +394,10 @@ def provisioner_create():
         try:
             # Filter out populated tagged fields and get their data
             parameters = {
-                k: v.data
+                k.split('__')[0]: v.data
                 for (k, v)
                 in form._fields.items()
-                if (hasattr(v, 'switchtag') and v.switchtag) and v.data
+                if (hasattr(v, 'switchtag') and v.switchtag) and prettify_engine_name(form.engine.data) in k
             }
             provisioner = {
                 'name': form.name.data,
