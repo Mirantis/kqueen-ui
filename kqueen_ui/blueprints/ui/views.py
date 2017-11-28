@@ -4,7 +4,7 @@ from flask import (current_app as app, abort, Blueprint, flash, jsonify, redirec
 from flask_mail import Mail, Message
 from kqueen_ui.api import get_kqueen_client, get_service_client
 from kqueen_ui.auth import authenticate, confirm_token, generate_confirmation_token
-from kqueen_ui.wrappers import login_required
+from kqueen_ui.utils.wrappers import login_required
 from uuid import UUID
 
 from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
@@ -13,9 +13,7 @@ from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
 from .tables import ClusterTable, OrganizationMembersTable, ProvisionerTable
 from .utils import generate_password, prettify_engine_name, status_for_cluster_detail
 
-import yaml
 import logging
-import sys
 
 logger = logging.getLogger(__name__)
 mail = Mail()

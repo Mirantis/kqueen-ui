@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask import url_for
 from kqueen_ui.server import create_app
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 import uuid
