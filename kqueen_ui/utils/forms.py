@@ -58,5 +58,7 @@ class FlaskExtendableForm(FlaskForm):
                 }
                 if field_class == SelectField:
                     field_kwargs['choices'] = field_params.get('choices', [])
+                if 'default' in field_params:
+                    field_kwargs['default'] = field_params['default']
                 field = field_class(label, **field_kwargs)
                 setattr(cls, field_name, field)
