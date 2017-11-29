@@ -1,13 +1,15 @@
 from flask_wtf.file import FileField as WTFileField
 from werkzeug.datastructures import FileStorage
 from wtforms import (
-    IntegerField as WTIntegerField,
     PasswordField as WTPasswordField,
     SelectField as WTSelectField,
     StringField as WTStringField,
     TextAreaField as WTTextAreaField
 )
-from wtforms.fields.html5 import EmailField as WTEmailField
+from wtforms.fields.html5 import (
+    EmailField as WTEmailField,
+    IntegerField as WTIntegerField
+)
 
 import json
 import logging
@@ -39,7 +41,12 @@ class FileField(SelectableMixin, WTFileField):
 
 
 class IntegerField(SelectableMixin, WTIntegerField):
-    pass
+
+    def _value(self):
+        # potentially dangerous hack which changes empty value to
+        # zero integer, so we can submit hidden integer fields
+        value = super(IntegerField, self)._value()
+        return value or 0
 
 
 class JsonFileField(FileField):
