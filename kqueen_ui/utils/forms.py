@@ -5,6 +5,7 @@ from kqueen_ui.utils.fields import (
     IntegerField,
     JsonFileField,
     PasswordField,
+    SelectField,
     StringField,
     TextAreaField,
     YamlFileField
@@ -17,6 +18,7 @@ TYPE_MAP = {
     'integer': IntegerField,
     'json_file': JsonFileField,
     'password': PasswordField,
+    'select': SelectField,
     'text': StringField,
     'text_area': TextAreaField,
     'yaml_file': YamlFileField
@@ -50,5 +52,12 @@ class FlaskExtendableForm(FlaskForm):
             if field_class:
                 label = field_params['label'] if 'label' in field_params else field_name
                 jsvalidators = field_params['validators'] if 'validators' in field_params else {}
-                field = field_class(label, switchtag=switchtag, jsvalidators=jsvalidators)
+                field_kwargs = {
+                    'switchtag': switchtag,
+                    'jsvalidators': jsvalidators
+                }
+                if field_class == SelectField:
+                    field_kwargs['choices'] = field_params.get('choices', [])
+                print(field_kwargs)
+                field = field_class(label, **field_kwargs)
                 setattr(cls, field_name, field)
