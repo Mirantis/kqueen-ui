@@ -511,7 +511,7 @@ Cluster {{ cluster.name }} detail
       $('#progress .ui-progress-bar').css('width', res.progress + '%')
       $('#progress .progress-bar-background > span').html(res.progress + '%');
       if(res.result != '{{ config.CLUSTER_PROVISIONING_STATE }}'){
-        clearInterval(interval);
+        location.reload();
       }
     });
   };
