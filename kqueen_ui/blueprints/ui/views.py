@@ -478,32 +478,31 @@ def cluster_create():
     form = form_cls()
     form.provisioner.choices = [(p['id'], p['name']) for p in provisioners]
 
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            try:
-                # Filter out populated tagged fields and get their data
-                metadata = {
-                    k.split('__')[0]: v.data
-                    for (k, v)
-                    in form._fields.items()
-                    if (hasattr(v, 'switchtag') and v.switchtag) and form.provisioner.data in k
-                }
+    if form.validate_on_submit():
+        try:
+            # Filter out populated tagged fields and get their data
+            metadata = {
+                k.split('__')[0]: v.data
+                for (k, v)
+                in form._fields.items()
+                if (hasattr(v, 'switchtag') and v.switchtag) and form.provisioner.data in k
+            }
 
-                cluster = {
-                    'name': form.name.data,
-                    'state': app.config['CLUSTER_PROVISIONING_STATE'],
-                    'provisioner': 'Provisioner:{}'.format(form.provisioner.data),
-                    'created_at': datetime.utcnow(),
-                    'metadata': metadata
-                }
-                response = client.cluster.create(cluster)
-                if response.status > 200:
-                    flash('Could not create cluster {}.'.format(form.name.data), 'danger')
-                flash('Provisioning of cluster {} is in progress.'.format(form.name.data), 'success')
-            except Exception as e:
-                logger.error('cluster_create view: {}'.format(repr(e)))
+            cluster = {
+                'name': form.name.data,
+                'state': app.config['CLUSTER_PROVISIONING_STATE'],
+                'provisioner': 'Provisioner:{}'.format(form.provisioner.data),
+                'created_at': datetime.utcnow(),
+                'metadata': metadata
+            }
+            response = client.cluster.create(cluster)
+            if response.status > 200:
                 flash('Could not create cluster {}.'.format(form.name.data), 'danger')
-            return redirect('/')
+            flash('Provisioning of cluster {} is in progress.'.format(form.name.data), 'success')
+        except Exception as e:
+            logger.error('cluster_create view: {}'.format(repr(e)))
+            flash('Could not create cluster {}.'.format(form.name.data), 'danger')
+        return redirect('/')
     return render_template('ui/cluster_create.html', form=form)
 
 
