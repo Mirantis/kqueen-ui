@@ -63,6 +63,8 @@ def index():
             if app.config['CLUSTER_ERROR_STATE'] not in cluster['state']:
                 healthy_clusters = healthy_clusters + 1
 
+    # sort clusters by date
+    clusters.sort(key=lambda k: k['created_at'])
     clustertable = ClusterTable(clusters)
 
     for provisioner in provisioners:
@@ -71,6 +73,8 @@ def index():
             if app.config['PROVISIONER_ERROR_STATE'] not in provisioner['state']:
                 healthy_provisioners = healthy_provisioners + 1
 
+    # sort provisioners by date
+    provisioners.sort(key=lambda k: k['created_at'])
     provisionertable = ProvisionerTable(provisioners)
 
     cluster_health = 100
@@ -111,9 +115,11 @@ def organization_manage():
         # Patch members until we actually have these data for realsies
         for member in members:
             member['role'] = 'Member'
-            member['state'] = 'Active'
+            member['state'] = 'Active' if member['active'] else 'Disabled'
             if 'email' not in member:
                 member['email'] = '-'
+        # sort members by date
+        members.sort(key=lambda k: k['created_at'])
     except Exception as e:
         logger.error('organization_manage view: {}'.format(repr(e)))
         organization = {}
