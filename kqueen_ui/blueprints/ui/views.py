@@ -64,7 +64,8 @@ def index():
                 healthy_clusters = healthy_clusters + 1
 
     # sort clusters by date
-    clusters.sort(key=lambda k: k['created_at'])
+    if isinstance(clusters, list):
+        clusters.sort(key=lambda k: k['created_at'])
     clustertable = ClusterTable(clusters)
 
     for provisioner in provisioners:
@@ -74,7 +75,8 @@ def index():
                 healthy_provisioners = healthy_provisioners + 1
 
     # sort provisioners by date
-    provisioners.sort(key=lambda k: k['created_at'])
+    if isinstance(provisioners, list):
+        provisioners.sort(key=lambda k: k['created_at'])
     provisionertable = ProvisionerTable(provisioners)
 
     cluster_health = 100
