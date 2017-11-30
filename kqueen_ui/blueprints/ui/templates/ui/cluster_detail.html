@@ -44,7 +44,7 @@ Cluster {{ cluster.name }} detail
 
 <div class="overview-actions">
   <div class="col-sm-4">
-    {% if cluster.state == config.CLUSTER_PROVISIONING_STATE %}
+    {% if cluster.state != config.CLUSTER_OK_STATE %}
       <a href="#" class="btn btn-primary btn-xs disabled">kubeconfig N/A</a>
     {% else %}
       <a href="{{ url_for('ui.cluster_kubeconfig', cluster_id=cluster.id) }}" class="btn btn-primary btn-xs">Download kubeconfig</a>
