@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from flask_wtf import FlaskForm
 from kqueen_ui.utils.fields import (
     EmailField,
@@ -47,7 +48,8 @@ class FlaskExtendableForm(FlaskForm):
                 }
             }
         '''
-        for field_name, field_params in ctx.items():
+        fields = OrderedDict(sorted(ctx.items(), key=lambda k: k[0]))
+        for field_name, field_params in fields.items():
             field_class = TYPE_MAP.get(field_params['type'], None)
             if field_class:
                 label = field_params['label'] if 'label' in field_params else field_name
