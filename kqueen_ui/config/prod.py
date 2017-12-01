@@ -1,7 +1,7 @@
 DEBUG = True
 
 # External endpoint
-SERVER_NAME = 'localhost:5080'
+#SERVER_NAME = 'localhost:5080'
 
 # App secret
 SECRET_KEY = 'secret'
