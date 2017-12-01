@@ -60,12 +60,12 @@ def index():
 
     for cluster in clusters:
         if 'state' in cluster:
-            if app.config['CLUSTER_ERROR_STATE'] not in cluster['state']:
+            if app.config['CLUSTER_ERROR_STATE'] != cluster['state']:
                 healthy_clusters = healthy_clusters + 1
 
     # sort clusters by date
     if isinstance(clusters, list):
-        clusters.sort(key=lambda k: k['created_at'])
+        clusters.sort(key=lambda k: (k['created_at'], k['name']))
     clustertable = ClusterTable(clusters)
 
     for provisioner in provisioners:
@@ -76,7 +76,7 @@ def index():
 
     # sort provisioners by date
     if isinstance(provisioners, list):
-        provisioners.sort(key=lambda k: k['created_at'])
+        provisioners.sort(key=lambda k: (k['created_at'], k['name']))
     provisionertable = ProvisionerTable(provisioners)
 
     cluster_health = 100
@@ -121,7 +121,7 @@ def organization_manage():
             if 'email' not in member:
                 member['email'] = '-'
         # sort members by date
-        members.sort(key=lambda k: k['created_at'])
+        members.sort(key=lambda k: (k['created_at'], k['username']))
     except Exception as e:
         logger.error('organization_manage view: {}'.format(repr(e)))
         organization = {}
@@ -517,8 +517,34 @@ def cluster_create():
 @ui.route('/clusters/<cluster_id>/delete')
 @login_required
 def cluster_delete(cluster_id):
-    # TODO: actually deprovision cluster
-    return redirect('/')
+    try:
+        UUID(cluster_id, version=4)
+    except ValueError:
+        logger.warning('cluster_delete view: invalid uuid {}'.format(str(cluster_id)))
+        abort(404)
+
+    try:
+        client = get_kqueen_client(token=session['user']['token'])
+        _cluster = client.cluster.get(cluster_id)
+        cluster = _cluster.data
+
+        if not cluster:
+            logger.warning('cluster_delete view: cluster {} not found'.format(str(cluster_id)))
+            abort(404)
+        if cluster['state'] != app.config['CLUSTER_OK_STATE']:
+            flash('Cannot delete cluster {}. Only running clusters can be deleted.'.format(cluster['name']), 'warning')
+            return redirect(request.environ['HTTP_REFERER'])
+
+        response = client.cluster.delete(cluster_id)
+        if response.status > 200:
+            logger.error('cluster_delete view: {}'.format(response.error))
+            flash('Cluster {} could not be destroyed.'.format(cluster['name']), 'danger')
+        else:
+            flash('Cluster {} is being destroyed.'.format(cluster['name']), 'success')
+        return redirect(request.environ['HTTP_REFERER'])
+    except Exception as e:
+        logger.error('cluster_delete view: {}'.format(repr(e)))
+        abort(500)
 
 
 ############
