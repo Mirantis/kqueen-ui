@@ -217,8 +217,9 @@ def status_for_cluster_detail(_status):
     status['services'] = services
 
     status['addons'] = _status['addons'] if 'addons' in _status else []
+
     status['overview'] = {
-        'namespaces': 2,
+        'namespaces': len(_status.get('namespaces', [])),
         'nodes': len(status['nodes']),
         'deployments': len(status['deployments']),
         'pods': podcount,

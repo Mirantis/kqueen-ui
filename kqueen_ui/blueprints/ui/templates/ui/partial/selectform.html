@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function() {
   $("#switchableForm").validate({
     rules: {
       {%- for field in tagged_fields %}
-      {{ field.id }}: {{ field.jsvalidators|tojson|safe }},
+      "{{ field.id }}": {{ field.jsvalidators|tojson|safe }},
       {%- endfor %}
     }
   });

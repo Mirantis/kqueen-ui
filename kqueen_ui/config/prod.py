@@ -1,7 +1,7 @@
 DEBUG = True
 
 # External endpoint
-SERVER_NAME = 'localhost:5080'
+#SERVER_NAME = 'localhost:5080'
 
 # App secret
 SECRET_KEY = 'secret'
@@ -16,7 +16,7 @@ BABEL_DEFAULT_TIMEZONE = 'UTC'
 BABEL_DEFAULT_LOCALE = 'en'
 
 # Registration
-ENABLE_PUBLIC_REGISTRATION = True
+ENABLE_PUBLIC_REGISTRATION = False
 KQUEEN_SERVICE_USER_NAME = 'admin'
 KQUEEN_SERVICE_USER_PASSWORD = 'default'
 

@@ -4,7 +4,7 @@ from flask import (current_app as app, abort, Blueprint, flash, jsonify, redirec
 from flask_mail import Mail, Message
 from kqueen_ui.api import get_kqueen_client, get_service_client
 from kqueen_ui.auth import authenticate, confirm_token, generate_confirmation_token
-from kqueen_ui.wrappers import login_required
+from kqueen_ui.utils.wrappers import login_required
 from uuid import UUID
 
 from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
@@ -13,9 +13,7 @@ from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
 from .tables import ClusterTable, OrganizationMembersTable, ProvisionerTable
 from .utils import generate_password, prettify_engine_name, status_for_cluster_detail
 
-import yaml
 import logging
-import sys
 
 logger = logging.getLogger(__name__)
 mail = Mail()
@@ -65,6 +63,9 @@ def index():
             if app.config['CLUSTER_ERROR_STATE'] not in cluster['state']:
                 healthy_clusters = healthy_clusters + 1
 
+    # sort clusters by date
+    if isinstance(clusters, list):
+        clusters.sort(key=lambda k: k['created_at'])
     clustertable = ClusterTable(clusters)
 
     for provisioner in provisioners:
@@ -73,6 +74,9 @@ def index():
             if app.config['PROVISIONER_ERROR_STATE'] not in provisioner['state']:
                 healthy_provisioners = healthy_provisioners + 1
 
+    # sort provisioners by date
+    if isinstance(provisioners, list):
+        provisioners.sort(key=lambda k: k['created_at'])
     provisionertable = ProvisionerTable(provisioners)
 
     cluster_health = 100
@@ -113,9 +117,11 @@ def organization_manage():
         # Patch members until we actually have these data for realsies
         for member in members:
             member['role'] = 'Member'
-            member['state'] = 'Active'
+            member['state'] = 'Active' if member['active'] else 'Disabled'
             if 'email' not in member:
                 member['email'] = '-'
+        # sort members by date
+        members.sort(key=lambda k: k['created_at'])
     except Exception as e:
         logger.error('organization_manage view: {}'.format(repr(e)))
         organization = {}
@@ -380,7 +386,13 @@ def provisioner_create():
     # Append tagged parameter fields to form
     form_cls = ProvisionerCreateForm
     for engine in engines:
-        form_cls.append_fields(engine['parameters'], switchtag=engine['name'])
+        _parameters = engine['parameters']['provisioner']
+        parameters = {
+            k + '__' + prettify_engine_name(engine['name']): v
+            for (k, v)
+            in _parameters.items()
+        }
+        form_cls.append_fields(parameters, switchtag=engine['name'])
 
     # Instantiate form and populate engine choices
     form = form_cls()
@@ -390,10 +402,10 @@ def provisioner_create():
         try:
             # Filter out populated tagged fields and get their data
             parameters = {
-                k: v.data
+                k.split('__')[0]: v.data
                 for (k, v)
                 in form._fields.items()
-                if (hasattr(v, 'switchtag') and v.switchtag) and v.data
+                if (hasattr(v, 'switchtag') and v.switchtag) and prettify_engine_name(form.engine.data) in k
             }
             provisioner = {
                 'name': form.name.data,
@@ -449,39 +461,56 @@ def provisioner_delete(provisioner_id):
 @ui.route('/clusters/deploy', methods=['GET', 'POST'])
 @login_required
 def cluster_create():
-    form = ClusterCreateForm()
+    # Get all necessary objects from backend
     client = get_kqueen_client(token=session['user']['token'])
     _provisioners = client.provisioner.list()
     provisioners = _provisioners.data
+    _engines = client.provisioner.engines()
+    engines = _engines.data
+    engine_dict = dict([(e.pop('name'), e) for e in engines])
+
+    # Append tagged parameter fields to form
+    form_cls = ClusterCreateForm
+    for provisioner in provisioners:
+        engine = engine_dict.get(provisioner['engine'], {})
+        _parameters = engine.get('parameters', {}).get('cluster', {})
+        # Append provisioner ID to parameter name to make it unique
+        parameters = {
+            k + '__' + provisioner['id']: v
+            for [k, v]
+            in _parameters.items()
+        }
+        form_cls.append_fields(parameters, switchtag=provisioner['id'])
+
+    # Instantiate form and populate provisioner choices
+    form = form_cls()
     form.provisioner.choices = [(p['id'], p['name']) for p in provisioners]
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            try:
-                # load kubeconfig
-                kubeconfig = {}
-                kubeconfig_file = form.kubeconfig.data
 
-                if kubeconfig_file:
-                    try:
-                        kubeconfig = yaml.load(kubeconfig_file.stream)
-                    except Exception:
-                        logger.error('cluster_create view: {}'.format(sys.exc_info()))
+    if form.validate_on_submit():
+        try:
+            # Filter out populated tagged fields and get their data
+            metadata = {
+                k.split('__')[0]: v.data
+                for (k, v)
+                in form._fields.items()
+                if (hasattr(v, 'switchtag') and v.switchtag) and form.provisioner.data in k
+            }
 
-                cluster = {
-                    'name': form.name.data,
-                    'state': app.config['CLUSTER_PROVISIONING_STATE'],
-                    'provisioner': 'Provisioner:{}'.format(form.provisioner.data),
-                    'kubeconfig': kubeconfig,
-                    'created_at': datetime.utcnow()
-                }
-                response = client.cluster.create(cluster)
-                if response.status > 200:
-                    flash('Could not create cluster {}.'.format(form.name.data), 'danger')
-                flash('Provisioning of cluster {} is in progress.'.format(form.name.data), 'success')
-            except Exception as e:
-                logger.error('cluster_create view: {}'.format(repr(e)))
+            cluster = {
+                'name': form.name.data,
+                'state': app.config['CLUSTER_PROVISIONING_STATE'],
+                'provisioner': 'Provisioner:{}'.format(form.provisioner.data),
+                'created_at': datetime.utcnow(),
+                'metadata': metadata
+            }
+            response = client.cluster.create(cluster)
+            if response.status > 200:
                 flash('Could not create cluster {}.'.format(form.name.data), 'danger')
-            return redirect('/')
+            flash('Provisioning of cluster {} is in progress.'.format(form.name.data), 'success')
+        except Exception as e:
+            logger.error('cluster_create view: {}'.format(repr(e)))
+            flash('Could not create cluster {}.'.format(form.name.data), 'danger')
+        return redirect('/')
     return render_template('ui/cluster_create.html', form=form)
 
 

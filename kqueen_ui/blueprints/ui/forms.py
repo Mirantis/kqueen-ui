@@ -1,90 +1,21 @@
-from flask_wtf import FlaskForm as WTFlaskForm
-from flask_wtf.file import FileField
 from kqueen_ui.api import get_service_client
-from wtforms import PasswordField as WTPasswordField, SelectField as WTSelectField, StringField as WTStringField, TextAreaField as WTTextAreaField
-from wtforms.fields.html5 import EmailField
+from kqueen_ui.utils.fields import (
+    EmailField,
+    PasswordField,
+    SelectField,
+    StringField,
+    TextAreaField,
+)
+from kqueen_ui.utils.forms import FlaskExtendableForm
 from wtforms.validators import DataRequired, Email, EqualTo
 
 
-#
-# EXTENSIONS
-#
-
-class SelectableMixin:
-    switchtag = None
-    jsvalidators = {}
-
-    def __init__(self, *args, **kwargs):
-        self.switchtag = kwargs.pop('switchtag', None)
-        self.jsvalidators = kwargs.pop('jsvalidators', None)
-        super(SelectableMixin, self).__init__(*args, **kwargs)
-
-
-class PasswordField(SelectableMixin, WTPasswordField):
-    pass
-
-
-class SelectField(SelectableMixin, WTSelectField):
-    switch = False
-
-    def __init__(self, *args, **kwargs):
-        self.switch = kwargs.pop('switch', False)
-        super(SelectField, self).__init__(*args, **kwargs)
-
-
-class StringField(SelectableMixin, WTStringField):
-    pass
-
-
-class TextAreaField(SelectableMixin, WTTextAreaField):
-    pass
-
-
-class FlaskForm(WTFlaskForm):
-
-    @classmethod
-    def append_fields(cls, ctx, switchtag=None):
-        '''
-            {
-                'username': {
-                    'type': 'text',
-                    'label': 'Username',
-                    'validators': {
-                        'required': True
-                    }
-                },
-                'password': {
-                    'type': 'password',
-                    'label': 'Password',
-                    'validators': {
-                        'required': True
-                    }
-                }
-            }
-        '''
-        for field_name, field_params in ctx.items():
-            field_class = None
-            if field_params['type'] == 'text':
-                field_class = StringField
-            elif field_params['type'] == 'password':
-                field_class = PasswordField
-            if field_class:
-                label = field_params['label'] if 'label' in field_params else field_name
-                jsvalidators = field_params['validators'] if 'validators' in field_params else {}
-                field = field_class(label, switchtag=switchtag, jsvalidators=jsvalidators)
-                setattr(cls, field_name, field)
-
-
-#
-# FORMS
-#
-
-class LoginForm(FlaskForm):
+class LoginForm(FlaskExtendableForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
 
 
-class ChangePasswordForm(FlaskForm):
+class ChangePasswordForm(FlaskExtendableForm):
     password_1 = PasswordField('New Password', validators=[DataRequired()])
     password_2 = PasswordField(
         'Repeat Password',
@@ -95,11 +26,11 @@ class ChangePasswordForm(FlaskForm):
     )
 
 
-class UserInviteForm(FlaskForm):
+class UserInviteForm(FlaskExtendableForm):
     email = EmailField('Email', validators=[Email()])
 
     def validate(self):
-        if not FlaskForm.validate(self):
+        if not FlaskExtendableForm.validate(self):
             return False
 
         # TODO: remove these uniqueness checks after introduction of unique constraint
@@ -119,7 +50,7 @@ class UserInviteForm(FlaskForm):
         return True
 
 
-class PasswordResetForm(FlaskForm):
+class PasswordResetForm(FlaskExtendableForm):
     password_1 = PasswordField('New Password', validators=[DataRequired()])
     password_2 = PasswordField(
         'Repeat Password',
@@ -130,11 +61,11 @@ class PasswordResetForm(FlaskForm):
     )
 
 
-class RequestPasswordResetForm(FlaskForm):
+class RequestPasswordResetForm(FlaskExtendableForm):
     email = EmailField('Email', validators=[Email()])
 
     def validate(self):
-        if not FlaskForm.validate(self):
+        if not FlaskExtendableForm.validate(self):
             return False
 
         # TODO: remove these uniqueness checks after introduction of unique constraint
@@ -154,16 +85,15 @@ class RequestPasswordResetForm(FlaskForm):
         return True
 
 
-class ProvisionerCreateForm(FlaskForm):
+class ProvisionerCreateForm(FlaskExtendableForm):
     name = StringField('Name', validators=[DataRequired()])
     engine = SelectField('Engine', choices=[], switch=True)
 
 
-class ClusterCreateForm(FlaskForm):
+class ClusterCreateForm(FlaskExtendableForm):
     name = StringField('Name', validators=[DataRequired()])
-    kubeconfig = FileField()
-    provisioner = SelectField('Provisioner', validators=[DataRequired()], choices=[])
+    provisioner = SelectField('Provisioner', validators=[DataRequired()], choices=[], switch=True)
 
 
-class ClusterApplyForm(FlaskForm):
+class ClusterApplyForm(FlaskExtendableForm):
     apply = TextAreaField('Apply Resource', validators=[DataRequired()])

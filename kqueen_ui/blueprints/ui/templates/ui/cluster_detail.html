@@ -44,10 +44,10 @@ Cluster {{ cluster.name }} detail
 
 <div class="overview-actions">
   <div class="col-sm-4">
-    {% if cluster.state == config.CLUSTER_PROVISIONING_STATE %}
-      <a href="#" class="btn btn-primary btn-xs disabled">kubeconfig N/A</a>
+    {% if cluster.state != config.CLUSTER_OK_STATE %}
+      <a href="#" class="btn btn-primary btn-xs disabled">Kubeconfig N/A</a>
     {% else %}
-      <a href="{{ url_for('ui.cluster_kubeconfig', cluster_id=cluster.id) }}" class="btn btn-primary btn-xs">Download kubeconfig</a>
+      <a target="_blank" href="{{ url_for('ui.cluster_kubeconfig', cluster_id=cluster.id) }}" class="btn btn-primary btn-xs">Download Kubeconfig</a>
     {% endif %}
   </div>
   <div class="col-sm-4" id="state">
@@ -511,7 +511,7 @@ Cluster {{ cluster.name }} detail
       $('#progress .ui-progress-bar').css('width', res.progress + '%')
       $('#progress .progress-bar-background > span').html(res.progress + '%');
       if(res.result != '{{ config.CLUSTER_PROVISIONING_STATE }}'){
-        clearInterval(interval);
+        location.reload();
       }
     });
   };
