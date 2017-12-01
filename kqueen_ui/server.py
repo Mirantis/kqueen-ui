@@ -8,7 +8,6 @@ from urllib.parse import urlsplit
 from werkzeug.contrib.cache import SimpleCache
 
 import logging
-import os
 
 logger = logging.getLogger(__name__)
 
