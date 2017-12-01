@@ -72,7 +72,6 @@ def register():
         mail.init_app(app)
         token = generate_confirmation_token(user['email'])
         html = render_template('registration/email/verify_email.html', token=token)
-        msg = Message(
             '[KQueen] E-mail verification',
             recipients=[user['email']],
             html=html

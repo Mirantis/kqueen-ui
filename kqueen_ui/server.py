@@ -1,11 +1,10 @@
 from .config import current_config
 
-from flask import Flask
-from flask import redirect
-from flask import url_for
+from flask import Flask, redirect, request, url_for
 from flask.ext.babel import Babel
 from kqueen_ui.blueprints.registration.views import registration
 from kqueen_ui.blueprints.ui.views import ui
+from urllib.parse import urlsplit
 from werkzeug.contrib.cache import SimpleCache
 
 import logging
@@ -38,6 +37,12 @@ app = create_app()
 @app.route('/')
 def root():
     return redirect(url_for('ui.index'), code=302)
+
+
+@app.context_processor
+def base_url():
+    base_url = urlsplit(request.url).scheme + '://' + urlsplit(request.url).netloc
+    return dict(base_url=base_url)
 
 
 def run():
