@@ -43,6 +43,6 @@ def root():
 def run():
     logger.debug('kqueen_ui starting')
     app.run(
-        host=app.config.get('KQUEEN_UI_HOST'),
-        port=int(app.config.get('KQUEEN_UI_PORT'))
+        host=app.config.get('HOST'),
+        port=int(app.config.get('PORT'))
     )
