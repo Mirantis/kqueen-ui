@@ -1,3 +1,5 @@
+from .config import current_config
+
 from flask import Flask
 from flask import redirect
 from flask import url_for
@@ -13,34 +15,24 @@ logger = logging.getLogger(__name__)
 
 cache = SimpleCache()
 
-config_file = os.environ.get('KQUEEN_CONFIG_FILE', 'config/dev.py')
 
-
-def create_app(config_file=config_file):
+def create_app(config_file=None):
     app = Flask(__name__, static_folder='./asset/static')
 
     app.register_blueprint(ui, url_prefix='/ui')
     app.register_blueprint(registration, url_prefix='/registration')
 
     # load configuration
-    if app.config.from_pyfile(config_file):
-        logger.info('Loading configuration from {}'.format(config_file))
-    else:
-        raise Exception('Config file {} could not be loaded.'.format(config_file))
+    config = current_config(config_file)
+    app.config.from_mapping(config.to_dict())
+    app.logger.setLevel(getattr(logging, app.config.get('LOG_LEVEL')))
+    app.logger.info('Loading configuration from {}'.format(config.source_file))
 
-    # allow override of backend urls from env variables
-    kqueen_api_url = os.getenv('KQUEEN_API_URL', app.config['KQUEEN_API_URL'])
-    kqueen_auth_url = os.getenv('KQUEEN_AUTH_URL', app.config['KQUEEN_AUTH_URL'])
-    app.config.update(
-        KQUEEN_API_URL=kqueen_api_url,
-        KQUEEN_AUTH_URL=kqueen_auth_url
-    )
     Babel(app)
     return app
 
 
 app = create_app()
-app.logger.setLevel(logging.INFO)
 
 
 @app.route('/')
@@ -50,4 +42,7 @@ def root():
 
 def run():
     logger.debug('kqueen_ui starting')
-    app.run(port=8000)
+    app.run(
+        host=app.config.get('KQUEEN_UI_HOST'),
+        port=int(app.config.get('KQUEEN_UI_PORT'))
+    )
