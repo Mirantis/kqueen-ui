@@ -28,14 +28,14 @@ def select_file(config_file=None):
     return config_file
 
 
-def apply_env_changes(config, prefix='KQUEEN_UI_'):
+def apply_env_changes(config, prefix='KQUEENUI_'):
     """
     Read env variables starting with prefix and apply
     them to existing configuration
 
     Attributes:
         config (obj): Connfiguration object. This configuration will updated.
-        prefix (str): Prefix for environment variables. Defaults to `KQUEEN_UI_`.
+        prefix (str): Prefix for environment variables. Defaults to `KQUEENUI_`.
 
     """
 

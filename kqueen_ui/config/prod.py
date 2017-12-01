@@ -6,8 +6,8 @@ class Config(BaseConfig):
     LOG_LEVEL = 'INFO'
 
     # KQueen UI endpoints
-    KQUEEN_UI_HOST = '0.0.0.0'
-    KQUEEN_UI_PORT = 8000
+    HOST = '0.0.0.0'
+    PORT = 8000
 
     # App secret
     SECRET_KEY = 'secret'

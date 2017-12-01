@@ -3,9 +3,9 @@ class BaseConfig:
     LOG_LEVEL = 'WARNING'
 
     # KQueen UI endpoints
-    KQUEEN_UI_HOST = 'localhost'
-    KQUEEN_UI_PORT = 8000
-    KQUEEN_UI_PUBLIC_ENDPOINT = 'localhost:8000'
+    HOST = 'localhost'
+    PORT = 8000
+    PUBLIC_ENDPOINT = 'localhost:8000'
 
     # KQueen API
     KQUEEN_API_URL = 'http://localhost:5000/api/v1/'
@@ -17,7 +17,7 @@ class BaseConfig:
 
     # Registration
     ENABLE_PUBLIC_REGISTRATION = False
-    KQUEEN_SERVICE_USER_NAME = 'admin'
+    KQUEEN_SERVICE_USER_USERNAME = 'admin'
     KQUEEN_SERVICE_USER_PASSWORD = 'default'
 
     # Mail
