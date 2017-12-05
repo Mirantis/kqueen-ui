@@ -122,6 +122,8 @@ def organization_manage():
             member['state'] = 'Active' if member['active'] else 'Disabled'
             if 'email' not in member:
                 member['email'] = '-'
+            if 'created_at' in member:
+                member['created_at'] = format_datetime(member['created_at'])
         # sort members by date
         members.sort(key=lambda k: (k['created_at'], k['username']))
     except Exception as e:
