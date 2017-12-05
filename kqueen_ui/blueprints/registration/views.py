@@ -45,7 +45,7 @@ def register():
         try:
             organization_ref = 'Organization:{}'.format(organization_id)
             user = {
-                'username': form.username.data,
+                'username': form.email.data,
                 'password': form.password_1.data,
                 'email': form.email.data,
                 'organization': organization_ref,
@@ -66,8 +66,6 @@ def register():
             flash('Could not create user.', 'danger')
             return render_template('registration/register.html', form=form)
 
-        flash('Registration successful. Check your e-mail for the activation link!', 'success')
-
         # Init mail handler
         mail.init_app(app)
         token = generate_confirmation_token(user['email'])
@@ -81,10 +79,12 @@ def register():
             mail.send(msg)
         except Exception as e:
             logger.error('register view: {}'.format(repr(e)))
-            client.organization.delete(organization_id)
             client.user.delete(user_id)
+            client.organization.delete(organization_id)
             flash('Could not send verification e-mail, please try again later.', 'danger')
             return render_template('registration/register.html', form=form)
+
+        flash('Registration successful. Check your e-mail for the activation link!', 'success')
 
         return redirect(url_for('ui.login'))
 

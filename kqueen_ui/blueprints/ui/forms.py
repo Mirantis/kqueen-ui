@@ -7,7 +7,7 @@ from kqueen_ui.utils.fields import (
     TextAreaField,
 )
 from kqueen_ui.utils.forms import FlaskExtendableForm
-from wtforms.validators import DataRequired, Email, EqualTo
+from wtforms.validators import DataRequired, Email, EqualTo, Length
 
 
 class LoginForm(FlaskExtendableForm):
@@ -16,7 +16,13 @@ class LoginForm(FlaskExtendableForm):
 
 
 class ChangePasswordForm(FlaskExtendableForm):
-    password_1 = PasswordField('New Password', validators=[DataRequired()])
+    password_1 = PasswordField(
+        'New Password',
+        validators=[
+            DataRequired(),
+            Length(min=6, message='Password must be at least 6 characters long.')
+        ]
+    )
     password_2 = PasswordField(
         'Repeat Password',
         validators=[
@@ -51,7 +57,13 @@ class UserInviteForm(FlaskExtendableForm):
 
 
 class PasswordResetForm(FlaskExtendableForm):
-    password_1 = PasswordField('New Password', validators=[DataRequired()])
+    password_1 = PasswordField(
+        'New Password',
+        validators=[
+            DataRequired(),
+            Length(min=6, message='Password must be at least 6 characters long.')
+        ]
+    )
     password_2 = PasswordField(
         'Repeat Password',
         validators=[
