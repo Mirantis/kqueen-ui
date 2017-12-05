@@ -142,3 +142,18 @@ $pagination-disabled-border:           transparent;
 
 $tooltip-bg:                  $brand-primary;
 
+//== Modals
+//
+//##
+
+//** Padding applied to the modal title
+$modal-title-padding:         10px;
+
+//** Modal backdrop background color
+$modal-backdrop-bg:           #fff;
+//** Modal backdrop opacity
+$modal-backdrop-opacity:      .7;
+//** Modal header border color
+$modal-header-border-color:   #fff;
+//** Modal footer border color
+$modal-footer-border-color:   $modal-header-border-color;
