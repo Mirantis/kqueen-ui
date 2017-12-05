@@ -35,6 +35,8 @@ Manage {{ organization.name }}
             </a>
           </td>
         </tr>
+      {% else %}
+        <tr style="pointer-events: none;"><td colspan="6" class="text-center">No Items</td></tr>
       {% endfor %}
     </tbody>
   </table>

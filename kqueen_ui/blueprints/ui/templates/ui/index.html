@@ -61,6 +61,8 @@
             </a>
           </td>
         </tr>
+      {% else %}
+        <tr style="pointer-events: none;"><td colspan="5" class="text-center">No Items</td></tr>
       {% endfor %}
     </tbody>
   </table>
@@ -93,6 +95,8 @@
             </a>
           </td>
         </tr>
+      {% else %}
+        <tr style="pointer-events: none;"><td colspan="5" class="text-center">No Items</td></tr>
       {% endfor %}
     </tbody>
   </table>
