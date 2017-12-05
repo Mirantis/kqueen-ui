@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import (current_app as app, abort, Blueprint, flash, jsonify, redirect,
                    render_template, request, session, url_for)
 from flask_mail import Mail, Message
+from flask.ext.babel import format_datetime
 from kqueen_ui.api import get_kqueen_client, get_service_client
 from kqueen_ui.auth import authenticate, confirm_token, generate_confirmation_token
 from kqueen_ui.utils.wrappers import login_required
@@ -10,7 +11,6 @@ from uuid import UUID
 from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
                     ChangePasswordForm, UserInviteForm, RequestPasswordResetForm,
                     PasswordResetForm)
-from .tables import ClusterTable, OrganizationMembersTable, ProvisionerTable
 from .utils import generate_password, prettify_engine_name, status_for_cluster_detail
 
 import logging
@@ -62,22 +62,24 @@ def index():
         if 'state' in cluster:
             if app.config['CLUSTER_ERROR_STATE'] != cluster['state']:
                 healthy_clusters = healthy_clusters + 1
+        if 'created_at' in cluster:
+            cluster['created_at'] = format_datetime(cluster['created_at'])
 
     # sort clusters by date
     if isinstance(clusters, list):
         clusters.sort(key=lambda k: (k['created_at'], k['name']))
-    clustertable = ClusterTable(clusters)
 
     for provisioner in provisioners:
         provisioner['engine_name'] = prettify_engine_name(provisioner['engine'])
         if 'state' in provisioner:
             if app.config['PROVISIONER_ERROR_STATE'] not in provisioner['state']:
                 healthy_provisioners = healthy_provisioners + 1
+        if 'created_at' in provisioner:
+            provisioner['created_at'] = format_datetime(provisioner['created_at'])
 
     # sort provisioners by date
     if isinstance(provisioners, list):
         provisioners.sort(key=lambda k: (k['created_at'], k['name']))
-    provisionertable = ProvisionerTable(provisioners)
 
     cluster_health = 100
     if healthy_clusters and clusters:
@@ -95,8 +97,8 @@ def index():
     }
     return render_template('ui/index.html',
                            overview=overview,
-                           clustertable=clustertable,
-                           provisionertable=provisionertable)
+                           clusters=clusters,
+                           provisioners=provisioners)
 
 
 @ui.route('/organizations/manage')
@@ -120,6 +122,8 @@ def organization_manage():
             member['state'] = 'Active' if member['active'] else 'Disabled'
             if 'email' not in member:
                 member['email'] = '-'
+            if 'created_at' in member:
+                member['created_at'] = format_datetime(member['created_at'])
         # sort members by date
         members.sort(key=lambda k: (k['created_at'], k['username']))
     except Exception as e:
@@ -127,10 +131,9 @@ def organization_manage():
         organization = {}
         members = []
 
-    membertable = OrganizationMembersTable(members)
     return render_template('ui/organization_manage.html',
                            organization=organization,
-                           membertable=membertable)
+                           members=members)
 
 
 @ui.route('/clusters/<cluster_id>/detail', methods=['GET', 'POST'])

@@ -1,4 +1,5 @@
 {% extends "ui/base.html" %}
+{% from "ui/partial/modal.html" import render_delete_modal %}
 
 {% block page_header %}
 Manage {{ organization.name }}
@@ -11,6 +12,41 @@ Manage {{ organization.name }}
   <div class="table-actions">
     <a href="{{ url_for('ui.user_invite') }}" role="button" class="btn btn-primary btn-sm">Invite Member</a>
   </div>
-  {{ membertable }}
+  <table class="table table-hover">
+    <thead>
+      <th>Name</th>
+      <th>E-mail</th>
+      <th>Role</th>
+      <th>Created</th>
+      <th class="status_column">Status</th>
+      <th class="action_column">Actions</th>
+    </thead>
+    <tbody>
+      {% for member in members %}
+        <tr>
+          <td>{{ member.username }}</td>
+          <td>{{ member.email }}</td>
+          <td>{{ member.role }}</td>
+          <td>{{ member.created_at }}</td>
+          <td class="status_column"><i class="mdi {{ member.state|user_status_icon_class }}" title="{{ member.state }}"></i></td>
+          <td class="action_column">
+            <a data-toggle="modal" data-target="#delete-{{ member.id }}" title="Delete member">
+              <i class="mdi mdi-delete-forever"></i>
+            </a>
+          </td>
+        </tr>
+      {% else %}
+        <tr style="pointer-events: none;"><td colspan="6" class="text-center">No Items</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
+{% endblock %}
+
+{% block modals %}
+
+{% for member in members %}
+  {{ render_delete_modal(resource=member, resource_name='user', name_key='username') }}
+{% endfor %}
+
 {% endblock %}

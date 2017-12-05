@@ -102,9 +102,9 @@ def status_for_cluster_detail(_status):
             for sc in node['status']['conditions']:
                 if sc['type'] != 'Ready':
                     if sc['status'] == 'False':
-                        icon = 'checkbox-marked-circle-outline'
+                        icon = 'mdi-checkbox-marked-circle-outline'
                     else:
-                        icon = 'checkbox-blank-circle-outline'
+                        icon = 'mdi-close-circle-outline'
                     node_status.append({
                         'type': sc['type'],
                         'icon': icon

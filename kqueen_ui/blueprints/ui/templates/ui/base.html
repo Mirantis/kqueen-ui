@@ -45,9 +45,10 @@
     <input id="BaseURI" type="hidden" value="/">
     <div id="flash-container">
     {% for category, message in get_flashed_messages(with_categories=true) %}
-      <div id="flash-message" class="alert alert-box-fixed0 alert-box-fixed alert-dismissible alert-{{ category }}" role="alert">
+      <div id="flash-message" class="alert alert-box-fixed0 alert-box-fixed alert-{{ category }} fade in" role="alert">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        {{ message }}
+        <i class="mdi"></i>
+        <span>{{ message }}</span>
       </div>
     {% endfor %}
     </div>
@@ -60,6 +61,9 @@
         {% block content %}{% endblock %}
       </div>
     </div>
+
+    {% block modals %}
+    {% endblock %}
 
     <script src="{{ url_for('static', filename='js/vendor.js') }}"></script>
     <script src="{{ url_for('static', filename='js/all.min.js') }}"></script>

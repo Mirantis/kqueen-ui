@@ -4,6 +4,7 @@ from flask import Flask, redirect, request, url_for
 from flask.ext.babel import Babel
 from kqueen_ui.blueprints.registration.views import registration
 from kqueen_ui.blueprints.ui.views import ui
+from kqueen_ui.utils.filters import filters
 from urllib.parse import urlsplit
 from werkzeug.contrib.cache import SimpleCache
 
@@ -27,6 +28,9 @@ def create_app(config_file=None):
     app.logger.info('Loading configuration from {}'.format(config.source_file))
 
     Babel(app)
+
+    app.jinja_env.filters.update(filters)
+
     return app
 
 

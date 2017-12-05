@@ -40,6 +40,11 @@ h1, h2 {
   cursor: pointer;
 }
 
+a.disabled {
+  opacity: 0.5;
+  pointer-events: none !important;
+}
+
 .box {
   margin-bottom: 50px;
   @include prefix(box-shadow, 1px 1px 4px 0px rgba(187,187,187,1), webkit moz);
@@ -172,35 +177,68 @@ h1, h2 {
   margin: 0;
 }
 
+.alert {
+  .mdi {
+    font-size: 20px;
+    line-height: 1;
+    padding-right: 5px;
+  }
+  > span {
+    padding-right: 10px;
+  }
+}
+
+.close {
+  margin-top: -2px;
+  color: #fff;
+  opacity: .4;
+  &:hover,
+  &:focus {
+    color: #fff;
+    opacity: .8;
+  }
+}
+
 .alert-primary {
   background-color: $brand-primary;
   border-color: $brand-primary;
   color: #fff;
-
 }
 
 .alert-info {
   background-color: $brand-info;
   border-color: $brand-info;
   color: #fff;
+  > .mdi::before {
+    content: "\F2FD";
+  }
 }
 
 .alert-success {
   background-color: $brand-success;
   border-color: $brand-success;
   color: #fff;
+  > .mdi::before {
+    content: "\F134";
+  }
 }
 
 .alert-warning {
   background-color: $brand-warning;
   border-color: $brand-warning;
   color: #fff;
+  > .mdi::before {
+    content: "\F5D6";
+  }
 }
 
 .alert-danger {
   background-color: $brand-danger;
   border-color: $brand-danger;
   color: #fff;
+  > .mdi::before {
+    content: "\F15A";
+  }
 }
 
 .alert-box-fixed {
@@ -246,19 +284,59 @@ label.error {
     text-align: right;
   }
   .table {
+    @include table-col-x;
     .status_column {
-      width: 150px;
+      @extend .text-right;
+      width: 120px;
+      .mdi {
+        font-size: 22px;
+        line-height: 1;
+        margin-top: -2px;
+        display: inline-block;
+      }
+      .mdi-cloud-check,
+      .mdi-checkbox-marked-circle-outline {
+        color: $brand-success;
+      }
+      .mdi-cloud-off-outline,
+      .mdi-close-circle-outline {
+        color: $brand-danger;
+      }
+      .mdi-cloud-sync {
+        color: $brand-info;
+      }
+      .mdi-alert-outline,
+      .mdi-alert-circle-outline {
+        color: $brand-warning;
+      }
     }
     .action_column {
-      width: 100px;
+      width: 120px;
       @extend .text-right;
       a {
+        color: $brand-primary;
+        &:hover,
+        &:focus,
+        &:active {
+          color: darken($brand-primary, 10%);
+          text-decoration: none;
+        }
+      }
+      a.delete {
         color: $brand-danger;
         &:hover,
         &:focus,
         &:active {
           color: darken($brand-danger, 10%);
+          text-decoration: none;
         }
+      }
+      .mdi {
+        font-size: 22px;
+        line-height: 1;
+        margin-top: -2px;
+        display: inline-block;
+        cursor: pointer;
       }
     }
   }
@@ -494,7 +572,6 @@ footer {
 
 .btn-default {
   @include mirantis-button-variant($btn-default-color, $btn-default-bg, $btn-default-border);
-  border-width: 2px;
 }
 .btn-primary {
   @include mirantis-button-variant($btn-primary-color, $btn-primary-bg, $btn-primary-border);
@@ -514,4 +591,19 @@ footer {
 // Danger and error appear as red
 .btn-danger {
   @include mirantis-button-variant($btn-danger-color, $btn-danger-bg, $btn-danger-border);
+}
+
+// *****************************************************************************
+// Modal
+// *****************************************************************************
+
+.modal-footer {
+  padding: $modal-title-padding;
+}
+
+.modal.confirm-delete {
+  top: calc(50% - 93px);
+  .modal-body {
+    @extend .text-center;
+  }
 }

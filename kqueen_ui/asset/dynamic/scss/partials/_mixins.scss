@@ -88,3 +88,15 @@
     background-color: $color;
   }
 }
+
+@function col-width($number) {
+  @return ($number / 12) * 100%;
+}
+
+$columns: 12;
+
+@mixin table-col-x {
+  @for $i from 1 through $columns {
+      .table-col-#{$i} { width: col-width($i); }
+  }
+}

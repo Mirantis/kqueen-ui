@@ -1,6 +1,7 @@
 {% extends "ui/base.html" %}
+{% from "ui/partial/modal.html" import render_delete_modal %}
 
-{% block page_header %}Profile Details{% endblock %}
+{% block page_header %}Overview{% endblock %}
 
 {% block content %}
 <div class="overview">
@@ -36,7 +37,35 @@
   <div class="table-actions">
     <a href="{{ url_for('ui.cluster_create') }}" role="button" class="btn btn-primary btn-sm">Deploy cluster</a>
   </div>
-  {{ clustertable }}
+  <table class="table table-hover">
+    <thead>
+      <th class="table-col-3">Name</th>
+      <th class="table-col-3">Provisioner</th>
+      <th class="table-col-3">Created</th>
+      <th class="status_column">Status</th>
+      <th class="action_column">Actions</th>
+    </thead>
+    <tbody>
+      {% for cluster in clusters %}
+        <tr>
+          <td class="table-col-3">{{ cluster.name }}</td>
+          <td class="table-col-3">{{ cluster.provisioner.name }}</td>
+          <td class="table-col-3">{{ cluster.created_at }}</td>
+          <td class="status_column"><i class="mdi {{ cluster.state|cluster_status_icon_class }}" title="{{ cluster.state }}"></i></td>
+          <td class="action_column">
+            <a href="{{ url_for('ui.cluster_detail', cluster_id=cluster.id) }}" title="Cluster detail">
+              <i class="mdi mdi-magnify"></i>
+            </a>
+            <a data-toggle="modal" data-target="#delete-{{ cluster.id }}"{% if cluster.state != config.CLUSTER_OK_STATE %} class="disabled"{% endif %} title="Delete cluster">
+              <i class="mdi mdi-delete-forever"></i>
+            </a>
+          </td>
+        </tr>
+      {% else %}
+        <tr style="pointer-events: none;"><td colspan="5" class="text-center">No Items</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 
 <h3>Available provisioners</h3>
@@ -45,8 +74,47 @@
   <div class="table-actions">
     <a href="{{ url_for('ui.provisioner_create') }}" role="button" class="btn btn-primary btn-sm">Create provisioner</a>
   </div>
-  {{ provisionertable }}
+  <table class="table table-hover">
+    <thead>
+      <th class="table-col-3">Name</th>
+      <th class="table-col-3">Engine</th>
+      <th class="table-col-3">Created</th>
+      <th class="status_column">Status</th>
+      <th class="action_column">Actions</th>
+    </thead>
+    <tbody>
+      {% for provisioner in provisioners %}
+        <tr>
+          <td class="table-col-3">{{ provisioner.name }}</td>
+          <td class="table-col-3">{{ provisioner.engine_name }}</td>
+          <td class="table-col-3">{{ provisioner.created_at }}</td>
+          <td class="status_column"><i class="mdi {{ provisioner.state|provisioner_status_icon_class }}" title="{{ provisioner.state }}"></i></td>
+          <td class="action_column">
+            <a data-toggle="modal" data-target="#delete-{{ provisioner.id }}" title="Delete provisioner">
+              <i class="mdi mdi-delete-forever"></i>
+            </a>
+          </td>
+        </tr>
+      {% else %}
+        <tr style="pointer-events: none;"><td colspan="5" class="text-center">No Items</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
+
+{% endblock %}
+
+{% block modals %}
+
+{% for cluster in clusters %}
+  {% if cluster.state == config.CLUSTER_OK_STATE %}
+  {{ render_delete_modal(resource=cluster, resource_name='cluster') }}
+  {% endif %}
+{% endfor %}
+
+{% for provisioner in provisioners %}
+  {{ render_delete_modal(resource=provisioner, resource_name='provisioner') }}
+{% endfor %}
 
 {% endblock %}
 

@@ -20,7 +20,6 @@ setup(
     install_requires=[
         'Flask==0.12.2',
         'Flask-Babel==0.11.2',
-        'Flask-Table',
         'Flask-WTF',
         'gunicorn',
         'python-dateutil',
