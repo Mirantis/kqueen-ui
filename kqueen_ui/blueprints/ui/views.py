@@ -189,6 +189,7 @@ class UserInvite(KQueenView):
                 'password': password,
                 'email': form.email.data,
                 'organization': organization,
+                'role': 'member',
                 'created_at': datetime.utcnow(),
                 'active': True
             }
