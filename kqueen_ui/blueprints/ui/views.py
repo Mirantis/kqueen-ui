@@ -5,6 +5,7 @@ from flask_mail import Mail, Message
 from flask.ext.babel import format_datetime
 from kqueen_ui.api import get_kqueen_client, get_service_client
 from kqueen_ui.auth import authenticate, confirm_token, generate_confirmation_token
+from kqueen_ui.generic_views import KQueenView
 from kqueen_ui.utils.wrappers import login_required
 from uuid import UUID
 
@@ -33,8 +34,9 @@ def test_token():
         if response.status == 401:
             flash('Session expired, please log in again.', 'warning')
             del session['user']
-        if response.status == -1:
+        elif response.status == -1:
             flash('Backend is unavailable at this time, please try again later.', 'danger')
+            del session['user']
 
 
 #############
@@ -298,26 +300,28 @@ def user_delete(user_id):
         abort(500)
 
 
-@ui.route('/users/changepw', methods=['GET', 'POST'])
-@login_required
-def user_change_password():
-    form = ChangePasswordForm()
-    if form.validate_on_submit():
-        try:
-            client = get_kqueen_client(token=session['user']['token'])
-            _user = client.user.get(session['user']['id'])
-            if _user.status == 200:
-                user = _user.data
+class UserChangePassword(KQueenView):
+    decorators = [login_required]
+    methods=['GET', 'POST']
+
+    def handle(self):
+        form = ChangePasswordForm()
+        if form.validate_on_submit():
+            try:
+                user_id = session['user']['id']
+                user = self.kqueen_request('user', 'get', fnargs=(user_id,))
                 user['password'] = form.password_1.data
-                update = client.user.update(user['id'], user)
-                if update.status == 200:
+                update = self.kqueen_request('user', 'update', fnargs=(user_id, user))
+                if update:
                     flash('Password successfully updated. Please log in again.', 'success')
                     return redirect(url_for('ui.logout'))
-            flash('Could not change password. Please try again later.', 'danger')
-        except Exception as e:
-            logger.error('user_change_password view: {}'.format(repr(e)))
-            flash('Password update failed.', 'danger')
-    return render_template('ui/user_change_password.html', form=form)
+                flash('Password update failed.', 'danger')
+            except Exception as e:
+                self.logger('error', repr(e))
+                flash('Password update failed.', 'danger')
+        return render_template('ui/user_change_password.html', form=form)
+
+ui.add_url_rule('/users/changepw', view_func=UserChangePassword.as_view('user_change_password'))
 
 
 @ui.route('/users/resetpw/<token>', methods=['GET', 'POST'])
