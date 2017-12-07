@@ -276,35 +276,25 @@ def user_invite():
     return render_template('ui/user_create.html', form=form)
 
 
-@ui.route('/users/<user_id>/delete')
-@login_required
-def user_delete(user_id):
-    try:
-        UUID(user_id, version=4)
-    except ValueError:
-        logger.warning('user_delete view: invalid uuid {}'.format(str(user_id)))
-        abort(404)
+class UserDelete(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
+    validation_hint = 'uuid'
 
-    try:
-        client = get_kqueen_client(token=session['user']['token'])
-        _user = client.user.get(user_id)
-        user = _user.data
-        if not user:
-            logger.warning('user_delete view: user {} not found'.format(str(user_id)))
-            abort(404)
-        client.user.delete(user_id)
+    def handle(self, user_id):
+        user = self.kqueen_request('user', 'get', fnargs=(user_id,))
+        self.kqueen_request('user', 'delete', fnargs=(user_id,))
         flash('User {} successfully deleted.'.format(user['username']), 'success')
         return redirect(request.environ['HTTP_REFERER'])
-    except Exception as e:
-        logger.error('user_delete view: {}'.format(repr(e)))
-        abort(500)
+
+ui.add_url_rule('/users/<user_id>/delete', view_func=UserDelete.as_view('user_delete'))
 
 
 class UserChangePassword(KQueenView):
     decorators = [login_required]
-    methods=['GET', 'POST']
+    methods = ['GET', 'POST']
 
-    def handle(self):
+    def handle(self, *args, **kwargs):
         form = ChangePasswordForm()
         if form.validate_on_submit():
             try:
