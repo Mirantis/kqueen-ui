@@ -5,7 +5,6 @@ import pytest
 
 @pytest.mark.parametrize('view,values', [
     ('ui.index', {}),
-    ('ui.catalog', {}),
     ('ui.provisioner_create', {'provisioner_id': 1}),
     ('ui.provisioner_delete', {'provisioner_id': 1}),
     ('ui.cluster_detail', {'cluster_id': 1}),

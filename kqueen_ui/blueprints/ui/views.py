@@ -99,12 +99,6 @@ class Index(KQueenView):
 ui.add_url_rule('/', view_func=Index.as_view('index'))
 
 
-@ui.route('/catalog')
-@login_required
-def catalog():
-    return render_template('ui/catalog.html')
-
-
 # Auth
 
 @ui.route('/login', methods=['GET', 'POST'])
