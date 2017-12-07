@@ -39,9 +39,9 @@ def test_token():
             del session['user']
 
 
-#############
-# Table Views
-#############
+###############
+# General Views
+###############
 
 # Main
 
@@ -138,53 +138,6 @@ def organization_manage():
                            members=members)
 
 
-@ui.route('/clusters/<cluster_id>/detail', methods=['GET', 'POST'])
-@login_required
-def cluster_detail(cluster_id):
-    try:
-        UUID(cluster_id, version=4)
-    except ValueError:
-        logger.warning('cluster_detail view: invalid uuid {}'.format(str(cluster_id)))
-        abort(404)
-
-    client = get_kqueen_client(token=session['user']['token'])
-    _cluster = client.cluster.get(cluster_id)
-    cluster = _cluster.data
-    if not cluster:
-        logger.warning('cluster_detail view: {} not found'.format(str(cluster_id)))
-        abort(404)
-
-    _status_data = {}
-    state_class = 'info'
-    state = cluster['state']
-    if state == app.config['CLUSTER_OK_STATE']:
-        state_class = 'success'
-        try:
-            _status = client.cluster.status(cluster_id)
-            _status_data = _status.data
-        except Exception as e:
-            logger.error('cluster_detail view: {}'.format(repr(e)))
-            flash('Unable to get information about cluster', 'danger')
-    elif state == app.config['CLUSTER_ERROR_STATE']:
-        state_class = 'danger'
-
-    status = status_for_cluster_detail(_status_data)
-
-    form = ClusterApplyForm()
-    if form.validate_on_submit():
-        # TODO: implement this after API supports apply call
-        # obj.apply(form.apply.data)
-        pass
-
-    return render_template(
-        'ui/cluster_detail.html',
-        cluster=cluster,
-        status=status,
-        state_class=state_class,
-        form=form
-    )
-
-
 @ui.route('/catalog')
 @login_required
 def catalog():
@@ -221,9 +174,9 @@ def logout():
     return redirect(url_for('ui.index'))
 
 
-#
-# Form Views
-#
+################
+# Resource Views
+################
 
 # User
 
@@ -510,6 +463,54 @@ class ClusterDelete(KQueenView):
         return redirect(request.environ['HTTP_REFERER'])
 
 
+class ClusterDeploymentStatus(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
+    validation_hint = 'uuid'
+
+    def handle(self, cluster_id):
+        # TODO: implement this function after it gets implemented in backend API
+        dummy = {
+            'response': 0,
+            'progress': 1,
+            'result': 'Deploying'
+        }
+        return jsonify(dummy)
+
+
+class ClusterDetail(KQueenView):
+    decorators = [login_required]
+    methods = ['GET', 'POST']
+    validation_hint = 'uuid'
+
+    def handle(self, cluster_id):
+        cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
+        state_class = 'info'
+        _status_data = {}
+
+        if cluster['state'] == app.config['CLUSTER_OK_STATE']:
+            state_class = 'success'
+            _status_data = self.kqueen_request('cluster', 'status', fnargs=(cluster_id,))
+        elif cluster['state'] == app.config['CLUSTER_ERROR_STATE']:
+            state_class = 'danger'
+
+        status = status_for_cluster_detail(_status_data)
+
+        form = ClusterApplyForm()
+        if form.validate_on_submit():
+            # TODO: implement this after API supports apply call
+            # obj.apply(form.apply.data)
+            pass
+    
+        return render_template(
+            'ui/cluster_detail.html',
+            cluster=cluster,
+            status=status,
+            state_class=state_class,
+            form=form
+        )
+
+
 class ClusterKubeconfig(KQueenView):
     decorators = [login_required]
     methods = ['GET']
@@ -530,23 +531,9 @@ class ClusterTopologyData(KQueenView):
         return jsonify(topology)
 
 
-class ClusterDeploymentStatus(KQueenView):
-    decorators = [login_required]
-    methods = ['GET']
-    validation_hint = 'uuid'
-
-    def handle(self, cluster_id):
-        # TODO: implement this function after it gets implemented in backend API
-        dummy = {
-            'response': 0,
-            'progress': 1,
-            'result': 'Deploying'
-        }
-        return jsonify(dummy)
-
-
 ui.add_url_rule('/clusters/create', view_func=ClusterCreate.as_view('cluster_create'))
 ui.add_url_rule('/clusters/<cluster_id>/delete', view_func=ClusterDelete.as_view('cluster_delete'))
+ui.add_url_rule('/clusters/<cluster_id>/deployment-status', view_func=ClusterDeploymentStatus.as_view('cluster_deployment_status'))
+ui.add_url_rule('/clusters/<cluster_id>/detail', view_func=ClusterDetail.as_view('cluster_detail'))
 ui.add_url_rule('/clusters/<cluster_id>/kubeconfig', view_func=ClusterKubeconfig.as_view('cluster_kubeconfig'))
 ui.add_url_rule('/clusters/<cluster_id>/topology-data', view_func=ClusterTopologyData.as_view('cluster_topology_data'))
-ui.add_url_rule('/clusters/<cluster_id>/deployment-status', view_func=ClusterDeploymentStatus.as_view('cluster_deployment_status'))
