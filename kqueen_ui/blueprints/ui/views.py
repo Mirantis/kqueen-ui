@@ -362,52 +362,56 @@ ui.add_url_rule('/users/requestresetpw', view_func=UserRequestResetPassword.as_v
 
 # Provisioner
 
-@ui.route('/provisioners/create', methods=['GET', 'POST'])
-@login_required
-def provisioner_create():
-    # Get engines with parameters
-    client = get_kqueen_client(token=session['user']['token'])
-    _engines = client.provisioner.engines()
-    engines = _engines.data
+class ProvisionerCreate(KQueenView):
+    decorators = [login_required]
+    methods = ['GET', 'POST']
 
-    # Append tagged parameter fields to form
-    form_cls = ProvisionerCreateForm
-    for engine in engines:
-        _parameters = engine['parameters']['provisioner']
-        parameters = {
-            k + '__' + prettify_engine_name(engine['name']): v
-            for (k, v)
-            in _parameters.items()
-        }
-        form_cls.append_fields(parameters, switchtag=engine['name'])
+    def handle(self):
+        # Get engines with parameters
+        engines = self.kqueen_request('provisioner', 'engines')
 
-    # Instantiate form and populate engine choices
-    form = form_cls()
-    form.engine.choices = [(e['name'], prettify_engine_name(e['name'])) for e in engines]
-
-    if form.validate_on_submit():
-        try:
-            # Filter out populated tagged fields and get their data
-            parameters = {
-                k.split('__')[0]: v.data
+        # Append tagged parameter fields to form
+        form_cls = ProvisionerCreateForm
+        for engine in engines:
+            _engine_parameters = engine['parameters']['provisioner']
+            engine_parameters = {
+                k + '__' + prettify_engine_name(engine['name']): v
                 for (k, v)
-                in form._fields.items()
-                if (hasattr(v, 'switchtag') and v.switchtag) and prettify_engine_name(form.engine.data) in k
+                in _engine_parameters.items()
             }
-            provisioner = {
+            form_cls.append_fields(engine_parameters, switchtag=engine['name'])
+
+        # Instantiate form and populate engine choices
+        form = form_cls()
+        form.engine.choices = [(e['name'], prettify_engine_name(e['name'])) for e in engines]
+
+        if form.validate_on_submit():
+            try:
+                # Filter out populated tagged fields and get their data
+                parameters = {
+                    k.split('__')[0]: v.data
+                    for (k, v)
+                    in form._fields.items()
+                    if (hasattr(v, 'switchtag') and v.switchtag) and prettify_engine_name(form.engine.data) in k
+                }
+            except Exception as e:
+                self.logger('error', repr(e))
+                flash('Invalid provisioner parameters.', 'danger')
+                render_template('ui/provisioner_create.html', form=form)
+            
+            provisioner_kw = {
                 'name': form.name.data,
                 'engine': form.engine.data,
                 'state': app.config['PROVISIONER_UNKNOWN_STATE'],
                 'parameters': parameters,
                 'created_at': datetime.utcnow()
             }
-            client.provisioner.create(provisioner)
+            provisioner = self.kqueen_request('provisioner', 'create', fnargs=(provisioner_kw,))
             flash('Provisioner {} successfully created.'.format(provisioner['name']), 'success')
-        except Exception as e:
-            logger.error('provisioner_create view: {}'.format(repr(e)))
-            flash('Could not create provisioner.', 'danger')
-        return redirect('/')
-    return render_template('ui/provisioner_create.html', form=form)
+            return redirect('/')
+        return render_template('ui/provisioner_create.html', form=form)
+
+ui.add_url_rule('/provisioners/create', view_func=ProvisionerCreate.as_view('provisioner_create'))
 
 
 @ui.route('/provisioners/<provisioner_id>/delete')
