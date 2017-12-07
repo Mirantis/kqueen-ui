@@ -1,7 +1,6 @@
 from datetime import datetime
 from flask import Blueprint, current_app as app, flash, redirect, render_template, url_for
 from flask_mail import Mail, Message
-from kqueen_ui.api import get_service_client
 from kqueen_ui.auth import confirm_token, generate_confirmation_token
 from kqueen_ui.exceptions import KQueenAPIException
 from kqueen_ui.generic_views import KQueenView
@@ -69,30 +68,31 @@ class Register(KQueenView):
             return redirect(url_for('ui.login'))
         return render_template('registration/register.html', form=form)
 
-registration.add_url_rule('/register', view_func=Register.as_view('register'))
 
+class VerifyEmail(KQueenView):
+    methods = ['GET', 'POST']
 
-@registration.route('/verify/<token>')
-def verify_email(token):
-    email = confirm_token(token)
-    if not email:
-        flash('Verification link is invalid or has expired.', 'danger')
+    def handle(self, token):
+        email = confirm_token(token)
+        if not email:
+            flash('Verification link is invalid or has expired.', 'danger')
+            return redirect(url_for('ui.index'))
+
+        users = self.kqueen_request('user', 'list', service=True)
+        # TODO: this logic realies heavily on unique emails, this is not the case on backend right now
+        filtered = [u for u in users if u.get('email', None) == email]
+        if len(filtered) == 1:
+            user = filtered[0]
+            if user.get('active', None):
+                flash('Account already verified. Please login.', 'success')
+            else:
+                user['active'] = True
+                self.kqueen_request('user', 'update', fnargs=(user['id'], user), service=True)
+                flash('You have confirmed your account. Thanks!', 'success')
+        else:
+            flash('No user found based on given e-mail.', 'danger')
         return redirect(url_for('ui.index'))
 
-    client = get_service_client()
-    _users = client.user.list()
-    users = _users.data
 
-    # TODO: this logic realies heavily on unique emails, this is not the case on backend right now
-    filtered = [u for u in users if u.get('email', None) == email]
-    if len(filtered) == 1:
-        user = filtered[0]
-        if user.get('active', None):
-            flash('Account already verified. Please login.', 'success')
-        else:
-            user['active'] = True
-            client.user.update(user['id'], user)
-            flash('You have confirmed your account. Thanks!', 'success')
-    else:
-        flash('No user found based on given e-mail.', 'danger')
-    return redirect(url_for('ui.index'))
+registration.add_url_rule('/register', view_func=Register.as_view('register'))
+registration.add_url_rule('/verify/<token>', view_func=VerifyEmail.as_view('verify_email'))

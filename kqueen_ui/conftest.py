@@ -66,29 +66,30 @@ def provisioner():
 @pytest.fixture
 def kubeconfig():
     kubeconfig = {
-        'apiVersion': 'v1', 
+        'apiVersion': 'v1',
         'clusters': [
-          {
-            'cluster': {
-              'server': 'http://127.0.0.1:8080'
-            }, 
-            'name': 'local'
-          }
-        ], 
+            {
+                'cluster': {
+                    'server': 'http://127.0.0.1:8080'
+                },
+                'name': 'local'
+            }
+        ],
         'contexts': [
-          {
-            'context': {
-              'cluster': 'local', 
-              'user': ''
-            }, 
-            'name': 'local'
-          }
-        ], 
-        'current-context': 'local', 
-        'kind': 'Config', 
+            {
+                'context': {
+                    'cluster': 'local',
+                    'user': ''
+                },
+                'name': 'local'
+            }
+        ],
+        'current-context': 'local',
+        'kind': 'Config',
         'preferences': {}
     }
     return kubeconfig
+
 
 @pytest.fixture
 def cluster():

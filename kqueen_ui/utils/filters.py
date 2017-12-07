@@ -25,8 +25,10 @@ USER_STATE_MAP = {
 def cluster_status_icon_class(status):
     return CLUSTER_STATE_MAP.get(status, 'mdi-alert-circle-outline')
 
+
 def provisioner_status_icon_class(status):
     return PROVISIONER_STATE_MAP.get(status, 'mdi-alert-outline')
+
 
 def user_status_icon_class(status):
     return USER_STATE_MAP.get(status, 'mdi-alert-outline')

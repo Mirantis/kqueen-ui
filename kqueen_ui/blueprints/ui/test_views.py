@@ -1,6 +1,5 @@
 from flask import url_for
 from kqueen_ui.generic_views import KQueenView
-from unittest.mock import patch
 
 import pytest
 
@@ -130,13 +129,6 @@ def test_cluster_detail(client_login, cluster, mock_kqueen_request, monkeypatch)
     assert response.status_code == 200
     assert '<h2>Cluster pytest-cluster detail</h2>'
     assert '<td>ip-10-0-10-95.us-west-2.compute.internal</td>' in html
-
-
-def test_cluster_kubeconfig(client_login, cluster, mock_kqueen_request, monkeypatch):
-    monkeypatch.setattr(KQueenView, 'kqueen_request', mock_kqueen_request)
-    response = client_login.get(url_for('ui.cluster_kubeconfig', cluster_id=cluster['id']))
-    assert response.status_code == 200
-    assert response.json == cluster['kubeconfig']
 
 
 def test_cluster_kubeconfig(client_login, cluster, mock_kqueen_request, monkeypatch):

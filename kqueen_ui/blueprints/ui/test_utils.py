@@ -2,7 +2,6 @@ from kqueen_ui.conftest import cluster_status
 from .utils import status_for_cluster_detail
 
 import pytest
-import json
 
 
 class TestNodes:

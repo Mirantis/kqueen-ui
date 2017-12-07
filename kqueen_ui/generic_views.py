@@ -1,4 +1,4 @@
-from flask import abort, flash, redirect, request, session
+from flask import abort, flash, session
 from flask.views import View
 from kqueen_ui.api import get_kqueen_client, get_service_client
 from kqueen_ui.exceptions import KQueenAPIException
