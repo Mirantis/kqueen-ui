@@ -70,7 +70,7 @@ class Register(KQueenView):
 
 
 class VerifyEmail(KQueenView):
-    methods = ['GET', 'POST']
+    methods = ['GET']
 
     def handle(self, token):
         email = confirm_token(token)
