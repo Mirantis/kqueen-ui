@@ -227,53 +227,52 @@ def logout():
 
 # User
 
-@ui.route('/users/invite', methods=['GET', 'POST'])
-@login_required
-def user_invite():
-    form = UserInviteForm()
-    if form.validate_on_submit():
-        organization = 'Organization:{}'.format(session['user']['organization']['id'])
-        password = generate_password()
-        user = {
-            'username': form.email.data,
-            'password': password,
-            'email': form.email.data,
-            'organization': organization,
-            'created_at': datetime.utcnow(),
-            'active': True
-        }
-        client = get_kqueen_client(token=session['user']['token'])
-        response = client.user.create(user)
-        if response.status > 200:
-            flash('Could not create user.', 'danger')
-            return render_template('ui/user_create.html', form=form)
-        user_id = response.data['id']
+class UserInvite(KQueenView):
+    decorators = [login_required]
+    methods = ['GET', 'POST']
 
-        # Init mail handler
-        mail.init_app(app)
-        token = generate_confirmation_token(form.email.data)
-        html = render_template(
-            'ui/email/user_invitation.html',
-            username=form.email.data,
-            token=token,
-            organization=session['user']['organization']['name']
-        )
-        msg = Message(
-            '[KQueen] Organization invitation',
-            recipients=[form.email.data],
-            html=html
-        )
-        try:
-            mail.send(msg)
-        except Exception as e:
-            logger.error('user_create view: {}'.format(repr(e)))
-            client.user.delete(user_id)
-            flash('Could not send invitation e-mail, please try again later.', 'danger')
-            return render_template('ui/user_create.html', form=form)
+    def handle(self):
+        form = UserInviteForm()
+        if form.validate_on_submit():
+            organization = 'Organization:{}'.format(session['user']['organization']['id'])
+            password = generate_password()
+            user_kw = {
+                'username': form.email.data,
+                'password': password,
+                'email': form.email.data,
+                'organization': organization,
+                'created_at': datetime.utcnow(),
+                'active': True
+            }
+            user = self.kqueen_request('user', 'create', fnargs=(user_kw,))
 
-        flash('User {} successfully created.'.format(user['username']), 'success')
-        return redirect(url_for('ui.organization_manage'))
-    return render_template('ui/user_create.html', form=form)
+            # Init mail handler
+            mail.init_app(app)
+            token = generate_confirmation_token(user['email'])
+            html = render_template(
+                'ui/email/user_invitation.html',
+                username=user['username'],
+                token=token,
+                organization=user['organization']['name']
+            )
+            msg = Message(
+                '[KQueen] Organization invitation',
+                recipients=[user['email']],
+                html=html
+            )
+            try:
+                mail.send(msg)
+            except Exception as e:
+                self.logger('error', repr(e))
+                self.kqueen_request('user', 'delete', fnargs=(user['id'],))
+                flash('Could not send invitation e-mail, please try again later.', 'danger')
+                return render_template('ui/user_invite.html', form=form)
+
+            flash('User {} successfully created.'.format(user['username']), 'success')
+            return redirect(url_for('ui.organization_manage'))
+        return render_template('ui/user_invite.html', form=form)
+
+ui.add_url_rule('/users/invite', view_func=UserInvite.as_view('user_invite'))
 
 
 class UserDelete(KQueenView):
