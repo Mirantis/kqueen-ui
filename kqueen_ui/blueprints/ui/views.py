@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import (current_app as app, abort, Blueprint, flash, jsonify, redirect,
+from flask import (current_app as app, Blueprint, flash, jsonify, redirect,
                    render_template, request, session, url_for)
 from flask_mail import Mail, Message
 from flask.ext.babel import format_datetime
@@ -7,7 +7,6 @@ from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.auth import authenticate, confirm_token, generate_confirmation_token
 from kqueen_ui.generic_views import KQueenView
 from kqueen_ui.utils.wrappers import login_required
-from uuid import UUID
 
 from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
                     ChangePasswordForm, UserInviteForm, RequestPasswordResetForm,
@@ -103,41 +102,6 @@ def index():
                            provisioners=provisioners)
 
 
-@ui.route('/organizations/manage')
-@login_required
-def organization_manage():
-    try:
-        client = get_kqueen_client(token=session['user']['token'])
-        _organization = client.organization.get(session['user']['organization']['id'])
-        organization = _organization.data
-        _users = client.user.list()
-        users = _users.data
-        members = [
-            u
-            for u
-            in users
-            if u['organization']['id'] == session['user']['organization']['id'] and u['id'] != session['user']['id']
-        ]
-        # Patch members until we actually have these data for realsies
-        for member in members:
-            member['role'] = 'Member'
-            member['state'] = 'Active' if member['active'] else 'Disabled'
-            if 'email' not in member:
-                member['email'] = '-'
-            if 'created_at' in member:
-                member['created_at'] = format_datetime(member['created_at'])
-        # sort members by date
-        members.sort(key=lambda k: (k['created_at'], k['username']))
-    except Exception as e:
-        logger.error('organization_manage view: {}'.format(repr(e)))
-        organization = {}
-        members = []
-
-    return render_template('ui/organization_manage.html',
-                           organization=organization,
-                           members=members)
-
-
 @ui.route('/catalog')
 @login_required
 def catalog():
@@ -177,6 +141,46 @@ def logout():
 ################
 # Resource Views
 ################
+
+#
+# Organization
+#
+
+class OrganizationManage(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
+
+    def handle(self):
+        # session data
+        organization_id = session['user']['organization']['id']
+        user_id = session['user']['id']
+        # backend resources
+        organization = self.kqueen_request('organization', 'get', fnargs=(organization_id,))
+        users = self.kqueen_request('user', 'list')
+        members = [
+            u
+            for u
+            in users
+            if u['organization']['id'] == organization_id and u['id'] != user_id
+        ]
+        # Patch members until we actually have these data for realsies
+        for member in members:
+            member['role'] = 'Member'
+            member['state'] = 'Active' if member['active'] else 'Disabled'
+            if 'email' not in member:
+                member['email'] = '-'
+            if 'created_at' in member:
+                member['created_at'] = format_datetime(member['created_at'])
+        # sort members by date
+        members.sort(key=lambda k: (k['created_at'], k['username']))
+
+        return render_template('ui/organization_manage.html',
+                               organization=organization,
+                               members=members)
+
+
+ui.add_url_rule('/organizations/manage', view_func=OrganizationManage.as_view('organization_manage'))
+
 
 # User
 
@@ -501,7 +505,7 @@ class ClusterDetail(KQueenView):
             # TODO: implement this after API supports apply call
             # obj.apply(form.apply.data)
             pass
-    
+
         return render_template(
             'ui/cluster_detail.html',
             cluster=cluster,
