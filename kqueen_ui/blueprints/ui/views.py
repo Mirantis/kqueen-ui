@@ -398,7 +398,7 @@ class ProvisionerCreate(KQueenView):
                 self.logger('error', repr(e))
                 flash('Invalid provisioner parameters.', 'danger')
                 render_template('ui/provisioner_create.html', form=form)
-            
+
             provisioner_kw = {
                 'name': form.name.data,
                 'engine': form.engine.data,
@@ -411,40 +411,29 @@ class ProvisionerCreate(KQueenView):
             return redirect('/')
         return render_template('ui/provisioner_create.html', form=form)
 
-ui.add_url_rule('/provisioners/create', view_func=ProvisionerCreate.as_view('provisioner_create'))
 
+class ProvisionerDelete(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
+    validation_hint = 'uuid'
 
-@ui.route('/provisioners/<provisioner_id>/delete')
-@login_required
-def provisioner_delete(provisioner_id):
-    try:
-        UUID(provisioner_id, version=4)
-    except ValueError:
-        logger.warning('provisioner_delete view: invalid uuid {}'.format(str(provisioner_id)))
-        abort(404)
-
-    try:
+    def handle(self, provisioner_id):
         # TODO: block deletion of used provisioner on backend, not here
-        client = get_kqueen_client(token=session['user']['token'])
-        _clusters = client.cluster.list()
-        clusters = _clusters.data
-        _provisioner = client.provisioner.get(provisioner_id)
-        provisioner = _provisioner.data
-        if not provisioner:
-            logger.warning('provisioner_delete view: {} not found'.format(str(provisioner_id)))
-            abort(404)
+        clusters = self.kqueen_request('cluster', 'list')
+        provisioner = self.kqueen_request('provisioner', 'get', fnargs=(provisioner_id,))
         used_provisioners = [p['id'] for p in [c['provisioner'] for c in clusters]]
 
         if provisioner_id not in used_provisioners:
-            client.provisioner.delete(provisioner_id)
+            self.kqueen_request('provisioner', 'delete', fnargs=(provisioner_id,))
             flash('Provisioner {} successfully deleted.'.format(provisioner['name']), 'success')
         else:
-            flash('Provisioner {} is used by deployed cluster, cannot delete.'.format(provisioner['name']), 'warning')
+            flash('Provisioner {} is in use, cannot delete.'.format(provisioner['name']), 'warning')
 
         return redirect('/')
-    except Exception as e:
-        logger.error('provisioner_delete view: {}'.format(repr(e)))
-        abort(500)
+
+
+ui.add_url_rule('/provisioners/create', view_func=ProvisionerCreate.as_view('provisioner_create'))
+ui.add_url_rule('/provisioners/<provisioner_id>/delete', view_func=ProvisionerDelete.as_view('provisioner_delete'))
 
 
 # Cluster
