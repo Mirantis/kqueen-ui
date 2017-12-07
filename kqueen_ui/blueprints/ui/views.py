@@ -307,37 +307,33 @@ class UserChangePassword(KQueenView):
 ui.add_url_rule('/users/changepw', view_func=UserChangePassword.as_view('user_change_password'))
 
 
-@ui.route('/users/resetpw/<token>', methods=['GET', 'POST'])
-def user_password_reset(token):
-    email = confirm_token(token)
-    if not email:
-        flash('Password reset link is invalid or has expired.', 'danger')
+class UserResetPassword(KQueenView):
+    methods = ['GET', 'POST']
+
+    def handle(self, token):
+        email = confirm_token(token)
+        if not email:
+            flash('Password reset link is invalid or has expired.', 'danger')
+            return redirect(url_for('ui.index'))
+
+        users = self.kqueen_request('user', 'list', service=True)
+        # TODO: this logic realies heavily on unique emails, this is not the case on backend right now
+        # change this logic after unique contraint is introduced to backend
+        filtered = [u for u in users if u.get('email', None) == email]
+        if len(filtered) == 1:
+            user = filtered[0]
+            form = PasswordResetForm()
+            if form.validate_on_submit():
+                user['password'] = form.password_1.data
+                self.kqueen_request('user', 'update', fnargs=(user['id'], user), service=True)
+                flash('Password successfully updated.', 'success')
+                return redirect(url_for('ui.login'))
+            return render_template('ui/user_reset_password.html', form=form)
+        else:
+            flash('Could not match user to given e-mail.', 'danger')
         return redirect(url_for('ui.index'))
 
-    client = get_service_client()
-    _users = client.user.list()
-    users = _users.data
-
-    # TODO: this logic realies heavily on unique emails, this is not the case on backend right now
-    filtered = [u for u in users if u.get('email', None) == email]
-    if len(filtered) == 1:
-        user = filtered[0]
-        form = PasswordResetForm()
-        if form.validate_on_submit():
-            try:
-                user['password'] = form.password_1.data
-                update = client.user.update(user['id'], user)
-                if update.status == 200:
-                    flash('Password successfully updated. Please log in again.', 'success')
-                    return redirect(url_for('ui.login'))
-                flash('Could not change password. Please try again later.', 'danger')
-            except Exception as e:
-                logger.error('user_password_reset view: {}'.format(repr(e)))
-                flash('Could not change password. Please try again later.', 'danger')
-        return render_template('ui/user_reset_password.html', form=form)
-    else:
-        flash('No user found based on given e-mail.', 'danger')
-    return redirect(url_for('ui.index'))
+ui.add_url_rule('/users/resetpw/<token>', view_func=UserResetPassword.as_view('user_reset_password'))
 
 
 @ui.route('/users/requestresetpw', methods=['GET', 'POST'])
