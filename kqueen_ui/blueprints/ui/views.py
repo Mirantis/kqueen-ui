@@ -447,7 +447,7 @@ class ClusterCreate(KQueenView):
         provisioners = self.kqueen_request('provisioner', 'list')
         engines = self.kqueen_request('provisioner', 'engines')
         engine_dict = dict([(e.pop('name'), e) for e in engines])
-    
+
         # Append tagged parameter fields to form
         form_cls = ClusterCreateForm
         for provisioner in provisioners:
@@ -460,11 +460,11 @@ class ClusterCreate(KQueenView):
                 in _parameters.items()
             }
             form_cls.append_fields(parameters, switchtag=provisioner['id'])
-    
+
         # Instantiate form and populate provisioner choices
         form = form_cls()
         form.provisioner.choices = [(p['id'], p['name']) for p in provisioners]
-    
+
         if form.validate_on_submit():
             try:
                 # Filter out populated tagged fields and get their data
@@ -478,7 +478,7 @@ class ClusterCreate(KQueenView):
                 self.logger('error', repr(e))
                 flash('Invalid cluster metadata.', 'danger')
                 render_template('ui/cluster_create.html', form=form)
-    
+
             cluster_kw = {
                 'name': form.name.data,
                 'state': app.config['CLUSTER_PROVISIONING_STATE'],
@@ -510,10 +510,6 @@ class ClusterDelete(KQueenView):
         return redirect(request.environ['HTTP_REFERER'])
 
 
-ui.add_url_rule('/clusters/create', view_func=ClusterCreate.as_view('cluster_create'))
-ui.add_url_rule('/clusters/<cluster_id>/delete', view_func=ClusterDelete.as_view('cluster_delete'))
-
-
 class ClusterKubeconfig(KQueenView):
     decorators = [login_required]
     methods = ['GET']
@@ -522,8 +518,6 @@ class ClusterKubeconfig(KQueenView):
     def handle(self, cluster_id):
         cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
         return jsonify(cluster['kubeconfig'])
-
-ui.add_url_rule('/clusters/<cluster_id>/kubeconfig', view_func=ClusterKubeconfig.as_view('cluster_kubeconfig'))
 
 
 class ClusterTopologyData(KQueenView):
@@ -535,22 +529,24 @@ class ClusterTopologyData(KQueenView):
         topology = self.kqueen_request('cluster', 'topology_data', fnargs=(cluster_id,))
         return jsonify(topology)
 
+
+class ClusterDeploymentStatus(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
+    validation_hint = 'uuid'
+
+    def handle(self, cluster_id):
+        # TODO: implement this function after it gets implemented in backend API
+        dummy = {
+            'response': 0,
+            'progress': 1,
+            'result': 'Deploying'
+        }
+        return jsonify(dummy)
+
+
+ui.add_url_rule('/clusters/create', view_func=ClusterCreate.as_view('cluster_create'))
+ui.add_url_rule('/clusters/<cluster_id>/delete', view_func=ClusterDelete.as_view('cluster_delete'))
+ui.add_url_rule('/clusters/<cluster_id>/kubeconfig', view_func=ClusterKubeconfig.as_view('cluster_kubeconfig'))
 ui.add_url_rule('/clusters/<cluster_id>/topology-data', view_func=ClusterTopologyData.as_view('cluster_topology_data'))
-
-
-@ui.route('/clusters/<cluster_id>/deployment-status')
-@login_required
-def cluster_deployment_status(cluster_id):
-    try:
-        UUID(cluster_id, version=4)
-    except ValueError:
-        logger.warning('cluster_deployment_status view: invalid uuid {}'.format(str(cluster_id)))
-        abort(404)
-
-    dummy = {
-        'response': 0,
-        'progress': 1,
-        'result': 'Deploying'
-    }
-
-    return jsonify(dummy)
+ui.add_url_rule('/clusters/<cluster_id>/deployment-status', view_func=ClusterDeploymentStatus.as_view('cluster_deployment_status'))
