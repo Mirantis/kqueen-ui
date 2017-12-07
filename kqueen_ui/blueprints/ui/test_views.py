@@ -1,4 +1,6 @@
 from flask import url_for
+from kqueen_ui.generic_views import KQueenView
+from unittest.mock import patch
 
 import pytest
 
@@ -14,7 +16,10 @@ def test_login_required(client, view, values):
     assert response.status_code == 302
 
 
-def test_index(client_login, app):
+def test_index(client_login, app, monkeypatch):
+    def kqueen_request(*args, **kwargs):
+        return []
+    monkeypatch.setattr(KQueenView, 'kqueen_request', kqueen_request)
     response = client_login.get(url_for('ui.index'))
     assert response.status_code == 200
 
