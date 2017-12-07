@@ -438,60 +438,60 @@ ui.add_url_rule('/provisioners/<provisioner_id>/delete', view_func=ProvisionerDe
 
 # Cluster
 
-@ui.route('/clusters/deploy', methods=['GET', 'POST'])
-@login_required
-def cluster_create():
-    # Get all necessary objects from backend
-    client = get_kqueen_client(token=session['user']['token'])
-    _provisioners = client.provisioner.list()
-    provisioners = _provisioners.data
-    _engines = client.provisioner.engines()
-    engines = _engines.data
-    engine_dict = dict([(e.pop('name'), e) for e in engines])
+class ClusterCreate(KQueenView):
+    decorators = [login_required]
+    methods = ['GET', 'POST']
 
-    # Append tagged parameter fields to form
-    form_cls = ClusterCreateForm
-    for provisioner in provisioners:
-        engine = engine_dict.get(provisioner['engine'], {})
-        _parameters = engine.get('parameters', {}).get('cluster', {})
-        # Append provisioner ID to parameter name to make it unique
-        parameters = {
-            k + '__' + provisioner['id']: v
-            for [k, v]
-            in _parameters.items()
-        }
-        form_cls.append_fields(parameters, switchtag=provisioner['id'])
-
-    # Instantiate form and populate provisioner choices
-    form = form_cls()
-    form.provisioner.choices = [(p['id'], p['name']) for p in provisioners]
-
-    if form.validate_on_submit():
-        try:
-            # Filter out populated tagged fields and get their data
-            metadata = {
-                k.split('__')[0]: v.data
-                for (k, v)
-                in form._fields.items()
-                if (hasattr(v, 'switchtag') and v.switchtag) and form.provisioner.data in k
+    def handle(self):
+        # Get all necessary objects from backend
+        provisioners = self.kqueen_request('provisioner', 'list')
+        engines = self.kqueen_request('provisioner', 'engines')
+        engine_dict = dict([(e.pop('name'), e) for e in engines])
+    
+        # Append tagged parameter fields to form
+        form_cls = ClusterCreateForm
+        for provisioner in provisioners:
+            engine = engine_dict.get(provisioner['engine'], {})
+            _parameters = engine.get('parameters', {}).get('cluster', {})
+            # Append provisioner ID to parameter name to make it unique
+            parameters = {
+                k + '__' + provisioner['id']: v
+                for [k, v]
+                in _parameters.items()
             }
-
-            cluster = {
+            form_cls.append_fields(parameters, switchtag=provisioner['id'])
+    
+        # Instantiate form and populate provisioner choices
+        form = form_cls()
+        form.provisioner.choices = [(p['id'], p['name']) for p in provisioners]
+    
+        if form.validate_on_submit():
+            try:
+                # Filter out populated tagged fields and get their data
+                metadata = {
+                    k.split('__')[0]: v.data
+                    for (k, v)
+                    in form._fields.items()
+                    if (hasattr(v, 'switchtag') and v.switchtag) and form.provisioner.data in k
+                }
+            except Exception as e:
+                self.logger('error', repr(e))
+                flash('Invalid cluster metadata.', 'danger')
+                render_template('ui/cluster_create.html', form=form)
+    
+            cluster_kw = {
                 'name': form.name.data,
                 'state': app.config['CLUSTER_PROVISIONING_STATE'],
                 'provisioner': 'Provisioner:{}'.format(form.provisioner.data),
                 'created_at': datetime.utcnow(),
                 'metadata': metadata
             }
-            response = client.cluster.create(cluster)
-            if response.status > 200:
-                flash('Could not create cluster {}.'.format(form.name.data), 'danger')
-            flash('Provisioning of cluster {} is in progress.'.format(form.name.data), 'success')
-        except Exception as e:
-            logger.error('cluster_create view: {}'.format(repr(e)))
-            flash('Could not create cluster {}.'.format(form.name.data), 'danger')
-        return redirect('/')
-    return render_template('ui/cluster_create.html', form=form)
+            cluster = self.kqueen_request('cluster', 'create', fnargs=(cluster_kw,))
+            flash('Provisioning of cluster {} is in progress.'.format(cluster['name']), 'success')
+            return redirect('/')
+        return render_template('ui/cluster_create.html', form=form)
+
+ui.add_url_rule('/clusters/create', view_func=ClusterCreate.as_view('cluster_create'))
 
 
 @ui.route('/clusters/<cluster_id>/delete')
