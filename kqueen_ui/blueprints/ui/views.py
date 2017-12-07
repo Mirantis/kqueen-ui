@@ -230,7 +230,7 @@ class UserDelete(KQueenView):
         user = self.kqueen_request('user', 'get', fnargs=(user_id,))
         self.kqueen_request('user', 'delete', fnargs=(user_id,))
         flash('User {} successfully deleted.'.format(user['username']), 'success')
-        return redirect(request.environ['HTTP_REFERER'])
+        return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
 
 
 class UserChangePassword(KQueenView):
@@ -317,7 +317,6 @@ class ProvisionerCreate(KQueenView):
     def handle(self):
         # Get engines with parameters
         engines = self.kqueen_request('provisioner', 'engines')
-
         # Append tagged parameter fields to form
         form_cls = ProvisionerCreateForm
         for engine in engines:
@@ -377,7 +376,7 @@ class ProvisionerDelete(KQueenView):
         else:
             flash('Provisioner {} is in use, cannot delete.'.format(provisioner['name']), 'warning')
 
-        return redirect('/')
+        return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
 
 
 ui.add_url_rule('/provisioners/create', view_func=ProvisionerCreate.as_view('provisioner_create'))
@@ -447,15 +446,13 @@ class ClusterDelete(KQueenView):
 
     def handle(self, cluster_id):
         cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
-
         if cluster['state'] != app.config['CLUSTER_OK_STATE']:
             # TODO: handle state together with policies in helper for allowed table actions
             flash('Only running clusters can be deleted.', 'warning')
-            return redirect(request.environ['HTTP_REFERER'])
-
+            return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
         self.kqueen_request('cluster', 'delete', fnargs=(cluster_id,))
         flash('Cluster {} successfully deleted.'.format(cluster['name']), 'success')
-        return redirect(request.environ['HTTP_REFERER'])
+        return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
 
 
 class ClusterDeploymentStatus(KQueenView):

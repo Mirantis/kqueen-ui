@@ -1,15 +1,8 @@
+from kqueen_ui.conftest import cluster_status
 from .utils import status_for_cluster_detail
 
 import pytest
 import json
-
-
-@pytest.fixture
-def cluster_status():
-    with open('kqueen_ui/fixtures/test_cluster_status.json', 'r') as stream:
-        data_loaded = json.load(stream)
-
-    return data_loaded
 
 
 class TestNodes:
