@@ -3,7 +3,7 @@ from flask import (current_app as app, abort, Blueprint, flash, jsonify, redirec
                    render_template, request, session, url_for)
 from flask_mail import Mail, Message
 from flask.ext.babel import format_datetime
-from kqueen_ui.api import get_kqueen_client, get_service_client
+from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.auth import authenticate, confirm_token, generate_confirmation_token
 from kqueen_ui.generic_views import KQueenView
 from kqueen_ui.utils.wrappers import login_required
@@ -272,8 +272,6 @@ class UserInvite(KQueenView):
             return redirect(url_for('ui.organization_manage'))
         return render_template('ui/user_invite.html', form=form)
 
-ui.add_url_rule('/users/invite', view_func=UserInvite.as_view('user_invite'))
-
 
 class UserDelete(KQueenView):
     decorators = [login_required]
@@ -285,8 +283,6 @@ class UserDelete(KQueenView):
         self.kqueen_request('user', 'delete', fnargs=(user_id,))
         flash('User {} successfully deleted.'.format(user['username']), 'success')
         return redirect(request.environ['HTTP_REFERER'])
-
-ui.add_url_rule('/users/<user_id>/delete', view_func=UserDelete.as_view('user_delete'))
 
 
 class UserChangePassword(KQueenView):
@@ -303,8 +299,6 @@ class UserChangePassword(KQueenView):
             flash('Password successfully updated. Please log in again.', 'success')
             return redirect(url_for('ui.logout'))
         return render_template('ui/user_change_password.html', form=form)
-
-ui.add_url_rule('/users/changepw', view_func=UserChangePassword.as_view('user_change_password'))
 
 
 class UserResetPassword(KQueenView):
@@ -333,30 +327,37 @@ class UserResetPassword(KQueenView):
             flash('Could not match user to given e-mail.', 'danger')
         return redirect(url_for('ui.index'))
 
+
+class UserRequestResetPassword(KQueenView):
+    methods = ['GET', 'POST']
+
+    def handle(self):
+        form = RequestPasswordResetForm()
+        if form.validate_on_submit():
+            # Init mail handler
+            mail.init_app(app)
+            token = generate_confirmation_token(form.email.data)
+            html = render_template('ui/email/user_request_password_reset.html', token=token)
+            msg = Message(
+                '[KQueen] Password reset',
+                recipients=[form.email.data],
+                html=html
+            )
+            try:
+                mail.send(msg)
+            except Exception as e:
+                self.logger('error', repr(e))
+                flash('Could not send password reset e-mail, please try again later.', 'danger')
+            flash('Password reset link was sent to your e-mail address.', 'success')
+            return redirect(url_for('ui.index'))
+        return render_template('ui/user_request_password_reset.html', form=form)
+
+
+ui.add_url_rule('/users/invite', view_func=UserInvite.as_view('user_invite'))
+ui.add_url_rule('/users/<user_id>/delete', view_func=UserDelete.as_view('user_delete'))
+ui.add_url_rule('/users/changepw', view_func=UserChangePassword.as_view('user_change_password'))
 ui.add_url_rule('/users/resetpw/<token>', view_func=UserResetPassword.as_view('user_reset_password'))
-
-
-@ui.route('/users/requestresetpw', methods=['GET', 'POST'])
-def user_request_password_reset():
-    form = RequestPasswordResetForm()
-    if form.validate_on_submit():
-        # Init mail handler
-        mail.init_app(app)
-        token = generate_confirmation_token(form.email.data)
-        html = render_template('ui/email/user_request_password_reset.html', token=token)
-        msg = Message(
-            '[KQueen] Password reset',
-            recipients=[form.email.data],
-            html=html
-        )
-        try:
-            mail.send(msg)
-        except Exception as e:
-            logger.error('request_password_reset view: {}'.format(repr(e)))
-            flash('Could not send password reset e-mail, please try again later.', 'danger')
-        flash('Password reset link was sent to your e-mail address.', 'success')
-        return redirect(url_for('ui.index'))
-    return render_template('ui/user_request_password_reset.html', form=form)
+ui.add_url_rule('/users/requestresetpw', view_func=UserRequestResetPassword.as_view('user_request_reset_password'))
 
 
 # Provisioner
