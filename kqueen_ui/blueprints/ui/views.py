@@ -491,40 +491,27 @@ class ClusterCreate(KQueenView):
             return redirect('/')
         return render_template('ui/cluster_create.html', form=form)
 
-ui.add_url_rule('/clusters/create', view_func=ClusterCreate.as_view('cluster_create'))
 
+class ClusterDelete(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
+    validation_hint = 'uuid'
 
-@ui.route('/clusters/<cluster_id>/delete')
-@login_required
-def cluster_delete(cluster_id):
-    try:
-        UUID(cluster_id, version=4)
-    except ValueError:
-        logger.warning('cluster_delete view: invalid uuid {}'.format(str(cluster_id)))
-        abort(404)
+    def handle(self, cluster_id):
+        cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
 
-    try:
-        client = get_kqueen_client(token=session['user']['token'])
-        _cluster = client.cluster.get(cluster_id)
-        cluster = _cluster.data
-
-        if not cluster:
-            logger.warning('cluster_delete view: cluster {} not found'.format(str(cluster_id)))
-            abort(404)
         if cluster['state'] != app.config['CLUSTER_OK_STATE']:
-            flash('Cannot delete cluster {}. Only running clusters can be deleted.'.format(cluster['name']), 'warning')
+            # TODO: handle state together with policies in helper for allowed table actions
+            flash('Only running clusters can be deleted.', 'warning')
             return redirect(request.environ['HTTP_REFERER'])
 
-        response = client.cluster.delete(cluster_id)
-        if response.status > 200:
-            logger.error('cluster_delete view: {}'.format(response.error))
-            flash('Cluster {} could not be destroyed.'.format(cluster['name']), 'danger')
-        else:
-            flash('Cluster {} is being destroyed.'.format(cluster['name']), 'success')
+        self.kqueen_request('cluster', 'delete', fnargs=(cluster_id,))
+        flash('Cluster {} successfully deleted.'.format(cluster['name']), 'success')
         return redirect(request.environ['HTTP_REFERER'])
-    except Exception as e:
-        logger.error('cluster_delete view: {}'.format(repr(e)))
-        abort(500)
+
+
+ui.add_url_rule('/clusters/create', view_func=ClusterCreate.as_view('cluster_create'))
+ui.add_url_rule('/clusters/<cluster_id>/delete', view_func=ClusterDelete.as_view('cluster_delete'))
 
 
 ############
