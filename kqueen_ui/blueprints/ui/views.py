@@ -514,31 +514,16 @@ ui.add_url_rule('/clusters/create', view_func=ClusterCreate.as_view('cluster_cre
 ui.add_url_rule('/clusters/<cluster_id>/delete', view_func=ClusterDelete.as_view('cluster_delete'))
 
 
-############
-# JSON Views
-############
+class ClusterKubeconfig(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
+    validation_hint = 'uuid'
 
-@ui.route('/clusters/<cluster_id>/kubeconfig')
-@login_required
-def cluster_kubeconfig(cluster_id):
-    try:
-        UUID(cluster_id, version=4)
-    except ValueError:
-        logger.warning('cluster_kubeconfig view: invalid uuid {}'.format(str(cluster_id)))
-        abort(400)
+    def handle(self, cluster_id):
+        cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
+        return jsonify(cluster['kubeconfig'])
 
-    try:
-        client = get_kqueen_client(token=session['user']['token'])
-        _cluster = client.cluster.get(cluster_id)
-        cluster = _cluster.data
-        if not cluster:
-            logger.warning('cluster_kubeconfig view: {} not found'.format(str(cluster_id)))
-            abort(404)
-    except Exception as e:
-        logger.error('cluster_kubeconfig view: {}'.format(repr(e)))
-        abort(500)
-
-    return jsonify(cluster['kubeconfig'])
+ui.add_url_rule('/clusters/<cluster_id>/kubeconfig', view_func=ClusterKubeconfig.as_view('cluster_kubeconfig'))
 
 
 @ui.route('/clusters/<cluster_id>/topology-data')
