@@ -526,28 +526,16 @@ class ClusterKubeconfig(KQueenView):
 ui.add_url_rule('/clusters/<cluster_id>/kubeconfig', view_func=ClusterKubeconfig.as_view('cluster_kubeconfig'))
 
 
-@ui.route('/clusters/<cluster_id>/topology-data')
-@login_required
-def cluster_topology_data(cluster_id):
-    try:
-        UUID(cluster_id, version=4)
-    except ValueError:
-        logger.error('cluster_topology_data view: invalid uuid {}'.format(str(cluster_id)))
-        abort(400)
+class ClusterTopologyData(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
+    validation_hint = 'uuid'
 
-    topology = {}
-    try:
-        client = get_kqueen_client(token=session['user']['token'])
-        _topology = client.cluster.topology_data(cluster_id)
-        topology = _topology.data
-        if not topology:
-            logger.warning('cluster_topology_data view: {} not found'.format(str(cluster_id)))
-            abort(404)
-    except Exception as e:
-        logger.error('cluster_topology_data view: {}'.format(repr(e)))
-        abort(500)
+    def handle(self, cluster_id):
+        topology = self.kqueen_request('cluster', 'topology_data', fnargs=(cluster_id,))
+        return jsonify(topology)
 
-    return jsonify(topology)
+ui.add_url_rule('/clusters/<cluster_id>/topology-data', view_func=ClusterTopologyData.as_view('cluster_topology_data'))
 
 
 @ui.route('/clusters/<cluster_id>/deployment-status')
