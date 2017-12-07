@@ -297,18 +297,12 @@ class UserChangePassword(KQueenView):
     def handle(self, *args, **kwargs):
         form = ChangePasswordForm()
         if form.validate_on_submit():
-            try:
-                user_id = session['user']['id']
-                user = self.kqueen_request('user', 'get', fnargs=(user_id,))
-                user['password'] = form.password_1.data
-                update = self.kqueen_request('user', 'update', fnargs=(user_id, user))
-                if update:
-                    flash('Password successfully updated. Please log in again.', 'success')
-                    return redirect(url_for('ui.logout'))
-                flash('Password update failed.', 'danger')
-            except Exception as e:
-                self.logger('error', repr(e))
-                flash('Password update failed.', 'danger')
+            user_id = session['user']['id']
+            user = self.kqueen_request('user', 'get', fnargs=(user_id,))
+            user['password'] = form.password_1.data
+            self.kqueen_request('user', 'update', fnargs=(user_id, user))
+            flash('Password successfully updated. Please log in again.', 'success')
+            return redirect(url_for('ui.logout'))
         return render_template('ui/user_change_password.html', form=form)
 
 ui.add_url_rule('/users/changepw', view_func=UserChangePassword.as_view('user_change_password'))
