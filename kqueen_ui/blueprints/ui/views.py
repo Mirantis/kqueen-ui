@@ -42,64 +42,61 @@ def test_token():
 # General Views
 ###############
 
-# Main
+# Index
 
-@ui.route('/')
-@login_required
-def index():
-    clusters = []
-    healthy_clusters = 0
-    provisioners = []
-    healthy_provisioners = 0
+class Index(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
 
-    if session.get('user', {}).get('token', None):
-        client = get_kqueen_client(token=session['user']['token'])
-        _clusters = client.cluster.list()
-        clusters = _clusters.data
-        _provisioners = client.provisioner.list()
-        provisioners = _provisioners.data
+    def handle(self):
+        clusters = self.kqueen_request('cluster', 'list')
+        provisioners = self.kqueen_request('provisioner', 'list')
+        healthy_clusters = 0
+        healthy_provisioners = 0
 
-    for cluster in clusters:
-        if 'state' in cluster:
-            if app.config['CLUSTER_ERROR_STATE'] != cluster['state']:
-                healthy_clusters = healthy_clusters + 1
-        if 'created_at' in cluster:
-            cluster['created_at'] = format_datetime(cluster['created_at'])
+        # sort clusters by date
+        if isinstance(clusters, list):
+            clusters.sort(key=lambda k: (k['created_at'], k['name']))
 
-    # sort clusters by date
-    if isinstance(clusters, list):
-        clusters.sort(key=lambda k: (k['created_at'], k['name']))
+        for cluster in clusters:
+            if 'state' in cluster:
+                if app.config['CLUSTER_ERROR_STATE'] != cluster['state']:
+                    healthy_clusters = healthy_clusters + 1
+            if 'created_at' in cluster:
+                cluster['created_at'] = format_datetime(cluster['created_at'])
 
-    for provisioner in provisioners:
-        provisioner['engine_name'] = prettify_engine_name(provisioner['engine'])
-        if 'state' in provisioner:
-            if app.config['PROVISIONER_ERROR_STATE'] not in provisioner['state']:
-                healthy_provisioners = healthy_provisioners + 1
-        if 'created_at' in provisioner:
-            provisioner['created_at'] = format_datetime(provisioner['created_at'])
+        # sort provisioners by date
+        if isinstance(provisioners, list):
+            provisioners.sort(key=lambda k: (k['created_at'], k['name']))
 
-    # sort provisioners by date
-    if isinstance(provisioners, list):
-        provisioners.sort(key=lambda k: (k['created_at'], k['name']))
+        for provisioner in provisioners:
+            provisioner['engine_name'] = prettify_engine_name(provisioner['engine'])
+            if 'state' in provisioner:
+                if app.config['PROVISIONER_ERROR_STATE'] not in provisioner['state']:
+                    healthy_provisioners = healthy_provisioners + 1
+            if 'created_at' in provisioner:
+                provisioner['created_at'] = format_datetime(provisioner['created_at'])
 
-    cluster_health = 100
-    if healthy_clusters and clusters:
-        cluster_health = int((healthy_clusters / len(clusters)) * 100)
+        cluster_health = 100
+        if healthy_clusters and clusters:
+            cluster_health = int((healthy_clusters / len(clusters)) * 100)
+        provisioner_health = 100
+        if healthy_provisioners and provisioners:
+            provisioner_health = int((healthy_provisioners / len(provisioners)) * 100)
 
-    provisioner_health = 100
-    if healthy_provisioners and provisioners:
-        provisioner_health = int((healthy_provisioners / len(provisioners)) * 100)
+        overview = {
+            'cluster_count': len(clusters),
+            'cluster_health': cluster_health,
+            'provisioner_count': len(provisioners),
+            'provisioner_health': provisioner_health,
+        }
+        return render_template('ui/index.html',
+                               overview=overview,
+                               clusters=clusters,
+                               provisioners=provisioners)
 
-    overview = {
-        'cluster_count': len(clusters),
-        'cluster_health': cluster_health,
-        'provisioner_count': len(provisioners),
-        'provisioner_health': provisioner_health,
-    }
-    return render_template('ui/index.html',
-                           overview=overview,
-                           clusters=clusters,
-                           provisioners=provisioners)
+
+ui.add_url_rule('/', view_func=Index.as_view('index'))
 
 
 @ui.route('/catalog')
