@@ -7,9 +7,19 @@ import pytest
 
 @pytest.mark.parametrize('view,values', [
     ('ui.index', {}),
+    ('ui.logout', {}),
+    ('ui.organization_manage', {}),
+    ('ui.user_invite', {}),
+    ('ui.user_delete', {'user_id': 1}),
+    ('ui.user_change_password', {}),
     ('ui.provisioner_create', {'provisioner_id': 1}),
     ('ui.provisioner_delete', {'provisioner_id': 1}),
+    ('ui.cluster_create', {}),
+    ('ui.cluster_delete', {'cluster_id': 1}),
+    ('ui.cluster_deployment_status', {'cluster_id': 1}),
     ('ui.cluster_detail', {'cluster_id': 1}),
+    ('ui.cluster_kubeconfig', {'cluster_id': 1}),
+    ('ui.cluster_topology_data', {'cluster_id': 1})
 ])
 def test_login_required(client, view, values):
     response = client.get(url_for(view, **values))

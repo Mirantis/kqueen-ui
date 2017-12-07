@@ -237,7 +237,7 @@ class UserChangePassword(KQueenView):
     decorators = [login_required]
     methods = ['GET', 'POST']
 
-    def handle(self, *args, **kwargs):
+    def handle(self):
         form = ChangePasswordForm()
         if form.validate_on_submit():
             user_id = session['user']['id']
