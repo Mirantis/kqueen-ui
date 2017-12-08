@@ -1,0 +1,2 @@
+class KQueenAPIException(Exception):
+    pass

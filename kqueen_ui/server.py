@@ -4,6 +4,7 @@ from flask import Flask, redirect, request, url_for
 from flask.ext.babel import Babel
 from kqueen_ui.blueprints.registration.views import registration
 from kqueen_ui.blueprints.ui.views import ui
+from kqueen_ui.exceptions import KQueenAPIException
 from kqueen_ui.utils.filters import filters
 from urllib.parse import urlsplit
 from werkzeug.contrib.cache import SimpleCache
@@ -46,6 +47,14 @@ def root():
 def base_url():
     base_url = urlsplit(request.url).scheme + '://' + urlsplit(request.url).netloc
     return dict(base_url=base_url)
+
+
+@app.errorhandler(KQueenAPIException)
+def handle_kqueen_api_exception(e):
+    redirect_to = url_for('ui.index')
+    if request.url.endswith(redirect_to):
+        redirect_to = url_for('ui.logout')
+    return redirect(request.environ.get('HTTP_REFERER', redirect_to))
 
 
 def run():

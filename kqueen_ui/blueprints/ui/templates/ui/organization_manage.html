@@ -1,9 +1,7 @@
 {% extends "ui/base.html" %}
 {% from "ui/partial/modal.html" import render_delete_modal %}
 
-{% block page_header %}
-Manage {{ organization.name }}
-{% endblock %}
+{% block page_header %}Manage {{ organization.name }}{% endblock %}
 
 {% block content %}
 <h3>Members</h3>
