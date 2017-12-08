@@ -347,12 +347,14 @@ class ProvisionerCreate(KQueenView):
                 flash('Invalid provisioner parameters.', 'danger')
                 render_template('ui/provisioner_create.html', form=form)
 
+            owner_ref = 'User:{}'.format(session['user']['id'])
             provisioner_kw = {
                 'name': form.name.data,
                 'engine': form.engine.data,
                 'state': app.config['PROVISIONER_UNKNOWN_STATE'],
                 'parameters': parameters,
-                'created_at': datetime.utcnow()
+                'created_at': datetime.utcnow(),
+                'owner': owner_ref
             }
             provisioner = self.kqueen_request('provisioner', 'create', fnargs=(provisioner_kw,))
             flash('Provisioner {} successfully created.'.format(provisioner['name']), 'success')
@@ -427,12 +429,14 @@ class ClusterCreate(KQueenView):
                 flash('Invalid cluster metadata.', 'danger')
                 render_template('ui/cluster_create.html', form=form)
 
+            owner_ref = 'User:{}'.format(session['user']['id'])
             cluster_kw = {
                 'name': form.name.data,
                 'state': app.config['CLUSTER_PROVISIONING_STATE'],
                 'provisioner': 'Provisioner:{}'.format(form.provisioner.data),
                 'created_at': datetime.utcnow(),
-                'metadata': metadata
+                'metadata': metadata,
+                'owner': owner_ref
             }
             cluster = self.kqueen_request('cluster', 'create', fnargs=(cluster_kw,))
             flash('Provisioning of cluster {} is in progress.'.format(cluster['name']), 'success')
