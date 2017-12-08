@@ -51,7 +51,10 @@ def base_url():
 
 @app.errorhandler(KQueenAPIException)
 def handle_kqueen_api_exception(e):
-    return redirect(request.environ['HTTP_REFERER'])
+    redirect_to = url_for('ui.index')
+    if request.url.endswith(redirect_to):
+        redirect_to = url_for('ui.logout')
+    return redirect(request.environ.get('HTTP_REFERER', redirect_to))
 
 
 def run():
