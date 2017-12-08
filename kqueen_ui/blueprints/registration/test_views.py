@@ -1,8 +1,6 @@
 from flask import url_for
 from kqueen_ui.generic_views import KQueenView
 
-import pytest
-
 
 def test_register(client, app):
     response = client.get(url_for('registration.register'))
