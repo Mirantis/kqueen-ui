@@ -1,4 +1,4 @@
-from flask import abort, flash, session
+from flask import flash, session
 from flask.views import View
 from kqueen_ui.api import get_kqueen_client, get_service_client
 from kqueen_ui.exceptions import KQueenAPIException
@@ -26,25 +26,22 @@ class KQueenView(View):
 
     def _handle_response(self, response, resource, action):
         if response is not None:
+            msg = 'Status Code: {}; Data: {}'.format(str(response.status), str(response.data))
             if response.status == -1:
-                msg = 'Backend is unavailable at this time, please try again later.'
-                flash(msg, 'danger')
-                raise KQueenAPIException()
+                user_msg = 'Backend is unavailable at this time, please try again later.'
+                self.graceful_exit(msg, user_msg)
             elif response.status == 401:
                 fmt_action = str(action).lower()
                 fmt_resource = str(resource).lower()
-                msg = 'You are not authorized to {} {}.'.format(fmt_action, fmt_resource)
-                flash(msg, 'warning')
-                raise KQueenAPIException()
+                user_msg = 'You are not authorized to {} {}.'.format(fmt_action, fmt_resource)
+                self.graceful_exit(msg, user_msg)
             elif response.status == 404:
                 fmt_resource = str(resource).capitalize()
-                msg = '{} not found.'.format(fmt_resource)
-                flash(msg, 'warning')
-                raise KQueenAPIException()
+                user_msg = '{} not found.'.format(fmt_resource)
+                self.graceful_exit(msg, user_msg)
             elif response.status >= 400:
-                msg = 'Exception occured while contacting backend, please try again later.'
-                flash(msg, 'danger')
-                raise KQueenAPIException()
+                user_msg = 'Error occurred while contacting backend, please try again later.'
+                self.graceful_exit(msg, user_msg)
             return response.data
 
     def _validate_uuid(self, uuid):
@@ -63,6 +60,12 @@ class KQueenView(View):
         self.validate(**kwargs)
         return self.handle(*args, **kwargs)
 
+    def graceful_exit(self, logger_message, user_message=''):
+        self.logger('error', logger_message)
+        if user_message:
+            flash(user_message, 'danger')
+        raise KQueenAPIException()
+
     def handle(self):
         """
         Override this method with view function
@@ -73,17 +76,26 @@ class KQueenView(View):
         client = self._get_kqueen_service_client() if service else self._get_kqueen_client()
         if not client:
             return None
+        user_msg = 'Error occurred while contacting backend, please try again later.'
+        # identify correct API method
         try:
             manager = getattr(client, resource)
-            response = getattr(manager, action)(*fnargs, **fnkwargs)
+            method = getattr(manager, action)
         except AttributeError:
             msg = 'Unknown API method reference "{}.{}"'.format(resource, action)
-            self.logger('error', msg)
-            abort(500)
+            self.graceful_exit(msg, user_msg)
+        except Exception as e:
+            msg = 'Unknown error during backend API request: {}'.format(repr(e))
+            self.graceful_exit(msg, user_msg)
+        # call API method with provided args/kwargs
+        try:
+            response = method(*fnargs, **fnkwargs)
         except TypeError:
             msg = 'Invalid API method arguments; args: {}, kwargs: {}'.format(str(fnargs), str(fnkwargs))
-            self.logger('error', msg)
-            abort(500)
+            self.graceful_exit(msg, user_msg)
+        except Exception as e:
+            msg = 'Unknown error during backend API request: {}'.format(repr(e))
+            self.graceful_exit(msg, user_msg)
         return self._handle_response(response, resource, action)
 
     def logger(self, severity, message):
