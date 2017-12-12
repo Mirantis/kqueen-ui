@@ -186,7 +186,7 @@
               <ul>
                 {% for external_ip in service.external_ip %}
                 <li style="position: relative;">
-                  <a href="{{ external_ip }}">{{ external_ip|truncate(30, True) }}</a>
+                  <a href="{{ external_ip }}">{{ external_ip|truncate(24, True) }}</a>
                   <a title="Copy to clipboard" class="clipboard pull-right" style="cursor: pointer;" data-clipboard-text="{{ external_ip }}">
                     <i class="mdi mdi-clipboard-outline" style="font-size: 18px; position: absolute; top: -3px; right: 0px;"></i>
                   </a>
