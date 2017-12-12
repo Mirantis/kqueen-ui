@@ -85,7 +85,7 @@ class KQueenView(View):
             msg = 'Unknown API method reference "{}.{}"'.format(resource, action)
             self.graceful_exit(msg, user_msg)
         except Exception as e:
-            msg = 'Unknown error during backend API request: {}'.format(repr(e))
+            msg = 'Unknown error during backend API request'
             self.graceful_exit(msg, user_msg)
         # call API method with provided args/kwargs
         try:
@@ -94,15 +94,21 @@ class KQueenView(View):
             msg = 'Invalid API method arguments; args: {}, kwargs: {}'.format(str(fnargs), str(fnkwargs))
             self.graceful_exit(msg, user_msg)
         except Exception as e:
-            msg = 'Unknown error during backend API request: {}'.format(repr(e))
+            msg = 'Unknown error during backend API request'
             self.graceful_exit(msg, user_msg)
         return self._handle_response(response, resource, action)
 
     def logger(self, severity, message):
         view = self.__class__.__name__
         msg = '{} view: {}'.format(view, message)
-        logger_fn = getattr(logger, severity)
-        logger_fn(msg)
+        severity_map = {
+            'critical': 50,
+            'error': 40,
+            'warning': 30,
+            'info': 20,
+            'debug': 10
+        }
+        logger.log(severity_map[severity], msg, exc_info=True)
 
     def validate(self, **kwargs):
         if self.validation_hint:
