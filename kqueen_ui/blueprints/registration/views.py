@@ -37,6 +37,7 @@ class Register(KQueenView):
                 'password': form.password_1.data,
                 'email': form.email.data,
                 'organization': organization_ref,
+                'role': 'admin',
                 'created_at': datetime.utcnow(),
                 'active': False
             }
