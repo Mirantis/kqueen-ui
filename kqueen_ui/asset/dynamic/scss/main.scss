@@ -434,6 +434,25 @@ footer {
     z-index: 3;
     font-size: 14px;
   }
+  > .bounce {
+    width: 50px;
+    height: 100%;
+    position: relative;
+    background-color: #E02D3A;
+    animation-name: bounce;
+    animation-duration: 1s;
+    animation-direction: alternate;
+    animation-iteration-count: infinite;
+  }
+}
+
+@keyframes bounce {
+  from {
+    left: 0%;
+  }
+  to {
+    left: calc(100% - 50px);
+  }
 }
 
 .ui-progress-bar {

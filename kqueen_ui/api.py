@@ -185,6 +185,9 @@ class ClusterManager(BaseManager):
     def kubeconfig(self, uuid):
         return self.request('%s/kubeconfig' % uuid)
 
+    def progress(self, uuid):
+        return self.request('%s/progress' % uuid)
+
 
 class ProvisionerManager(BaseManager):
     resource_url = 'provisioners/'
