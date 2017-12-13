@@ -53,12 +53,13 @@
   </div>
   <div class="col-sm-4" id="progress">
     {% if cluster.state == config.CLUSTER_PROVISIONING_STATE %}
-      {% set initial_progress = 1 %}
+      {% set initial_progress = 0 %}
     {% else %}
       {% set initial_progress = 100 %}
     {% endif %}
     <div class="progress-bar-background">
-      <span>{% if cluster.state == config.CLUSTER_PROVISIONING_STATE %}{{ initial_progress }}%{% else %}Done{% endif %}</span>
+      <span>{% if not cluster.state == config.CLUSTER_PROVISIONING_STATE %}Done{% endif %}</span>
+      <div class="bounce" style="display: none;"></div>
       <div class="ui-progress-bar" style="width: {{ initial_progress }}%;"></div>
     </div>
   </div>
@@ -506,13 +507,20 @@
   var progressRefreshFn = function(){
     $.get("{{ url_for('ui.cluster_deployment_status', cluster_id=cluster.id) }}", function(res){
       console.log(JSON.stringify(res));
-      $('#progress .ui-progress-bar').css('width', res.progress + '%')
-      $('#progress .progress-bar-background > span').html(res.progress + '%');
+      if(res.response == 200){
+        $('#progress .ui-progress-bar').css('width', res.progress + '%')
+        $('#progress .progress-bar-background > span').html(res.progress + '%');
+      }else{
+        $('#progress .ui-progress-bar').css('width', 0)
+        $('#progress .progress-bar-background > span').hide();
+        $('#progress .progress-bar-background > .bounce').show();
+      }
       if(res.result != '{{ config.CLUSTER_PROVISIONING_STATE }}'){
-        location.reload();
+        window.location.reload(1);
       }
     });
   };
+  progressRefreshFn();
   var interval = setInterval(progressRefreshFn, 10000);
 })();
 </script>

@@ -466,13 +466,8 @@ class ClusterDeploymentStatus(KQueenView):
     validation_hint = 'uuid'
 
     def handle(self, cluster_id):
-        # TODO: implement this function after it gets implemented in backend API
-        dummy = {
-            'response': 0,
-            'progress': 1,
-            'result': 'Deploying'
-        }
-        return jsonify(dummy)
+        progress = self.kqueen_request('cluster', 'progress', fnargs=(cluster_id,))
+        return jsonify(progress)
 
 
 class ClusterDetail(KQueenView):
