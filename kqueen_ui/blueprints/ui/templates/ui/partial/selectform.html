@@ -30,16 +30,15 @@ document.addEventListener("DOMContentLoaded", function() {
 {% if tagged_fields|length > 0 %}
 <script>
 function validateJsonFileField(value, element, requiredKeys) {
-  var data = ""
-  , file = element.files[0]
+  var file = element.files[0]
   , reader = new FileReader()
   , valid = false
   ;
 
   reader.onload = function(evt) {
-    data = evt.target.result;
+    var data = evt.target.result;
     var json = 'error';
-    var message = 'Unknown error during file upload'
+    var message = 'Validation pending'
     try {
       json = JSON.parse(data);
     } catch(err) {
@@ -58,9 +57,9 @@ function validateJsonFileField(value, element, requiredKeys) {
         }
       });
       if ( countKeys != requiredKeys.length ) {
-        console.log(missingKeys);
         message = 'Missing mandatory keys: ' + missingKeys.toString();
       }
+      valid = true;
     } else {
       valid = false;
     }
