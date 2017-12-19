@@ -30,48 +30,60 @@ document.addEventListener("DOMContentLoaded", function() {
 {% if tagged_fields|length > 0 %}
 <script>
 function validateJsonFileField(value, element, requiredKeys) {
-  var sleep = function(ms) {
-    var start = new Date().getTime();
-    for (var i = 0; i < 1e4; i++) {
-      if ((new Date().getTime() - start) > ms){
-        break;
-      }
-    }
-  }
   var data = ""
   , file = element.files[0]
   , reader = new FileReader()
-  , ready = false
-  , result = false
+  , valid = false
   ;
 
   reader.onload = function(evt) {
     data = evt.target.result;
-    ready = true;
+    var json = 'error';
+    var message = 'Unknown error during file upload'
+    try {
+      json = JSON.parse(data);
+    } catch(err) {
+      message = 'Not a valid JSON'
+      console.log(err);
+    }
+    if (json != 'error') {
+      var missingKeys = [];
+      var countKeys = 0;
+      requiredKeys.forEach(function(key) {
+        contains = Object.keys(json).indexOf(key) != -1;
+        if ( contains ) {
+          countKeys++;
+        } else {
+          missingKeys.push(key);
+        }
+      });
+      if ( countKeys != requiredKeys.length ) {
+        console.log(missingKeys);
+        message = 'Missing mandatory keys: ' + missingKeys.toString();
+      }
+    } else {
+      valid = false;
+    }
+    var validator = $("#switchableForm").data().validator
+    if ( valid ) {
+        var submitted = validator.formSubmitted;
+        validator.resetInternals();
+        validator.toHide = validator.errorsFor( element );
+        validator.formSubmitted = submitted;
+        validator.successList.push( element );
+        validator.invalid[ element.name ] = false;
+        validator.showErrors();
+    } else {
+        errors = {};
+        errors[ element.name ] =  message;
+        validator.invalid[ element.name ] = true;
+        validator.showErrors( errors );
+    }
+    validator.stopRequest( element, valid );
   };
   reader.readAsText(file)
 
-  for (var i = 0; i <= 50; i++) {
-    if (ready === true) {
-        var json = 'error';
-        try {
-          json = JSON.parse(data);
-        } catch(err) {
-          console.log(err);
-        }
-        if (json != 'error') {
-          result = requiredKeys.every(function(key) {
-            return Object.keys(json).indexOf(key) != -1;
-          });
-        } else {
-          result = false;
-        }
-        break;
-    } else {
-      sleep(100);
-    }
-  }
-  return result;
+  return "pending";
 }
 
 document.addEventListener("DOMContentLoaded", function() {
