@@ -29,7 +29,54 @@ document.addEventListener("DOMContentLoaded", function() {
 {% endif %}
 {% if tagged_fields|length > 0 %}
 <script>
+function validateJsonFileField(value, element, requiredKeys) {
+  var sleep = function(ms) {
+    var start = new Date().getTime();
+    for (var i = 0; i < 1e4; i++) {
+      if ((new Date().getTime() - start) > ms){
+        break;
+      }
+    }
+  }
+  var data = ""
+  , file = element.files[0]
+  , reader = new FileReader()
+  , ready = false
+  , result = false
+  ;
+
+  reader.onload = function(evt) {
+    data = evt.target.result;
+    ready = true;
+  };
+  reader.readAsText(file)
+
+  for (var i = 0; i <= 50; i++) {
+    if (ready === true) {
+        var json = 'error';
+        try {
+          json = JSON.parse(data);
+        } catch(err) {
+          console.log(err);
+        }
+        if (json != 'error') {
+          result = requiredKeys.every(function(key) {
+            return Object.keys(json).indexOf(key) != -1;
+          });
+        } else {
+          result = false;
+        }
+        break;
+    } else {
+      sleep(100);
+    }
+  }
+  return result;
+}
+
 document.addEventListener("DOMContentLoaded", function() {
+  $.validator.addMethod("jsonfile", validateJsonFileField, $.validator.format("Test validation"));
+
   $("#switchableForm").validate({
     rules: {
       {%- for field in tagged_fields %}
