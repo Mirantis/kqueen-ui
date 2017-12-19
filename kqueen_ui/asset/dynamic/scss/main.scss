@@ -626,3 +626,79 @@ footer {
     @extend .text-center;
   }
 }
+
+// *****************************************************************************
+// Ribbon
+// *****************************************************************************
+
+.corner-ribbon {
+  width: 200px;
+  background: #e43;
+  position: absolute;
+  top: 25px;
+  left: -50px;
+  text-align: center;
+  line-height: 50px;
+  letter-spacing: 1px;
+  color: #f0f0f0;
+  z-index: 5000;
+  @include prefix(transform, rotate(-45deg), webkit);
+  font-family: "Exo 2";
+  font-size: 20px;
+  text-transform: uppercase;
+  // Variants
+  &.sticky {
+    position: fixed;
+  }
+  &.shadow {
+    @include prefix(box-shadow, 0 0 3px rgba(0,0,0,.3), webkit moz);
+  }
+  // Positions
+  &.top-left {
+    top: 25px;
+    left: -50px;
+    @include prefix(transform, rotate(-45deg), webkit);
+  }
+  &.top-right {
+    top: 25px;
+    right: -50px;
+    left: auto;
+    @include prefix(transform, rotate(-45deg), webkit);
+  }
+  &.bottom-left {
+    top: auto;
+    bottom: 25px;
+    left: -50px;
+    @include prefix(transform, rotate(-45deg), webkit);
+  }
+  &.bottom-right {
+    top: auto;
+    right: -50px;
+    bottom: 25px;
+    left: auto;
+    @include prefix(transform, rotate(-45deg), webkit);
+  }
+  // Colors
+  &.white { 
+    background: #f0f0f0;
+    color: #555;
+  }
+  &.black {
+    background: #333;
+  }
+  &.blue {
+    background: $mira-blue;
+  }
+  &.green {
+    background: $mira-teal;
+  }
+  &.purple {
+    background: $mira-purple;
+  }
+  &.red {
+    background: $mira-red;
+  }
+  &.orange {
+    background: $mira-orange;
+  }
+}
