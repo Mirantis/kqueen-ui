@@ -70,7 +70,6 @@ class Index(KQueenView):
             provisioners.sort(key=lambda k: (k['created_at'], k['name']))
 
         for provisioner in provisioners:
-            provisioner['engine_name'] = prettify_engine_name(provisioner['engine'])
             if 'state' in provisioner:
                 if app.config['PROVISIONER_ERROR_STATE'] not in provisioner['state']:
                     healthy_provisioners = healthy_provisioners + 1
@@ -331,7 +330,7 @@ class ProvisionerCreate(KQueenView):
 
         # Instantiate form and populate engine choices
         form = form_cls()
-        form.engine.choices = [(e['name'], prettify_engine_name(e['name'])) for e in engines]
+        form.engine.choices = [(e['name'], e['verbose_name']) for e in engines]
 
         if form.validate_on_submit():
             try:

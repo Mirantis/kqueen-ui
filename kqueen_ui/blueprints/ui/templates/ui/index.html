@@ -86,7 +86,7 @@
       {% for provisioner in provisioners %}
         <tr>
           <td class="table-col-3">{{ provisioner.name }}</td>
-          <td class="table-col-3">{{ provisioner.engine_name }}</td>
+          <td class="table-col-3">{{ provisioner.verbose_name }}</td>
           <td class="table-col-3">{{ provisioner.created_at }}</td>
           <td class="status_column"><i class="mdi {{ provisioner.state|provisioner_status_icon_class }}" title="{{ provisioner.state }}"></i></td>
           <td class="action_column">
