@@ -1,5 +1,6 @@
 {% extends "ui/base.html" %}
 {% from "ui/partial/modal.html" import render_delete_modal %}
+{% from "ui/partial/tableaction.html" import render_cluster_table_actions, render_cluster_row_actions, render_provisioner_table_actions, render_provisioner_row_actions with context %}
 
 {% block page_header %}Overview{% endblock %}
 
@@ -35,7 +36,7 @@
 
 <div class="table-container">
   <div class="table-actions">
-    <a href="{{ url_for('ui.cluster_create') }}" role="button" class="btn btn-primary btn-sm">Deploy cluster</a>
+    {{ render_cluster_table_actions() }}
   </div>
   <table class="table table-hover">
     <thead>
@@ -53,12 +54,7 @@
           <td class="table-col-3">{{ cluster.created_at }}</td>
           <td class="status_column"><i class="mdi {{ cluster.state|cluster_status_icon_class }}" title="{{ cluster.state }}"></i></td>
           <td class="action_column">
-            <a href="{{ url_for('ui.cluster_detail', cluster_id=cluster.id) }}" title="Cluster detail">
-              <i class="mdi mdi-magnify"></i>
-            </a>
-            <a data-toggle="modal" data-target="#delete-{{ cluster.id }}"{% if cluster.state != config.CLUSTER_OK_STATE %} class="disabled"{% endif %} title="Delete cluster">
-              <i class="mdi mdi-delete-forever"></i>
-            </a>
+            {{ render_cluster_row_actions(cluster) }}
           </td>
         </tr>
       {% else %}
@@ -72,7 +68,7 @@
 
 <div class="table-container">
   <div class="table-actions">
-    <a href="{{ url_for('ui.provisioner_create') }}" role="button" class="btn btn-primary btn-sm">Create provisioner</a>
+    {{ render_provisioner_table_actions() }}
   </div>
   <table class="table table-hover">
     <thead>
@@ -90,9 +86,7 @@
           <td class="table-col-3">{{ provisioner.created_at }}</td>
           <td class="status_column"><i class="mdi {{ provisioner.state|provisioner_status_icon_class }}" title="{{ provisioner.state }}"></i></td>
           <td class="action_column">
-            <a data-toggle="modal" data-target="#delete-{{ provisioner.id }}" title="Delete provisioner">
-              <i class="mdi mdi-delete-forever"></i>
-            </a>
+            {{ render_provisioner_row_actions(provisioner) }}
           </td>
         </tr>
       {% else %}

@@ -49,6 +49,15 @@ def base_url():
     return dict(base_url=base_url)
 
 
+@app.context_processor
+def policy_handler():
+    def authorized(session, action, resource=None):
+        from kqueen_ui.auth import is_authorized
+        policy_value = session['policy'].get(action, '-')
+        return is_authorized(session, policy_value, resource)
+    return dict(is_authorized=authorized)
+
+
 @app.errorhandler(KQueenAPIException)
 def handle_kqueen_api_exception(e):
     redirect_to = url_for('ui.index')
