@@ -203,6 +203,9 @@ class OrganizationManager(BaseManager):
 class UserManager(BaseManager):
     resource_url = 'users/'
 
+    def updatepw(self, uuid, payload):
+        return self.request('%s/updatepw' % uuid, method='PATCH', payload=payload)
+
     def update(self, uuid, payload):
         organization = payload.get('organization', None)
         if organization and isinstance(organization, dict):

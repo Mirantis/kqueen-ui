@@ -242,8 +242,8 @@ class UserChangePassword(KQueenView):
         if form.validate_on_submit():
             user_id = session['user']['id']
             user = self.kqueen_request('user', 'get', fnargs=(user_id,))
-            user['password'] = form.password_1.data
-            self.kqueen_request('user', 'update', fnargs=(user_id, user))
+            password = {'password': form.password_1.data}
+            self.kqueen_request('user', 'updatepw', fnargs=(user_id, password))
             flash('Password successfully updated. Please log in again.', 'success')
             return redirect(url_for('ui.logout'))
         return render_template('ui/user_change_password.html', form=form)
@@ -266,8 +266,8 @@ class UserResetPassword(KQueenView):
             user = filtered[0]
             form = PasswordResetForm()
             if form.validate_on_submit():
-                user['password'] = form.password_1.data
-                self.kqueen_request('user', 'update', fnargs=(user['id'], user), service=True)
+                password = {'password': form.password_1.data}
+                self.kqueen_request('user', 'updatepw', fnargs=(user['id'], password), service=True)
                 flash('Password successfully updated.', 'success')
                 return redirect(url_for('ui.login'))
             return render_template('ui/user_reset_password.html', form=form)
