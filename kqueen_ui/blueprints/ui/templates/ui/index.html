@@ -40,18 +40,18 @@
   </div>
   <table class="table table-hover">
     <thead>
-      <th class="table-col-3">Name</th>
-      <th class="table-col-3">Provisioner</th>
-      <th class="table-col-3">Created</th>
+      <th class="table-col-4">Name</th>
+      <th class="table-col-4">Provisioner</th>
+      <th class="table-col-4">Created</th>
       <th class="status_column">Status</th>
       <th class="action_column">Actions</th>
     </thead>
     <tbody>
       {% for cluster in clusters %}
         <tr>
-          <td class="table-col-3">{{ cluster.name }}</td>
-          <td class="table-col-3">{{ cluster.provisioner.name }}</td>
-          <td class="table-col-3">{{ cluster.created_at }}</td>
+          <td class="table-col-4">{{ cluster.name }}</td>
+          <td class="table-col-4">{{ cluster.provisioner.name }}</td>
+          <td class="table-col-4">{{ cluster.created_at }}</td>
           <td class="status_column"><i class="mdi {{ cluster.state|cluster_status_icon_class }}" title="{{ cluster.state }}"></i></td>
           <td class="action_column">
             {{ render_cluster_row_actions(cluster) }}
@@ -72,18 +72,18 @@
   </div>
   <table class="table table-hover">
     <thead>
-      <th class="table-col-3">Name</th>
-      <th class="table-col-3">Engine</th>
-      <th class="table-col-3">Created</th>
+      <th class="table-col-4">Name</th>
+      <th class="table-col-4">Engine</th>
+      <th class="table-col-4">Created</th>
       <th class="status_column">Status</th>
       <th class="action_column">Actions</th>
     </thead>
     <tbody>
       {% for provisioner in provisioners %}
         <tr>
-          <td class="table-col-3">{{ provisioner.name }}</td>
-          <td class="table-col-3">{{ provisioner.verbose_name }}</td>
-          <td class="table-col-3">{{ provisioner.created_at }}</td>
+          <td class="table-col-4">{{ provisioner.name }}</td>
+          <td class="table-col-4">{{ provisioner.verbose_name }}</td>
+          <td class="table-col-4">{{ provisioner.created_at }}</td>
           <td class="status_column"><i class="mdi {{ provisioner.state|provisioner_status_icon_class }}" title="{{ provisioner.state }}"></i></td>
           <td class="action_column">
             {{ render_provisioner_row_actions(provisioner) }}
