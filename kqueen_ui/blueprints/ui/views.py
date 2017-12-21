@@ -224,7 +224,7 @@ class UserInvite(KQueenView):
                 'organization': organization,
                 'role': 'member',
                 'created_at': datetime.utcnow(),
-                'active': True
+                'active': False
             }
             user = self.kqueen_request('user', 'create', fnargs=(user_kw,))
 
@@ -253,6 +253,43 @@ class UserInvite(KQueenView):
             flash('User {} successfully created.'.format(user['username']), 'success')
             return redirect(url_for('ui.organization_manage'))
         return render_template('ui/user_invite.html', form=form)
+
+
+class UserReinvite(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
+    validation_hint = 'uuid'
+
+    def handle(self, user_id):
+        user = self.kqueen_request('user', 'get', fnargs=(user_id,))
+        if user['active']:
+            flash('User {} is already active.'.format(user['username']), 'warning')
+            return redirect(request.environ.get('HTTP_REFERER', url_for('ui.organization_manage')))
+
+        # Init mail handler
+        mail.init_app(app)
+        token = generate_confirmation_token(user['email'])
+        html = render_template(
+            'ui/email/user_invitation.html',
+            username=user['username'],
+            token=token,
+            organization=user['organization']['name']
+        )
+        msg = Message(
+            '[KQueen] Organization invitation',
+            recipients=[user['email']],
+            html=html
+        )
+        try:
+            mail.send(msg)
+        except Exception as e:
+            self.logger('error', repr(e))
+            self.kqueen_request('user', 'delete', fnargs=(user['id'],))
+            flash('Could not send activation e-mail, please try again later.', 'danger')
+            return redirect(request.environ.get('HTTP_REFERER', url_for('ui.organization_manage')))
+
+        flash('Activation e-mail sent to user {}.'.format(user['username']), 'success')
+        return redirect(request.environ.get('HTTP_REFERER', url_for('ui.organization_manage')))
 
 
 class UserDelete(KQueenView):
@@ -310,6 +347,35 @@ class UserResetPassword(KQueenView):
         return redirect(url_for('ui.index'))
 
 
+class UserSetPassword(KQueenView):
+    methods = ['GET', 'POST']
+
+    def handle(self, token):
+        email = confirm_token(token)
+        if not email:
+            flash('Password reset link is invalid or has expired.', 'danger')
+            return redirect(url_for('ui.index'))
+
+        users = self.kqueen_request('user', 'list', service=True)
+        # TODO: this logic realies heavily on unique emails, this is not the case on backend right now
+        # change this logic after unique contraint is introduced to backend
+        filtered = [u for u in users if u.get('email', None) == email]
+        if len(filtered) == 1:
+            user = filtered[0]
+            form = PasswordResetForm()
+            if form.validate_on_submit():
+                password = {'password': form.password_1.data}
+                self.kqueen_request('user', 'updatepw', fnargs=(user['id'], password), service=True)
+                user['active'] = True
+                self.kqueen_request('user', 'update', fnargs=(user['id'], user), service=True)
+                flash('Password successfully updated.', 'success')
+                return redirect(url_for('ui.login'))
+            return render_template('ui/user_reset_password.html', form=form)
+        else:
+            flash('Could not match user to given e-mail.', 'danger')
+        return redirect(url_for('ui.index'))
+
+
 class UserRequestResetPassword(KQueenView):
     methods = ['GET', 'POST']
 
@@ -336,9 +402,11 @@ class UserRequestResetPassword(KQueenView):
 
 
 ui.add_url_rule('/users/invite', view_func=UserInvite.as_view('user_invite'))
+ui.add_url_rule('/users/<user_id>/reinvite', view_func=UserReinvite.as_view('user_reinvite'))
 ui.add_url_rule('/users/<user_id>/delete', view_func=UserDelete.as_view('user_delete'))
 ui.add_url_rule('/users/changepw', view_func=UserChangePassword.as_view('user_change_password'))
 ui.add_url_rule('/users/resetpw/<token>', view_func=UserResetPassword.as_view('user_reset_password'))
+ui.add_url_rule('/users/setpw/<token>', view_func=UserSetPassword.as_view('user_set_password'))
 ui.add_url_rule('/users/requestresetpw', view_func=UserRequestResetPassword.as_view('user_request_reset_password'))
 
 
