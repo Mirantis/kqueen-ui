@@ -312,7 +312,6 @@ class UserChangePassword(KQueenView):
         form = ChangePasswordForm()
         if form.validate_on_submit():
             user_id = session['user']['id']
-            user = self.kqueen_request('user', 'get', fnargs=(user_id,))
             password = {'password': form.password_1.data}
             self.kqueen_request('user', 'updatepw', fnargs=(user_id, password))
             flash('Password successfully updated. Please log in again.', 'success')
