@@ -110,3 +110,5 @@ package-lock.json
 # DO NOT COMMIT LOCAL CONFIG
 kqueen_ui/config_local.py
 
+# DO NOT COMMIT STATIC DIR
+kqueen_ui/asset/static/*
