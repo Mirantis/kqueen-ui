@@ -29,13 +29,21 @@ ui = Blueprint('ui', __name__, template_folder='templates')
 def test_token():
     if session.get('user', None) and not app.testing:
         client = get_kqueen_client(token=session['user']['token'])
-        response = client.user.whoami()
+        organization_id = session['user']['organization']['id']
+        response = client.organization.policy(organization_id)
         if response.status == 401:
             flash('Session expired, please log in again.', 'warning')
             del session['user']
+            if 'policy' in session:
+                del session['policy']
         elif response.status == -1:
             flash('Backend is unavailable at this time, please try again later.', 'danger')
             del session['user']
+            if 'policy' in session:
+                del session['policy']
+        policy = response.data
+        if policy and isinstance(policy, dict):
+            session['policy'] = policy
 
 
 ###############
@@ -107,6 +115,30 @@ def login():
         user, _error = authenticate(request.form['username'], request.form['password'])
         if user:
             session['user'] = user
+            client = get_kqueen_client(token=user['token'])
+            organization_id = user['organization']['id']
+            response = client.organization.policy(organization_id)
+            if response.status == -1:
+                flash('Backend is unavailable at this time, please try again later.', 'danger')
+                del session['user']
+                if 'policy' in session:
+                    del session['policy']
+                return render_template('ui/login.html', error=error)
+            elif response.status > 200:
+                flash('Could not contact authentication backend, please try again later.', 'danger')
+                del session['user']
+                if 'policy' in session:
+                    del session['policy']
+                return render_template('ui/login.html', error=error)
+            policy = response.data
+            if policy and isinstance(policy, dict):
+                session['policy'] = policy
+            else:
+                del session['user']
+                if 'policy' in session:
+                    del session['policy']
+                return render_template('ui/login.html', error=error)
+
             flash('You were logged in', 'success')
             next_url = request.form.get('next', '')
             if next_url:
@@ -124,6 +156,8 @@ def login():
 @login_required
 def logout():
     del session['user']
+    if 'policy' in session:
+        del session['policy']
     flash('You were logged out', 'success')
     return redirect(url_for('ui.index'))
 

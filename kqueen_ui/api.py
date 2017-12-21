@@ -199,6 +199,9 @@ class ProvisionerManager(BaseManager):
 class OrganizationManager(BaseManager):
     resource_url = 'organizations/'
 
+    def policy(self, uuid):
+        return self.request('%s/policy' % uuid, method='GET')
+
 
 class UserManager(BaseManager):
     resource_url = 'users/'
