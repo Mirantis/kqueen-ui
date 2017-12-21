@@ -1,25 +1,23 @@
 from datetime import datetime
 from flask import url_for
-from kqueen_ui.auth import generate_confirmation_token
-from kqueen_ui.server import create_app
-from unittest.mock import patch
+from kqueen_ui.api import KQueenResponse
+from kqueen_ui import auth
+from kqueen_ui.server import app as application
 
 import json
 import pytest
-import uuid
 
 config_file = 'config/test.py'
-cluster_uuid = uuid.uuid4()
-organization_uuid = uuid.uuid4()
-provisioner_uuid = uuid.uuid4()
-user_uuid = uuid.uuid4()
+cluster_uuid = '1868f6f4-1dbb-4555-ba46-1d2924e81f5e'
+organization_uuid = '93d66558-7ed1-4ccd-a1d6-2f903ceb7d7b'
+provisioner_uuid = '7ebef38d-a7b6-4c34-bbb0-8c98e820133c'
+user_uuid = '59142471-8334-45e4-b632-653692f0523c'
 
 
 @pytest.fixture
 def app():
-    app = create_app(config_file=config_file)
-    app.testing = True
-    return app
+    application.testing = True
+    return application
 
 
 @pytest.fixture
@@ -27,9 +25,38 @@ def organization():
     organization = {
         'id': organization_uuid,
         'name': 'PytestOrg',
-        'namespace': 'pytestorg'
+        'namespace': 'pytestorg',
+        'policy': {},
+        'created_at': datetime.utcnow()
     }
     return organization
+
+
+@pytest.fixture
+def default_policy():
+    policy = {
+        "cluster:create": "ALL",
+        "cluster:delete": "ADMIN_OR_OWNER",
+        "cluster:get": "ALL",
+        "cluster:list": "ALL",
+        "cluster:update": "ADMIN_OR_OWNER",
+        "organization:create": "IS_SUPERADMIN",
+        "organization:delete": "IS_SUPERADMIN",
+        "organization:get": "ALL",
+        "organization:list": "ALL",
+        "organization:update": "IS_SUPERADMIN",
+        "provisioner:create": "ALL",
+        "provisioner:delete": "ADMIN_OR_OWNER",
+        "provisioner:get": "ALL",
+        "provisioner:list": "ALL",
+        "provisioner:update": "ALL",
+        "user:create": "IS_ADMIN",
+        "user:delete": "IS_ADMIN",
+        "user:get": "ALL",
+        "user:list": "ALL",
+        "user:update": "ADMIN_OR_OWNER"
+    }
+    return policy
 
 
 @pytest.fixture
@@ -42,6 +69,8 @@ def user():
         'organization': organization(),
         'active': True,
         'created_at': datetime.utcnow(),
+        'role': 'admin',
+        'metadata': {},
         'token': token()
     }
     return user
@@ -54,11 +83,12 @@ def provisioner():
         'name': 'pytest-provisioner',
         'engine': 'kqueen.engines.JenkinsEngine',
         'state': 'OK',
-        'parmeters': {
+        'parameters': {
             'username': 'pytest',
             'password': 'pytest'
         },
-        'created_at': datetime.utcnow()
+        'created_at': datetime.utcnow(),
+        'owner': user()
     }
     return provisioner
 
@@ -92,6 +122,16 @@ def kubeconfig():
 
 
 @pytest.fixture
+def cluster_progress():
+    progress = {
+        'response': 200,
+        'progress': 10,
+        'result': 'Deploying'
+    }
+    return progress
+
+
+@pytest.fixture
 def cluster():
     cluster = {
         'id': cluster_uuid,
@@ -100,7 +140,8 @@ def cluster():
         'state': 'OK',
         'kubeconfig': kubeconfig(),
         'metadata': {},
-        'created_at': datetime.utcnow()
+        'created_at': datetime.utcnow(),
+        'owner': user()
     }
     return cluster
 
@@ -129,13 +170,15 @@ def token():
 @pytest.fixture
 def email_token():
     _user = user()
-    return generate_confirmation_token(_user['email'])
+    return auth.generate_confirmation_token(_user['email'])
 
 
-@patch('kqueen_ui.blueprints.ui.views.authenticate')
-def _login(client, mock_get):
+@pytest.fixture
+def client_login(client, monkeypatch):
+    def mock_authenticate(username, password):
+        return (user(), None)
+    monkeypatch.setattr('kqueen_ui.blueprints.ui.views.authenticate', mock_authenticate)
     _user = user()
-    mock_get.return_value = (_user, None)
     client.post(url_for('ui.login'), data={
         'username': _user['username'],
         'password': _user['password']
@@ -143,14 +186,9 @@ def _login(client, mock_get):
     return client
 
 
-@pytest.fixture
-def client_login(client):
-    return _login(client)
-
-
-@pytest.fixture
-def mock_kqueen_request():
-    def mock(self, resource, action, fnargs=(), fnkwargs={}, service=False):
+@pytest.fixture(autouse=True)
+def no_kqueen_requests(monkeypatch):
+    def mock_kqueen_request(self, resource, action, fnargs=(), fnkwargs={}, service=False):
         if resource == 'cluster':
             obj = cluster()
         elif resource == 'provisioner':
@@ -173,6 +211,17 @@ def mock_kqueen_request():
             return cluster_status()
         elif action == 'topology_data':
             return {}
+        elif action == 'policy':
+            return default_policy()
+        elif action == 'progress':
+            return cluster_progress()
         else:
             raise NotImplementedError('Action {} is not supported by mock_kqueen_request'.format(action))
-    return mock
+    monkeypatch.setattr('kqueen_ui.generic_views.KQueenView.kqueen_request', mock_kqueen_request)
+
+    # TODO: should always use wrapper, so I don't need to patch single manager method directly on client
+    def mock_policy(self, uuid):
+        response = KQueenResponse()
+        response.data = default_policy()
+        return response
+    monkeypatch.setattr('kqueen_ui.api.OrganizationManager.policy', mock_policy)

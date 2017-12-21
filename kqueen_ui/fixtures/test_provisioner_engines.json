@@ -1,6 +1,7 @@
 [
   {
     "name": "kqueen.engines.JenkinsEngine", 
+    "verbose_name": "Jenkins",
     "parameters": {
       "cluster": {}, 
       "provisioner": {
@@ -23,6 +24,7 @@
   }, 
   {
     "name": "kqueen.engines.ManualEngine", 
+    "verbose_name": "Manual Engine",
     "parameters": {
       "cluster": {
         "kubeconfig": {
@@ -38,6 +40,7 @@
   }, 
   {
     "name": "kqueen.engines.GceEngine", 
+    "verbose_name": "Google Container Engine",
     "parameters": {
       "cluster": {
         "node_count": {
@@ -103,7 +106,8 @@
     }
   }, 
   {
-    "name": "kqueen.engines.AksEngine", 
+    "name": "kqueen.engines.AksEngine",
+    "verbose_name": "Azure Kubernetes Managed Service",
     "parameters": {
       "cluster": {
         "location": {
