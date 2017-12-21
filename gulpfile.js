@@ -104,11 +104,13 @@ gulp.task('javascript-all', ['javascript', 'vendor-js', 'particles']);
 
 // Fonts Task
 gulp.task('fonts', function() {
+    gulp.src(folderAsset + '/dynamic/fonts/*')
+     .pipe(gulp.dest(folderAsset + '/static/fonts/'));
     gulp.src('node_modules/mdi/fonts/*')
      .pipe(gulp.dest(folderAsset + '/static/fonts/'));
     gulp.src('node_modules/mdi/css/materialdesignicons.min.*')
      .pipe(gulp.dest(folderAsset + '/static/css/'));
-    return gulp.src(bootstrapDir + '/assets/fonts/**/*')
+    return gulp.src(bootstrapDir + '/assets/fonts/bootstrap/*')
         .pipe(gulp.dest(folderAsset + '/static/fonts/'));
 });
 
@@ -220,7 +222,7 @@ gulp.task('watch', function () {
 gulp.task('dev', ['run-server', 'watch']);
 
 // Init - every task
-gulp.task('build', ['sass', 'javascript-all', 'vendor-js', 'vendor-css']);
+gulp.task('build', ['sass', 'javascript-all', 'vendor-js', 'vendor-css', 'fonts', 'images', 'favicon']);
 
 // Default - only run the tasks that change often
 gulp.task('default', ['build']);

@@ -1,7 +1,7 @@
 version: '2'
 services:
   kqueen_ui:
-    image: kqueen-ui
+    image: kqueen/ui:master
     ports:
       - 127.0.0.1:5080:5080
     environment:
