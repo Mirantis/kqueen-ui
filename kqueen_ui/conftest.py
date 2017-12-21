@@ -6,13 +6,12 @@ from kqueen_ui.server import app as application
 
 import json
 import pytest
-import uuid
 
 config_file = 'config/test.py'
-cluster_uuid = uuid.uuid4()
-organization_uuid = uuid.uuid4()
-provisioner_uuid = uuid.uuid4()
-user_uuid = uuid.uuid4()
+cluster_uuid = '1868f6f4-1dbb-4555-ba46-1d2924e81f5e'
+organization_uuid = '93d66558-7ed1-4ccd-a1d6-2f903ceb7d7b'
+provisioner_uuid = '7ebef38d-a7b6-4c34-bbb0-8c98e820133c'
+user_uuid = '59142471-8334-45e4-b632-653692f0523c'
 
 
 @pytest.fixture
