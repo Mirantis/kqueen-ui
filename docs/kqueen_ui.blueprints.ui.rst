@@ -12,18 +12,18 @@ kqueen_ui\.blueprints\.ui\.forms module
     :undoc-members:
     :show-inheritance:
 
-kqueen_ui\.blueprints\.ui\.tables module
+kqueen_ui\.blueprints\.ui\.utils module
 -------------------------------------
 
-.. automodule:: kqueen_ui.blueprints.ui.tables
+.. automodule:: kqueen_ui.blueprints.ui.utils
     :members:
     :undoc-members:
     :show-inheritance:
 
-kqueen_ui\.blueprints\.ui\.tests module
+kqueen_ui\.blueprints\.ui\.test_utils module
 ------------------------------------
 
-.. automodule:: kqueen_ui.blueprints.ui.tests
+.. automodule:: kqueen_ui.blueprints.ui.test_utils
     :members:
     :undoc-members:
     :show-inheritance:
@@ -36,6 +36,13 @@ kqueen_ui\.blueprints\.ui\.views module
     :undoc-members:
     :show-inheritance:
 
+kqueen_ui\.blueprints\.ui\.test_views module
+------------------------------------
+
+.. automodule:: kqueen_ui.blueprints.ui.test_views
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 Module contents
 ---------------

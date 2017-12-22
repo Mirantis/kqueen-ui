@@ -9,10 +9,42 @@ Server
     :undoc-members:
     :show-inheritance:
 
-Wrappers
+Api
 -----------------------
 
-.. automodule:: kqueen_ui.wrappers
+.. automodule:: kqueen_ui.api
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Auth
+-----------------------
+
+.. automodule:: kqueen_ui.auth
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Exceptions
+-----------------------
+
+.. automodule:: kqueen_ui.exceptions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Generic Views
+-----------------------
+
+.. automodule:: kqueen_ui.generic_views
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Tests
+-----------------------
+
+.. automodule:: kqueen_ui.tests
     :members:
     :undoc-members:
     :show-inheritance:

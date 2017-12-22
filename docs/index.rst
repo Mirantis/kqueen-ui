@@ -6,6 +6,7 @@ Welcome to KQueen UI documentation!
    :caption: Contents:
 
    kqueen_ui
+   quickstart
 
 
 
