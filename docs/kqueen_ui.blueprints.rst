@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
 
     kqueen_ui.blueprints.ui
+    kqueen_ui.blueprints.registration
 
 Module contents
 ---------------
