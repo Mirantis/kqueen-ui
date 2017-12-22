@@ -68,7 +68,9 @@
 <ul class="nav nav-tabs{% if cluster.state != config.CLUSTER_OK_STATE %} hidden{% endif %}">
   <li role="presentation" class="active"><a data-toggle="tab" href="#status" data-tabcode="#statusTab">Status</a></li>
   <li role="presentation"><a data-toggle="tab" href="#topology" data-tabcode="#topologyTab">Topology</a></li>
+  {% if config.ENABLE_ADDONS %}
   <li role="presentation"><a data-toggle="tab" href="#addons" data-tabcode="#addonsTab">Addons</a></li>
+  {% endif %}
 </ul>
 
 <div class="tab-content clearfix{% if cluster.state != config.CLUSTER_OK_STATE %} hidden{% endif %}">
@@ -423,6 +425,7 @@
       </div>
     </div>
   </div>
+  {% if config.ENABLE_ADDONS %}
   {# ADDONS TAB #}
   <div class="tab-pane" id="addons">
     <h3>Active Addons</h3>
@@ -451,6 +454,7 @@
       {{ render_form(form) }}
     </div>
   </div>
+  {% endif %}
 </div>
 
 <svg class="kube-topology" hidden>

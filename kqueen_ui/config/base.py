@@ -15,6 +15,9 @@ class BaseConfig:
     BABEL_DEFAULT_TIMEZONE = 'UTC'
     BABEL_DEFAULT_LOCALE = 'en'
 
+    # Addons
+    ENABLE_ADDONS = True
+
     # Registration
     ENABLE_PUBLIC_REGISTRATION = False
     KQUEEN_SERVICE_USER_USERNAME = 'admin'
