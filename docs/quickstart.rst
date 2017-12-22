@@ -47,7 +47,7 @@ After you submit the form, you can see your new cluster on the overview page in 
 Review your cluster
 -------------------
 
-You can check the cluster detail page for more informations about your workload. Right after the deployment you need to wait before the cluster is provisioned to the backend.
+You can check the cluster detail page for more informations about your workload. Right after the deployment you need to wait before the cluster is provisioned.
 
 .. figure:: screenshots/kqueen_cluster_detail_1.png
    :scale: 100 %
@@ -76,7 +76,7 @@ You can review your organization from the Manage Organization page.
    :scale: 100 %
    :alt: empty manage organization page
 
-Admin user can invite more users to his organization as member users. Just hit the Invite Member button and fill in new members e-mail address.
+Admin user can invite more users to his organization as member users. Just hit the Invite Member button and fill in new member's e-mail address.
 
 .. figure:: screenshots/kqueen_invite_member.png
    :scale: 100 %
@@ -88,7 +88,7 @@ New members are considered inactive until they set their password via link provi
    :scale: 100 %
    :alt: manage organization page with pending user
 
-After they set their password, new users are considered active and can log into the application.
+After they set the password, new users are considered active and can log into the application.
 
 .. figure:: screenshots/kqueen_manage_organization_3.png
    :scale: 100 %
