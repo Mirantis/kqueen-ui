@@ -139,7 +139,7 @@ def login():
                     del session['policy']
                 return render_template('ui/login.html', error=error)
 
-            flash('You were logged in', 'success')
+            flash('You have been logged in', 'success')
             next_url = request.form.get('next', '')
             if next_url:
                 return redirect(next_url)
@@ -158,7 +158,7 @@ def logout():
     del session['user']
     if 'policy' in session:
         del session['policy']
-    flash('You were logged out', 'success')
+    flash('You have been logged out', 'success')
     return redirect(url_for('ui.index'))
 
 
