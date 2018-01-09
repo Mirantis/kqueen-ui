@@ -59,6 +59,7 @@ class Index(KQueenView):
     def handle(self):
         clusters = self.kqueen_request('cluster', 'list')
         provisioners = self.kqueen_request('provisioner', 'list')
+        deployed_clusters = 0
         healthy_clusters = 0
         healthy_provisioners = 0
 
@@ -68,6 +69,8 @@ class Index(KQueenView):
 
         for cluster in clusters:
             if 'state' in cluster:
+                if app.config['CLUSTER_PROVISIONING_STATE'] != cluster['state']:
+                    deployed_clusters = deployed_clusters + 1
                 if app.config['CLUSTER_ERROR_STATE'] != cluster['state']:
                     healthy_clusters = healthy_clusters + 1
             if 'created_at' in cluster:
@@ -79,22 +82,24 @@ class Index(KQueenView):
 
         for provisioner in provisioners:
             if 'state' in provisioner:
-                if app.config['PROVISIONER_ERROR_STATE'] not in provisioner['state']:
+                if app.config['PROVISIONER_ERROR_STATE'] != provisioner['state']:
                     healthy_provisioners = healthy_provisioners + 1
             if 'created_at' in provisioner:
                 provisioner['created_at'] = format_datetime(provisioner['created_at'])
 
-        cluster_health = 100
-        if healthy_clusters and clusters:
-            cluster_health = int((healthy_clusters / len(clusters)) * 100)
-        provisioner_health = 100
+        cluster_health = 0
+        if healthy_clusters and deployed_clusters:
+            cluster_health = int((healthy_clusters / deployed_clusters) * 100)
+        provisioner_health = 0
         if healthy_provisioners and provisioners:
             provisioner_health = int((healthy_provisioners / len(provisioners)) * 100)
 
         overview = {
             'cluster_count': len(clusters),
+            'cluster_max': len(clusters) if len(clusters) else 1,
             'cluster_health': cluster_health,
             'provisioner_count': len(provisioners),
+            'provisioner_max': len(provisioners) if len(provisioners) else 1,
             'provisioner_health': provisioner_health,
         }
         return render_template('ui/index.html',

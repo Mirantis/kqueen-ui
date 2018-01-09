@@ -218,12 +218,21 @@ def status_for_cluster_detail(_status):
 
     status['addons'] = _status['addons'] if 'addons' in _status else []
 
+    c_namespaces = len(_status.get('namespaces', []))
+    c_nodes = len(status['nodes'])
+    c_deployments = len(status['deployments'])
+    c_services = len(status['services'])
     status['overview'] = {
-        'namespaces': len(_status.get('namespaces', [])),
-        'nodes': len(status['nodes']),
-        'deployments': len(status['deployments']),
+        'namespaces': c_namespaces,
+        'namespaces_max': c_namespaces if c_namespaces else 1,
+        'nodes': c_nodes,
+        'nodes_max': c_nodes if c_nodes else 1,
+        'deployments': c_deployments,
+        'deployments_max': c_deployments if c_deployments else 1,
         'pods': podcount,
-        'services': len(status['services'])
+        'pods_max': podcount if podcount else 1,
+        'services': c_services,
+        'services_max': c_services if c_services else 1
     }
 
     return status
