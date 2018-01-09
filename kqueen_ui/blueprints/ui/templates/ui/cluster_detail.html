@@ -7,33 +7,33 @@
 {% block content %}
 <div class="overview">
   <div class="col-sm-2 col-sm-offset-1 clearfix">
-    <div class="pie_progress" role="progressbar" data-goal="{{ status.overview.namespaces }}" aria-valuemax="{{ status.overview.namespaces }}">
+    <div class="pie_progress" role="progressbar" data-goal="{{ status.overview.namespaces }}" aria-valuemax="{{ status.overview.namespaces_max }}">
       <div class="pie_progress__number">0</div>
       <div class="pie_progress__label">Namespaces</div>
     </div>
   </div>
   <div class="col-sm-2 clearfix">
-    <div class="pie_progress" role="progressbar" data-goal="{{ status.overview.nodes }}" aria-valuemax="{{ status.overview.nodes }}">
+    <div class="pie_progress" role="progressbar" data-goal="{{ status.overview.nodes }}" aria-valuemax="{{ status.overview.nodes_max }}">
       <div class="pie_progress__number">0</div>
       <div class="pie_progress__label">Nodes</div>
     </div>
   </div>
   <div class="col-sm-2 clearfix">
-    <div class="pie_progress" role="progressbar" data-goal="{{ status.overview.deployments }}" aria-valuemax="{{ status.overview.deployments }}"> 
+    <div class="pie_progress" role="progressbar" data-goal="{{ status.overview.deployments }}" aria-valuemax="{{ status.overview.deployments_max }}">
       <div class="pie_progress__number">0</div>
       <div class="pie_progress__label">Deployments</div>
     </div>
   </div>
   {% set podcount = status.pods|length %}
   <div class="col-sm-2 clearfix">
-    <div class="pie_progress" role="progressbar" data-goal="{{ status.overview.pods }}" aria-valuemax="{{ status.overview.pods }}"> 
+    <div class="pie_progress" role="progressbar" data-goal="{{ status.overview.pods }}" aria-valuemax="{{ status.overview.pods_max }}">
       <div class="pie_progress__number">0</div>
       <div class="pie_progress__label">Pods</div>
     </div>
   </div>
   {% set servicecount = status.services|length %}
   <div class="col-sm-2 clearfix">
-    <div class="pie_progress" role="progressbar" data-goal="{{ status.overview.services }}" aria-valuemax="{{ status.overview.services }}"> 
+    <div class="pie_progress" role="progressbar" data-goal="{{ status.overview.services }}" aria-valuemax="{{ status.overview.services_max }}">
       <div class="pie_progress__number">0</div>
       <div class="pie_progress__label">Services</div>
     </div>
