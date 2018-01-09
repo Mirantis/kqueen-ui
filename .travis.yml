@@ -6,10 +6,31 @@ python:
 service:
 - docker
 stages:
+- name: test
 - name: build
 jobs:
   include:
+  - stage: test
+    install:
+    - pip install -r requirements.txt
+    - pip install -r requirements-dev.txt
+    script:
+    - python3 -m flake8
+  - stage: test
+    install:
+    - pip install -r requirements.txt
+    - pip install -r requirements-dev.txt
+    script:
+    - python3 -m pytest --cov=. --cov-report=term-missing:skip-covered
+    - coveralls
+    - pip3 install --editable .
+    - kqueen-ui &
+    - sleep 2
+    - wget -O - http://localhost:8000/
+
   - stage: build
+    install:
+    - /bin/true
     script:
     - export IMAGE="kqueen/ui:${TRAVIS_BRANCH/\//-}"
     - echo "Building image $IMAGE"
