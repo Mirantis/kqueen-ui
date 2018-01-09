@@ -60,8 +60,8 @@ class Register(KQueenView):
                 mail.send(msg)
             except Exception as e:
                 self.logger('error', repr(e))
-                self.kqueen_request('organization', 'delete', fnargs=(organization['id'],), service=True)
                 self.kqueen_request('user', 'delete', fnargs=(user['id'],), service=True)
+                self.kqueen_request('organization', 'delete', fnargs=(organization['id'],), service=True)
                 flash('Could not send verification e-mail, please try again later.', 'danger')
                 return render_template('registration/register.html', form=form)
 
