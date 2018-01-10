@@ -1,7 +1,7 @@
 from datetime import datetime
 from dateutil.parser import parse as dateutil_parse
 from flask import current_app as app
-from flask.ext.babel import to_utc
+from flask_babel import to_utc
 from functools import reduce
 from urllib.parse import urljoin
 

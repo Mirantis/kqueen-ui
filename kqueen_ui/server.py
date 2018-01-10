@@ -1,19 +1,14 @@
 from .config import current_config
 
 from flask import Flask, redirect, request, url_for
-from flask.ext.babel import Babel
 from kqueen_ui.blueprints.registration.views import registration
 from kqueen_ui.blueprints.ui.views import ui
 from kqueen_ui.exceptions import KQueenAPIException
-from kqueen_ui.utils.filters import filters
-from urllib.parse import urlsplit
-from werkzeug.contrib.cache import SimpleCache
+from kqueen_ui.utils.filters import filters, context_processors
 
 import logging
 
 logger = logging.getLogger(__name__)
-
-cache = SimpleCache()
 
 
 def create_app(config_file=None):
@@ -28,9 +23,9 @@ def create_app(config_file=None):
     app.logger.setLevel(getattr(logging, app.config.get('LOG_LEVEL')))
     app.logger.info('Loading configuration from {}'.format(config.source_file))
 
-    Babel(app)
-
     app.jinja_env.filters.update(filters)
+    for cp in context_processors:
+        app.template_context_processors[None].append(cp)
 
     return app
 
@@ -41,21 +36,6 @@ app = create_app()
 @app.route('/')
 def root():
     return redirect(url_for('ui.index'), code=302)
-
-
-@app.context_processor
-def base_url():
-    base_url = urlsplit(request.url).scheme + '://' + urlsplit(request.url).netloc
-    return dict(base_url=base_url)
-
-
-@app.context_processor
-def policy_handler():
-    def authorized(session, action, resource=None):
-        from kqueen_ui.auth import is_authorized
-        policy_value = session['policy'].get(action, '-')
-        return is_authorized(session, policy_value, resource)
-    return dict(is_authorized=authorized)
 
 
 @app.errorhandler(KQueenAPIException)
