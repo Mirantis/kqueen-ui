@@ -4,6 +4,9 @@ KQueen UI - UI for Kubernetes cluster manager
 .. image:: https://travis-ci.org/atengler/kqueen-ui.svg?branch=master
     :target: https://travis-ci.org/atengler/kqueen-ui
 
+.. image:: https://coveralls.io/repos/github/Mirantis/kqueen-ui/badge.svg?branch=master
+    :target: https://coveralls.io/github/Mirantis/kqueen-ui?branch=master
+
 .. image:: https://readthedocs.org/projects/kqueen-ui/badge/?version=latest
     :target: http://kqueen-ui.readthedocs.io/en/latest/
 

@@ -61,7 +61,7 @@ def policy_handler():
 def sanitize_resource_metadata():
     from kqueen_ui import cache
 
-    def metaparser(session, clusters={}, provisioners={}):
+    def metaparser(session, clusters=[], provisioners=[]):
         token = session.get('user', {}).get('token', None)
         client = None
         engines = cache.get('provisioner-engines')
