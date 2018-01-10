@@ -1,182 +1,196 @@
 [
   {
-    "name": "kqueen.engines.JenkinsEngine", 
-    "verbose_name": "Jenkins",
-    "parameters": {
-      "cluster": {}, 
-      "provisioner": {
-        "password": {
-          "label": "Password", 
-          "type": "password", 
-          "validators": {
-            "required": true
-          }
-        }, 
-        "username": {
-          "label": "Username", 
-          "type": "text", 
-          "validators": {
-            "required": true
-          }
+    "parameters":{
+      "provisioner":{
+        "password":{
+          "validators":{
+            "required":true
+          },
+          "label":"Password",
+          "type":"password"
+        },
+        "username":{
+          "validators":{
+            "required":true
+          },
+          "label":"Username",
+          "type":"text"
+        }
+      },
+      "cluster":{
+
+      }
+    },
+    "name":"kqueen.engines.JenkinsEngine",
+    "verbose_name":"Jenkins"
+  },
+  {
+    "parameters":{
+      "provisioner":{
+
+      },
+      "cluster":{
+        "kubeconfig":{
+          "validators":{
+            "required":true
+          },
+          "label":"Kubeconfig",
+          "type":"yaml_file"
         }
       }
-    }
-  }, 
+    },
+    "name":"kqueen.engines.ManualEngine",
+    "verbose_name":"Manual Engine"
+  },
   {
-    "name": "kqueen.engines.ManualEngine", 
-    "verbose_name": "Manual Engine",
-    "parameters": {
-      "cluster": {
-        "kubeconfig": {
-          "label": "Kubeconfig", 
-          "type": "yaml_file", 
-          "validators": {
-            "required": true
-          }
+    "parameters":{
+      "provisioner":{
+        "project":{
+          "validators":{
+            "required":true
+          },
+          "label":"Project ID",
+          "type":"text"
+        },
+        "service_account_info":{
+          "validators":{
+            "jsonfile":[
+              "private_key_id",
+              "private_key",
+              "client_email",
+              "client_id",
+              "auth_uri",
+              "token_uri"
+            ],
+            "required":true
+          },
+          "label":"Service Account File (JSON)",
+          "type":"json_file"
         }
-      }, 
-      "provisioner": {}
-    }
-  }, 
-  {
-    "name": "kqueen.engines.GceEngine", 
-    "verbose_name": "Google Container Engine",
-    "parameters": {
-      "cluster": {
-        "node_count": {
-          "default": 1, 
-          "label": "Node Count", 
-          "type": "integer", 
-          "validators": {
-            "min": 1, 
-            "number": true, 
-            "required": true
-          }
-        }
-      }, 
-      "provisioner": {
-        "project": {
-          "label": "Project", 
-          "type": "text", 
-          "validators": {
-            "required": true
-          }
-        }, 
-        "service_account_info": {
-          "label": "Service Account File (JSON)", 
-          "type": "json_file", 
-          "validators": {
-            "required": true
-          }
-        }, 
-        "zone": {
-          "choices": [
+      },
+      "cluster":{
+        "node_count":{
+          "default":1,
+          "validators":{
+            "min":1,
+            "number":true,
+            "required":true
+          },
+          "label":"Node Count",
+          "type":"integer"
+        },
+        "zone":{
+          "validators":{
+            "required":true
+          },
+          "label":"Zone",
+          "type":"select",
+          "choices":[
             [
-              "us-central1-a", 
+              "us-central1-a",
               "US - Central 1 - A"
-            ], 
+            ],
             [
-              "us-west1-a", 
+              "us-west1-a",
               "US - West 1 - A"
-            ], 
+            ],
             [
-              "us-east1-a", 
+              "us-east1-a",
               "US - East 1 - A"
-            ], 
+            ],
             [
-              "southamerica-east1-a", 
+              "southamerica-east1-a",
               "South America - East 1 - A"
-            ], 
+            ],
             [
-              "europe-west1-b", 
+              "europe-west1-b",
               "Europe - West 1 - B"
-            ], 
+            ],
             [
-              "asia-southeast1-a", 
+              "asia-southeast1-a",
               "Asia - Southeast 1 - A"
             ]
-          ], 
-          "label": "Zone", 
-          "type": "select", 
-          "validators": {
-            "required": true
-          }
+          ]
         }
       }
-    }
-  }, 
+    },
+    "name":"kqueen.engines.GceEngine",
+    "verbose_name":"Google Container engine"
+  },
   {
-    "name": "kqueen.engines.AksEngine",
-    "verbose_name": "Azure Kubernetes Managed Service",
-    "parameters": {
-      "cluster": {
-        "location": {
-          "choices": [
+    "parameters":{
+      "provisioner":{
+        "secret":{
+          "validators":{
+            "required":true
+          },
+          "label":"Secret",
+          "type":"password"
+        },
+        "tenant":{
+          "validators":{
+            "required":true
+          },
+          "label":"Tenant",
+          "type":"text"
+        },
+        "subscription_id":{
+          "validators":{
+            "required":true
+          },
+          "label":"Subscription ID",
+          "type":"text"
+        },
+        "client_id":{
+          "validators":{
+            "required":true
+          },
+          "label":"Client ID",
+          "type":"text"
+        }
+      },
+      "cluster":{
+        "node_count":{
+          "default":1,
+          "validators":{
+            "min":1,
+            "number":true,
+            "required":true
+          },
+          "label":"Node Count",
+          "type":"integer"
+        },
+        "ssh_key":{
+          "validators":{
+
+          },
+          "label":"SSH Key (public)",
+          "type":"text_area"
+        },
+        "location":{
+          "validators":{
+            "required":true
+          },
+          "label":"Location",
+          "type":"select",
+          "choices":[
             [
-              "eastus", 
+              "eastus",
               "East US"
-            ], 
+            ],
             [
-              "centralus", 
+              "centralus",
               "Central US"
-            ], 
+            ],
             [
-              "westeurope", 
+              "westeurope",
               "West Europe"
             ]
-          ], 
-          "label": "Location", 
-          "type": "select", 
-          "validators": {
-            "required": true
-          }
-        }, 
-        "node_count": {
-          "default": 1, 
-          "label": "Node Count", 
-          "type": "integer", 
-          "validators": {
-            "min": 1, 
-            "number": true, 
-            "required": true
-          }
-        }, 
-        "ssh_key": {
-          "label": "SSH Key (public)", 
-          "type": "text_area", 
-          "validators": {}
-        }
-      }, 
-      "provisioner": {
-        "client_id": {
-          "label": "Client ID", 
-          "type": "text", 
-          "validators": {
-            "required": true
-          }
-        }, 
-        "secret": {
-          "label": "Secret", 
-          "type": "password", 
-          "validators": {
-            "required": true
-          }
-        }, 
-        "subscription_id": {
-          "label": "Subscription ID", 
-          "type": "text", 
-          "validators": {
-            "required": true
-          }
-        }, 
-        "tenant": {
-          "label": "Tenant", 
-          "type": "text", 
-          "validators": {
-            "required": true
-          }
+          ]
         }
       }
-    }
+    },
+    "name":"kqueen.engines.AksEngine",
+    "verbose_name":"Azure Kubernetes Managed Service"
   }
 ]
