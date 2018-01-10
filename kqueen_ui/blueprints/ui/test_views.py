@@ -1,4 +1,5 @@
 from flask import url_for
+from kqueen_ui.api import KQueenResponse
 
 import pytest
 
@@ -47,6 +48,21 @@ def test_logout(client_login, app):
     assert response.headers['Location'].endswith(url_for('ui.index'))
 
 
+def test_user_invite(client_login):
+    form_data = {
+        'email': 'test@test.org'
+    }
+    response = client_login.post(url_for('ui.user_invite'), data=form_data)
+    assert response.status_code == 302
+    assert response.headers['Location'].endswith(url_for('ui.organization_manage'))
+
+
+def test_user_reinvite(client_login, user):
+    response = client_login.get(url_for('ui.user_reinvite', user_id=user['id']))
+    assert response.status_code == 302
+    assert response.headers['Location'].endswith(url_for('ui.organization_manage'))
+
+
 def test_user_delete(client_login, user):
     response = client_login.get(url_for('ui.user_delete', user_id=user['id']))
     assert response.status_code == 302
@@ -67,15 +83,54 @@ def test_user_set_password(client, email_token):
     assert '<h2>Set New Password</h2>' in html
 
 
-def test_user_request_reset_password(client):
+def test_user_request_reset_password(client, user, monkeypatch):
+    # GET
     response = client.get(url_for('ui.user_request_reset_password'))
     html = response.data.decode('utf-8')
     assert response.status_code == 200
     assert '<h2>Request Password Reset</h2>' in html
 
+    # POST
+    def mock_user_list(self):
+        response = KQueenResponse()
+        response.data = [user]
+        return response
+    monkeypatch.setattr('kqueen_ui.api.UserManager.list', mock_user_list)
+
+    form_data = {
+        'email': user['email']
+    }
+    response = client.post(url_for('ui.user_request_reset_password'), data=form_data)
+    assert response.status_code == 302
+    assert response.headers['Location'].endswith(url_for('ui.index'))
+
+
+def test_provisioner_create(client_login):
+    # POST
+    form_data = {
+        'name': 'Pytest Jenkins',
+        'engine': 'kqueen.engines.JenkinsEngine',
+        'password__Jenkins': 'pytest',
+        'username__Jenkins': 'pytest'
+    }
+    response = client_login.post(url_for('ui.provisioner_create'), data=form_data)
+    assert response.status_code == 302
+    assert response.headers['Location'].endswith(url_for('ui.index'))
+
 
 def test_provisioner_delete(client_login, provisioner):
     response = client_login.get(url_for('ui.provisioner_delete', provisioner_id=provisioner['id']))
+    assert response.status_code == 302
+    assert response.headers['Location'].endswith(url_for('ui.index'))
+
+
+def test_cluster_create(client_login, provisioner):
+    # POST
+    form_data = {
+        'name': 'pytest_cluster',
+        'provisioner': provisioner['id']
+    }
+    response = client_login.post(url_for('ui.cluster_create'), data=form_data)
     assert response.status_code == 302
     assert response.headers['Location'].endswith(url_for('ui.index'))
 

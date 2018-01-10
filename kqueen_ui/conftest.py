@@ -3,6 +3,7 @@ from flask import url_for
 from kqueen_ui.api import KQueenResponse
 from kqueen_ui import app as application
 from kqueen_ui import auth
+from uuid import uuid4
 
 import json
 import pytest
@@ -20,6 +21,8 @@ superadmin_uuid = '59142471-8334-45e4-b632-653692f0523f'
 @pytest.fixture
 def app():
     application.testing = True
+    application.config['CSRF_ENABLED'] = False
+    application.config['WTF_CSRF_ENABLED'] = False
     return application
 
 
@@ -229,6 +232,19 @@ def no_kqueen_requests(monkeypatch):
             return obj
         elif action == 'list':
             return [obj]
+        elif action == 'create':
+            obj.update(fnargs[0])
+            # patch object references
+            if 'cluster' in obj:
+                obj['cluster'] = cluster()
+            if 'provisioner' in obj:
+                obj['provisioner'] = provisioner()
+            if 'organization' in obj:
+                obj['organization'] = organization()
+            if 'user' in obj:
+                obj['user'] = user()
+            obj['id'] = uuid4()
+            return obj
         elif action == 'delete':
             return {'id': obj['id'], 'state': 'deleted'}
         elif action == 'engines':
