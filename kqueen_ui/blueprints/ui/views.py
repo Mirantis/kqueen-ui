@@ -556,9 +556,9 @@ class ClusterDelete(KQueenView):
 
     def handle(self, cluster_id):
         cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
-        if cluster['state'] != app.config['CLUSTER_OK_STATE']:
+        if cluster['state'] == app.config['CLUSTER_PROVISIONING_STATE']:
             # TODO: handle state together with policies in helper for allowed table actions
-            flash('Only running clusters can be deleted.', 'warning')
+            flash('Cannot delete clusters during provisioning.', 'warning')
             return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
         self.kqueen_request('cluster', 'delete', fnargs=(cluster_id,))
         flash('Cluster {} successfully deleted.'.format(cluster['name']), 'success')
