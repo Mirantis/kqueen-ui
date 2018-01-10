@@ -71,7 +71,7 @@ class Index(KQueenView):
             if 'state' in cluster:
                 if app.config['CLUSTER_PROVISIONING_STATE'] != cluster['state']:
                     deployed_clusters = deployed_clusters + 1
-                if app.config['CLUSTER_ERROR_STATE'] != cluster['state']:
+                if app.config['CLUSTER_OK_STATE'] == cluster['state']:
                     healthy_clusters = healthy_clusters + 1
             if 'created_at' in cluster:
                 cluster['created_at'] = format_datetime(cluster['created_at'])
@@ -590,6 +590,8 @@ class ClusterDetail(KQueenView):
             _status_data = self.kqueen_request('cluster', 'status', fnargs=(cluster_id,))
         elif cluster['state'] == app.config['CLUSTER_ERROR_STATE']:
             state_class = 'danger'
+        elif cluster['state'] == app.config['CLUSTER_UNKNOWN_STATE']:
+            state_class = 'warning'
 
         status = status_for_cluster_detail(_status_data)
 

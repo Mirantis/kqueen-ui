@@ -51,7 +51,7 @@
     </thead>
     <tbody>
       {% for cluster in clusters %}
-        <tr{% if cluster.metadata %} data-toggle="collapse" data-target="#cluster-{{ loop.index }}" class="clickable"{% endif %}>
+        <tr>
           <td class="table-col-4">
             {% if is_authorized(session, 'cluster:get', cluster) %}
             <a href="{{ url_for('ui.cluster_detail', cluster_id=cluster.id) }}">{{ cluster.name }}</a>
@@ -63,6 +63,11 @@
           <td class="table-col-4">{{ cluster.created_at }}</td>
           <td class="status_column"><i class="mdi {{ cluster.state|cluster_status_icon_class }}" title="{{ cluster.state }}"></i></td>
           <td class="action_column">
+            {% if cluster.metadata %}
+            <a data-toggle="collapse" data-target="#cluster-{{ loop.index }}" class="clickable" title="More informations">
+              <i class="mdi mdi-information-outline"></i>
+            </a>
+            {% endif %}
             {{ render_cluster_row_actions(cluster) }}
           </td>
         </tr>
@@ -107,12 +112,17 @@
     </thead>
     <tbody>
       {% for provisioner in provisioners %}
-        <tr{% if provisioner.parameters %} data-toggle="collapse" data-target="#provisioner-{{ loop.index }}" class="clickable"{% endif %}>
+        <tr>
           <td class="table-col-4">{{ provisioner.name }}</td>
           <td class="table-col-4">{{ provisioner.verbose_name }}</td>
           <td class="table-col-4">{{ provisioner.created_at }}</td>
           <td class="status_column"><i class="mdi {{ provisioner.state|provisioner_status_icon_class }}" title="{{ provisioner.state }}"></i></td>
           <td class="action_column">
+            {% if provisioner.parameters %}
+            <a data-toggle="collapse" data-target="#provisioner-{{ loop.index }}" class="clickable" title="More informations">
+              <i class="mdi mdi-information-outline"></i>
+            </a>
+            {% endif %}
             {{ render_provisioner_row_actions(provisioner) }}
           </td>
         </tr>
