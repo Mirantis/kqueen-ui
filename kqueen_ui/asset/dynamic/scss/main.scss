@@ -311,6 +311,7 @@ label.error {
       }
     }
     .action_column {
+      display: inline-block;
       width: 120px;
       @extend .text-right;
       a {
