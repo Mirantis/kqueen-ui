@@ -12,6 +12,9 @@ cluster_uuid = '1868f6f4-1dbb-4555-ba46-1d2924e81f5e'
 organization_uuid = '93d66558-7ed1-4ccd-a1d6-2f903ceb7d7b'
 provisioner_uuid = '7ebef38d-a7b6-4c34-bbb0-8c98e820133c'
 user_uuid = '59142471-8334-45e4-b632-653692f0523c'
+admin_uuid = '59142471-8334-45e4-b632-653692f0523d'
+member_uuid = '59142471-8334-45e4-b632-653692f0523e'
+superadmin_uuid = '59142471-8334-45e4-b632-653692f0523f'
 
 
 @pytest.fixture
@@ -74,6 +77,29 @@ def user():
         'token': token()
     }
     return user
+
+
+@pytest.fixture
+def admin():
+    admin = user()
+    admin['id'] = admin_uuid
+    return admin
+
+
+@pytest.fixture
+def member():
+    member = user()
+    member['id'] = member_uuid
+    member['role'] = 'member'
+    return member
+
+
+@pytest.fixture
+def superadmin():
+    superadmin = user()
+    superadmin['id'] = superadmin_uuid
+    superadmin['role'] = 'superadmin'
+    return superadmin
 
 
 @pytest.fixture
