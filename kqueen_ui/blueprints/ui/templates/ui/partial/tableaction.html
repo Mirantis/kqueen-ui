@@ -6,7 +6,7 @@
 <a href="{{ url_for('ui.cluster_detail', cluster_id=cluster.id) }}"{% if not is_authorized(session, 'cluster:get', cluster) %} class="disabled"{% endif %} title="Cluster detail">
   <i class="mdi mdi-magnify"></i>
 </a>
-<a data-toggle="modal" data-target="#delete-{{ cluster.id }}"{% if cluster.state != config.CLUSTER_OK_STATE or not is_authorized(session, 'cluster:delete', cluster) %} class="disabled"{% endif %} title="Delete cluster">
+<a data-toggle="modal" data-target="#delete-{{ cluster.id }}"{% if cluster.state == config.CLUSTER_PROVISIONING_STATE or not is_authorized(session, 'cluster:delete', cluster) %} class="disabled"{% endif %} title="Delete cluster">
   <i class="mdi mdi-delete-forever"></i>
 </a>
 {% endmacro %}
