@@ -385,6 +385,13 @@ div:not(.tab-pane) {
   }
 }
 
+#table-clustermeta,
+#table-provisionerparams {
+  > tbody > tr td {
+    word-break: break-word;
+  }
+}
+
 // *****************************************************************************
 // Flicker on Load Fix for Glyphicons
 // *****************************************************************************
