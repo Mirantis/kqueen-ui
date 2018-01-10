@@ -1,8 +1,8 @@
 from datetime import datetime
 from flask import url_for
 from kqueen_ui.api import KQueenResponse
+from kqueen_ui import app as application
 from kqueen_ui import auth
-from kqueen_ui.server import app as application
 
 import json
 import pytest

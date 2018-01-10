@@ -1,8 +1,8 @@
 from datetime import datetime
 from flask import (current_app as app, Blueprint, flash, jsonify, redirect,
                    render_template, request, session, url_for)
+from flask_babel import format_datetime
 from flask_mail import Mail, Message
-from flask.ext.babel import format_datetime
 from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.auth import authenticate, confirm_token, generate_confirmation_token
 from kqueen_ui.generic_views import KQueenView

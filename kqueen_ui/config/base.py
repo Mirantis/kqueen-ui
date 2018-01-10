@@ -1,6 +1,7 @@
 class BaseConfig:
     DEBUG = False
     LOG_LEVEL = 'WARNING'
+    CACHE = {'CACHE_TYPE': 'simple'}
 
     # KQueen UI endpoints
     HOST = 'localhost'
