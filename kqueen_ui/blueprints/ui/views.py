@@ -463,7 +463,7 @@ class ProvisionerCreate(KQueenView):
             }
             provisioner = self.kqueen_request('provisioner', 'create', fnargs=(provisioner_kw,))
             flash('Provisioner {} successfully created.'.format(provisioner['name']), 'success')
-            return redirect('/')
+            return redirect(url_for('ui.index'))
         return render_template('ui/provisioner_create.html', form=form)
 
 
@@ -545,7 +545,7 @@ class ClusterCreate(KQueenView):
             }
             cluster = self.kqueen_request('cluster', 'create', fnargs=(cluster_kw,))
             flash('Provisioning of cluster {} is in progress.'.format(cluster['name']), 'success')
-            return redirect('/')
+            return redirect(url_for('ui.index'))
         return render_template('ui/cluster_create.html', form=form)
 
 
