@@ -710,3 +710,43 @@ footer {
     background: $mira-orange;
   }
 }
+
+// *****************************************************************************
+// Provisioning loader
+// *****************************************************************************
+
+@-webkit-keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+.loading-icon {
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  border: 0.25rem solid #ddd;
+  border-top-color: #004d99;
+  display: inline-block;
+  margin: 0 3px;
+  @include prefix(animation-name, spin, webkit moz o);  
+  @include prefix(animation-duration, 1s, webkit moz o);  
+  @include prefix(animation-iteration-count, infinite, webkit moz o);  
+  @include prefix(animation-timing-function, cubic-bezier(0.5, -0.35, 0.5, 1.35), webkit moz o);
+}
