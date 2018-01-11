@@ -4,14 +4,14 @@ from kqueen_ui.api import KQueenResponse
 # load constants
 from kqueen_ui.utils.filters import CLUSTER_STATE_MAP, PROVISIONER_STATE_MAP, USER_STATE_MAP
 # load filters
-from kqueen_ui.utils.filters import cluster_status_icon_class, provisioner_status_icon_class, user_status_icon_class
+from kqueen_ui.utils.filters import cluster_status_icon, provisioner_status_icon_class, user_status_icon_class
 # load context processors
 from kqueen_ui.utils.filters import base_url, policy_handler, sanitize_resource_metadata
 
 
 @pytest.mark.parametrize('state,icon_class', CLUSTER_STATE_MAP.items())
 def test_cluster_status_icon_class(state, icon_class):
-    assert icon_class == cluster_status_icon_class(state)
+    assert icon_class in cluster_status_icon(state)
 
 
 @pytest.mark.parametrize('state,icon_class', PROVISIONER_STATE_MAP.items())

@@ -61,7 +61,9 @@
           </td>
           <td class="table-col-4">{{ cluster.provisioner.name }}</td>
           <td class="table-col-4">{{ cluster.created_at }}</td>
-          <td class="status_column"><i class="mdi {{ cluster.state|cluster_status_icon_class }}" title="{{ cluster.state }}"></i></td>
+          <td class="status_column">
+            {{ cluster.state|cluster_status_icon|safe }}
+          </td>
           <td class="action_column">
             {% if cluster.metadata %}
             <a data-toggle="collapse" data-target="#cluster-{{ loop.index }}" class="clickable" title="More informations">

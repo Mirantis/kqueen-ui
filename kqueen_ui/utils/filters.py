@@ -10,7 +10,7 @@ config = current_config().to_dict()
 CLUSTER_STATE_MAP = {
     config['CLUSTER_OK_STATE']: 'mdi-cloud-check',
     config['CLUSTER_ERROR_STATE']: 'mdi-cloud-off-outline',
-    config['CLUSTER_PROVISIONING_STATE']: 'mdi-cloud-sync',
+    config['CLUSTER_PROVISIONING_STATE']: 'loading-icon',
     config['CLUSTER_DEPROVISIONING_STATE']: 'mdi-cloud-sync',
     config['CLUSTER_UNKNOWN_STATE']: 'mdi-alert-outline'
 }
@@ -27,8 +27,17 @@ USER_STATE_MAP = {
 }
 
 
-def cluster_status_icon_class(status):
-    return CLUSTER_STATE_MAP.get(status, 'mdi-alert-circle-outline')
+def cluster_status_icon(status):
+    icon = '<i class="mdi {}" title="{}"></i>'.format(
+        CLUSTER_STATE_MAP.get(status, 'mdi-alert-circle-outline'),
+        status
+    )
+    if status == config['CLUSTER_PROVISIONING_STATE']:
+        icon = '<div class="icon-container"><div class="{}" title="{}"></div></div>'.format(
+            config['CLUSTER_PROVISIONING_STATE'],
+            CLUSTER_STATE_MAP.get(status, 'mdi-alert-circle-outline')
+        )
+    return icon
 
 
 def provisioner_status_icon_class(status):
@@ -40,7 +49,7 @@ def user_status_icon_class(status):
 
 
 filters = {
-    'cluster_status_icon_class': cluster_status_icon_class,
+    'cluster_status_icon': cluster_status_icon,
     'provisioner_status_icon_class': provisioner_status_icon_class,
     'user_status_icon_class': user_status_icon_class
 }
