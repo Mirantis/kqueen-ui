@@ -34,8 +34,8 @@ def cluster_status_icon(status):
     )
     if status == config['CLUSTER_PROVISIONING_STATE']:
         icon = '<div class="icon-container"><div class="{}" title="{}"></div></div>'.format(
-            config['CLUSTER_PROVISIONING_STATE'],
-            CLUSTER_STATE_MAP.get(status, 'mdi-alert-circle-outline')
+            CLUSTER_STATE_MAP.get(status, 'mdi-alert-circle-outline'),
+            config['CLUSTER_PROVISIONING_STATE']
         )
     return icon
 
