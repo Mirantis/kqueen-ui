@@ -506,7 +506,7 @@ footer {
 // Loading screen
 // *****************************************************************************
 
-.miraload {
+.loading-backdrop {
   width: 100%;
   height: 100vh;
   position: fixed;
@@ -514,6 +514,10 @@ footer {
   left: 0px;
   background-color: rgba(255, 255, 255, 0.7);
   z-index: 5050;
+}
+
+// Hexagon loader
+.loading-backdrop {
   .hexagon {
     overflow: hidden;
     visibility: hidden;
@@ -539,6 +543,116 @@ footer {
     background-position: 50%;
     visibility: visible;
     @include prefix(transform, rotate(-60deg), webkit moz ms o);
+  }
+}
+
+// Simple loader
+.loading-backdrop {
+  .bouncer {
+    width: 100px;
+    height: 100px;
+    position: fixed;
+    top: calc(50% - 50px);
+    left: calc(50% - 50px);
+    background-image:
+      linear-gradient($brand-primary, $brand-primary),
+      linear-gradient($brand-primary, $brand-primary),
+      linear-gradient($brand-primary, $brand-primary),
+      linear-gradient($brand-primary, $brand-primary),
+      linear-gradient($brand-primary, $brand-primary),
+      linear-gradient($brand-primary, $brand-primary),
+      linear-gradient($brand-primary, $brand-primary);
+    background-position:
+      calc(50% - 30px) 50%,
+      calc(50% - 20px) 50%,
+      calc(50% - 10px) 50%,
+      50% 50%,
+      calc(50% + 10px) 50%,
+      calc(50% + 20px) 50%,
+      calc(50% + 30px) 50%;
+    background-size:
+      5px 10px,
+      5px 10px,
+      5px 10px,
+      5px 10px,
+      5px 10px,
+      5px 10px,
+      5px 10px;
+    background-repeat: no-repeat;
+    animation: l-bars 1s linear infinite alternate;
+  }
+}
+
+@keyframes l-bars {
+  0% {
+    background-size:
+      5px 30px,
+      5px 10px,
+      5px 10px,
+      5px 10px,
+      5px 10px,
+      5px 10px,
+      5px 10px;
+  }
+  16.6% {
+    background-size:
+      5px 10px,
+      5px 40px,
+      5px 10px,
+      5px 10px,
+      5px 10px,
+      5px 10px,
+      5px 10px;
+  }
+  33.2% {
+    background-size:
+      5px 10px,
+      5px 10px,
+      5px 40px,
+      5px 10px,
+      5px 10px,
+      5px 10px,
+      5px 10px;
+  }
+  49.8% {
+    background-size:
+      5px 10px,
+      5px 10px,
+      5px 10px,
+      5px 40px,
+      5px 10px,
+      5px 10px,
+      5px 10px;
+  }
+  66.4% {
+    background-size:
+      5px 10px,
+      5px 10px,
+      5px 10px,
+      5px 10px,
+      5px 40px,
+      5px 10px,
+      5px 10px;
+  }
+  83% {
+    background-size:
+      5px 10px,
+      5px 10px,
+      5px 10px,
+      5px 10px,
+      5px 10px,
+      5px 40px,
+      5px 10px;
+  }
+  100% {
+    background-size:
+      5px 10px,
+      5px 10px,
+      5px 10px,
+      5px 10px,
+      5px 10px,
+      5px 10px,
+      5px 40px;
   }
 }
 

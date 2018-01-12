@@ -70,8 +70,26 @@
     <script src="{{ url_for('static', filename='js/all.min.js') }}"></script>
     {% block extrajs %}{% endblock %}
 
-    {# comment this out if you have no swag #}
-    {% include "ui/partial/miraload.html" %}
+    {# START PREALOADER #}
+    <div class="loading-backdrop" style="display: none;">
+    {% if config.PRELOADER == 'simple' %}
+      {% include "ui/partial/simpleload.html" %}
+    {% elif config.PRELOADER == 'hexagon' %}
+      {% include "ui/partial/hexaload.html" %}
+    {% endif %}
+    </div>
+
+    <script src="{{ url_for('static', filename='js/particles.min.js') }}"></script>
+    <script>
+      $(window).bind('beforeunload', function(){
+        setTimeout(function(){
+          $('body').css('overflow', 'hidden');
+          $('.loading-backdrop').css('display', 'initial');
+          particlesJS.load('particles', "{{ url_for('static', filename='js/particles.json') }}");
+        }, 200);
+      });
+    </script>
+    {# END PRELOADER #}
 
     {#
     {% include "ui/partial/footer.html" %}
