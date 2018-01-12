@@ -12,6 +12,7 @@ CLUSTER_STATE_MAP = {
     config['CLUSTER_ERROR_STATE']: 'mdi-cloud-off-outline',
     config['CLUSTER_PROVISIONING_STATE']: 'loading-icon',
     config['CLUSTER_DEPROVISIONING_STATE']: 'mdi-cloud-sync',
+    config['CLUSTER_RESIZING_STATE']: 'loading-icon',
     config['CLUSTER_UNKNOWN_STATE']: 'mdi-alert-outline'
 }
 
@@ -32,10 +33,10 @@ def cluster_status_icon(status):
         CLUSTER_STATE_MAP.get(status, 'mdi-alert-circle-outline'),
         status
     )
-    if status == config['CLUSTER_PROVISIONING_STATE']:
+    if status in [config['CLUSTER_PROVISIONING_STATE'], config['CLUSTER_RESIZING_STATE']]:
         icon = '<div class="icon-container"><div class="{}" title="{}"></div></div>'.format(
             CLUSTER_STATE_MAP.get(status, 'mdi-alert-circle-outline'),
-            config['CLUSTER_PROVISIONING_STATE']
+            status
         )
     return icon
 

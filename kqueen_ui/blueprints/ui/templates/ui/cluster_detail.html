@@ -505,7 +505,7 @@
   // init Visualisation
   K8SVisualisations.init("{{ url_for('ui.cluster_topology_data', cluster_id=cluster.id) }}");
 </script>
-{% if cluster.state == config.CLUSTER_PROVISIONING_STATE %}
+{% if cluster.state in [config.CLUSTER_PROVISIONING_STATE, config.CLUSTER_RESIZING_STATE] %}
 <script>
 (function(){
   var progressRefreshFn = function(){
@@ -519,7 +519,7 @@
         $('#progress .progress-bar-background > span').hide();
         $('#progress .progress-bar-background > .bounce').show();
       }
-      if(res.result != '{{ config.CLUSTER_PROVISIONING_STATE }}'){
+      if(! (res.result == '{{ config.CLUSTER_PROVISIONING_STATE }}' || res.result == '{{ config.CLUSTER_RESIZING_STATE }}')){
         window.location.reload(1);
       }
     });
