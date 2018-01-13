@@ -610,6 +610,24 @@ class ClusterDetail(KQueenView):
         )
 
 
+class ClusterResize(KQueenView):
+    decorators = [login_required]
+    methods = ['POST']
+    validation_hint = 'uuid'
+
+    def handle(self, cluster_id):
+        cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
+        if 'node_count' not in cluster.get('metadata', {}):
+            flash("This cluster doesn't support scaling.", 'warning')
+            return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
+        current_node_count = cluster['metadata']['node_count']
+        node_count = request.form['node_count']
+        if current_node_count == node_count:
+            return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
+        self.kqueen_request('cluster', 'resize', fnargs=(cluster_id, node_count))
+        return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
+
+
 class ClusterKubeconfig(KQueenView):
     decorators = [login_required]
     methods = ['GET']
@@ -634,5 +652,6 @@ ui.add_url_rule('/clusters/create', view_func=ClusterCreate.as_view('cluster_cre
 ui.add_url_rule('/clusters/<cluster_id>/delete', view_func=ClusterDelete.as_view('cluster_delete'))
 ui.add_url_rule('/clusters/<cluster_id>/deployment-status', view_func=ClusterDeploymentStatus.as_view('cluster_deployment_status'))
 ui.add_url_rule('/clusters/<cluster_id>/detail', view_func=ClusterDetail.as_view('cluster_detail'))
+ui.add_url_rule('/clusters/<cluster_id>/resize', view_func=ClusterResize.as_view('cluster_resize'))
 ui.add_url_rule('/clusters/<cluster_id>/kubeconfig', view_func=ClusterKubeconfig.as_view('cluster_kubeconfig'))
 ui.add_url_rule('/clusters/<cluster_id>/topology-data', view_func=ClusterTopologyData.as_view('cluster_topology_data'))
