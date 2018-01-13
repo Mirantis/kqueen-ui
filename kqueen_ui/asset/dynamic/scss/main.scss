@@ -273,6 +273,30 @@ label.error {
   font-weight: 400;
 }
 
+.scaleformbox {
+  position: relative;
+  #scaleinput {
+    height: 25px;
+    top: 0px;
+    left: 0px;
+    position: absolute;
+    display: none;
+    .form-control,
+    .input-group-addon,
+    .input-group-btn > .btn {
+      font-size: 14px;
+      padding: 2px 11px;
+      height: 25px;
+    }
+  }
+  #scalebtn {
+    top: 0px;
+    left: 0px;
+    position: absolute;
+    overflow: hidden;
+  }
+}
+
 // *****************************************************************************
 // Table
 // *****************************************************************************
