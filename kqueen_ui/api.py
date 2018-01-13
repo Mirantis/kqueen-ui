@@ -188,6 +188,11 @@ class ClusterManager(BaseManager):
     def progress(self, uuid):
         return self.request('%s/progress' % uuid)
 
+    def resize(self, uuid, node_count):
+        payload = {
+            'node_count': node_count
+        }
+        return self.request('%s/resize' % uuid, method='PATCH', payload=payload)
 
 class ProvisionerManager(BaseManager):
     resource_url = 'provisioners/'
