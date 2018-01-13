@@ -41,17 +41,34 @@
 </div>
 
 <div class="overview-actions">
-  <div class="col-sm-4">
+  <div class="col-sm-3">
     {% if cluster.state != config.CLUSTER_OK_STATE %}
       <a href="#" class="btn btn-primary btn-xs disabled">Kubeconfig N/A</a>
     {% else %}
       <a target="_blank" href="{{ url_for('ui.cluster_kubeconfig', cluster_id=cluster.id) }}" class="btn btn-primary btn-xs">Download Kubeconfig</a>
     {% endif %}
   </div>
-  <div class="col-sm-4" id="state">
+  <div class="col-sm-3">
+    <form id="scaleform" action="{{ url_for('ui.cluster_resize', cluster_id=cluster.id) }}" method="post" enctype="multipart/form-data">  
+      <div class="scaleformbox">
+        {% if cluster.state != config.CLUSTER_OK_STATE %}
+        <a class="btn btn-primary btn-xs disabled" id="scalebtn">Scale N/A</a>
+        {% else %}
+        <div class="btn btn-primary btn-xs" id="scalebtn">Scale</div>
+        <div class="input-group" id="scaleinput">
+          <span class="input-group-btn">
+            <input class="btn btn-primary" type="submit" value="&#10004;">
+          </span>
+          <input type="number" id="node_count" step="1" min="1" value="{{ status.overview.nodes }}" name="node_count" class="form-control">
+        </div>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+  <div class="col-sm-3" id="state">
     <a class="btn btn-{{ state_class }} btn-xs" style="pointer-events: none;">State: {{ cluster.state }}</a>
   </div>
-  <div class="col-sm-4" id="progress">
+  <div class="col-sm-3" id="progress">
     {% if cluster.state == config.CLUSTER_PROVISIONING_STATE %}
       {% set initial_progress = 0 %}
     {% else %}
@@ -502,6 +519,16 @@
   $('.pie_progress').asPieProgress('start');
   // init Popover
   $('[data-toggle="popover"]').popover();
+  // handle scaleform
+  $('.scaleformbox #scalebtn').click(function(){
+    $(this).hide();
+    $('.scaleformbox #scaleinput').css('display', 'table');
+    $('.scaleformbox #node_count').focus();
+  });
+  $('.scaleformbox #node_count').blur(setTimeout(function(){
+    $('.scaleformbox #scaleinput').hide();
+    $('.scaleformbox #scalebtn').show();
+  }), 200);
   // init Visualisation
   K8SVisualisations.init("{{ url_for('ui.cluster_topology_data', cluster_id=cluster.id) }}");
 </script>
