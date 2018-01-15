@@ -71,7 +71,7 @@ class Index(KQueenView):
             if 'state' in cluster:
                 if app.config['CLUSTER_PROVISIONING_STATE'] != cluster['state']:
                     deployed_clusters = deployed_clusters + 1
-                if app.config['CLUSTER_OK_STATE'] == cluster['state']:
+                if cluster['state'] in [app.config['CLUSTER_RESIZING_STATE'], app.config['CLUSTER_OK_STATE']]:
                     healthy_clusters = healthy_clusters + 1
             if 'created_at' in cluster:
                 cluster['created_at'] = format_datetime(cluster['created_at'])
