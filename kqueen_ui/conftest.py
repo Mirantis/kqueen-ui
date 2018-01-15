@@ -168,7 +168,9 @@ def cluster():
         'provisioner': provisioner(),
         'state': 'OK',
         'kubeconfig': kubeconfig(),
-        'metadata': {},
+        'metadata': {
+            'node_count': '2'
+        },
         'created_at': datetime.utcnow(),
         'owner': user()
     }
@@ -257,6 +259,8 @@ def no_kqueen_requests(monkeypatch):
             return default_policy()
         elif action == 'progress':
             return cluster_progress()
+        elif action == 'resize':
+            return obj
         else:
             raise NotImplementedError('Action {} is not supported by mock_kqueen_request'.format(action))
     monkeypatch.setattr('kqueen_ui.generic_views.KQueenView.kqueen_request', mock_kqueen_request)

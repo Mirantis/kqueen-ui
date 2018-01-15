@@ -41,24 +41,41 @@
 </div>
 
 <div class="overview-actions">
-  <div class="col-sm-4">
+  <div class="col-sm-3">
     {% if cluster.state != config.CLUSTER_OK_STATE %}
       <a href="#" class="btn btn-primary btn-xs disabled">Kubeconfig N/A</a>
     {% else %}
       <a target="_blank" href="{{ url_for('ui.cluster_kubeconfig', cluster_id=cluster.id) }}" class="btn btn-primary btn-xs">Download Kubeconfig</a>
     {% endif %}
   </div>
-  <div class="col-sm-4" id="state">
+  <div class="col-sm-3">
+    <form id="scaleform" action="{{ url_for('ui.cluster_resize', cluster_id=cluster.id) }}" method="post" enctype="multipart/form-data">  
+      <div class="scaleformbox">
+        {% if cluster.state != config.CLUSTER_OK_STATE %}
+        <a class="btn btn-primary btn-xs disabled" id="scalebtn">Scale Nodes N/A</a>
+        {% else %}
+        <div class="btn btn-primary btn-xs" id="scalebtn">Scale Nodes</div>
+        <div class="input-group" id="scaleinput">
+          <input type="number" id="node_count" step="1" min="1" value="{{ status.overview.nodes }}" name="node_count" class="form-control">
+          <span class="input-group-btn">
+            <input class="btn btn-primary" type="submit" value="&#10004;">
+          </span>
+        </div>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+  <div class="col-sm-3" id="state">
     <a class="btn btn-{{ state_class }} btn-xs" style="pointer-events: none;">State: {{ cluster.state }}</a>
   </div>
-  <div class="col-sm-4" id="progress">
-    {% if cluster.state == config.CLUSTER_PROVISIONING_STATE %}
+  <div class="col-sm-3" id="progress">
+    {% if cluster.state in [config.CLUSTER_PROVISIONING_STATE, config.CLUSTER_RESIZING_STATE] %}
       {% set initial_progress = 0 %}
     {% else %}
       {% set initial_progress = 100 %}
     {% endif %}
-    <div class="progress-bar-background">
-      <span>{% if not cluster.state == config.CLUSTER_PROVISIONING_STATE %}Done{% endif %}</span>
+    <div class="progress-bar-background {{ state_class }}">
+      <span>{% if not cluster.state in [config.CLUSTER_PROVISIONING_STATE, config.CLUSTER_RESIZING_STATE] %}Done{% endif %}</span>
       <div class="bounce" style="display: none;"></div>
       <div class="ui-progress-bar" style="width: {{ initial_progress }}%;"></div>
     </div>
@@ -502,10 +519,26 @@
   $('.pie_progress').asPieProgress('start');
   // init Popover
   $('[data-toggle="popover"]').popover();
+  // handle scaleform
+  var scalebutton = $('.scaleformbox #scalebtn')
+  , scaleinput = $('.scaleformbox #scaleinput')
+  , nodecount = $('.scaleformbox #node_count')
+  ;
+  scalebutton.click(function(){
+    scalebutton.hide();
+    scaleinput.css('display', 'table');
+    nodecount.focus();
+  });
+  nodecount.blur(function(){
+    setTimeout(function(){
+      scaleinput.hide();
+      scalebutton.show();
+    }, 200);
+  });
   // init Visualisation
   K8SVisualisations.init("{{ url_for('ui.cluster_topology_data', cluster_id=cluster.id) }}");
 </script>
-{% if cluster.state == config.CLUSTER_PROVISIONING_STATE %}
+{% if cluster.state in [config.CLUSTER_PROVISIONING_STATE, config.CLUSTER_RESIZING_STATE] %}
 <script>
 (function(){
   var progressRefreshFn = function(){
@@ -519,7 +552,7 @@
         $('#progress .progress-bar-background > span').hide();
         $('#progress .progress-bar-background > .bounce').show();
       }
-      if(res.result != '{{ config.CLUSTER_PROVISIONING_STATE }}'){
+      if(! (res.result == '{{ config.CLUSTER_PROVISIONING_STATE }}' || res.result == '{{ config.CLUSTER_RESIZING_STATE }}')){
         window.location.reload(1);
       }
     });

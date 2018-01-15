@@ -105,6 +105,6 @@ def test_sanitize_resource_metadata(app, user, cluster, provisioner, provisioner
     parsed_clusters, parsed_provisioners = metaparser(session, [cluster], [provisioner])
     parsed_cluster_metadata = parsed_clusters[0]['metadata']
     parsed_provisioner_parameters = parsed_provisioners[0]['parameters']
-    assert parsed_cluster_metadata == {}
+    assert parsed_cluster_metadata == cluster['metadata']
     assert parsed_provisioner_parameters['username'] == provisioner['parameters']['username']
     assert parsed_provisioner_parameters['password'] == '*****************'
