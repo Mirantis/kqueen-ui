@@ -52,9 +52,9 @@
     <form id="scaleform" action="{{ url_for('ui.cluster_resize', cluster_id=cluster.id) }}" method="post" enctype="multipart/form-data">  
       <div class="scaleformbox">
         {% if cluster.state != config.CLUSTER_OK_STATE %}
-        <a class="btn btn-primary btn-xs disabled" id="scalebtn">Scale N/A</a>
+        <a class="btn btn-primary btn-xs disabled" id="scalebtn">Scale Nodes N/A</a>
         {% else %}
-        <div class="btn btn-primary btn-xs" id="scalebtn">Scale</div>
+        <div class="btn btn-primary btn-xs" id="scalebtn">Scale Nodes</div>
         <div class="input-group" id="scaleinput">
           <input type="number" id="node_count" step="1" min="1" value="{{ status.overview.nodes }}" name="node_count" class="form-control">
           <span class="input-group-btn">
