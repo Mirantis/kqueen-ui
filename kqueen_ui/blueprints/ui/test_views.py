@@ -141,6 +141,15 @@ def test_cluster_delete(client_login, cluster):
     assert response.headers['Location'].endswith(url_for('ui.index'))
 
 
+def test_cluster_resize(client_login, cluster):
+    form_data = {
+        'node_count': '3'
+    }
+    response = client_login.post(url_for('ui.cluster_resize', cluster_id=cluster['id']), data=form_data)
+    assert response.status_code == 302
+    assert response.headers['Location'].endswith(url_for('ui.index'))
+
+
 def test_cluster_deployment_status(client_login, cluster):
     response = client_login.get(url_for('ui.cluster_deployment_status', cluster_id=cluster['id']))
     expected_keys = ['progress', 'response', 'result']
