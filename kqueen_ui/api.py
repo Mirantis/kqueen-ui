@@ -194,6 +194,7 @@ class ClusterManager(BaseManager):
         }
         return self.request('%s/resize' % uuid, method='PATCH', payload=payload)
 
+
 class ProvisionerManager(BaseManager):
     resource_url = 'provisioners/'
 
