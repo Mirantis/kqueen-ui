@@ -456,7 +456,6 @@ footer {
   width: 100%;
   text-align: center;
   position: relative;
-  background-color: lighten($brand-primary, 15%);
   z-index: 1;
   > span {
     font-weight: 700;
@@ -470,11 +469,50 @@ footer {
     width: 50px;
     height: 100%;
     position: relative;
-    background-color: #E02D3A;
     animation-name: bounce;
     animation-duration: 1s;
     animation-direction: alternate;
     animation-iteration-count: infinite;
+  }
+}
+
+.progress-bar-background.primary {
+  background-color: lighten($brand-primary, 15%);
+  > .bounce,
+  > .ui-progress-bar {
+    background-color: $brand-primary;
+  }
+}
+
+.progress-bar-background.success {
+  background-color: lighten($brand-success, 15%);
+  > .bounce,
+  > .ui-progress-bar {
+    background-color: $brand-success;
+  }
+}
+
+.progress-bar-background.warning {
+  background-color: lighten($brand-warning, 15%);
+  > .bounce,
+  > .ui-progress-bar {
+    background-color: $brand-warning;
+  }
+}
+
+.progress-bar-background.danger {
+  background-color: lighten($brand-danger, 15%);
+  > .bounce,
+  > .ui-progress-bar {
+    background-color: $brand-danger;
+  }
+}
+
+.progress-bar-background.info {
+  background-color: lighten($brand-info, 15%);
+  > .bounce,
+  > .ui-progress-bar {
+    background-color: $brand-info;
   }
 }
 
@@ -488,7 +526,6 @@ footer {
 }
 
 .ui-progress-bar {
-  background-color: $brand-primary;
   height: 100%;
   position: absolute;
   left: 0px;
