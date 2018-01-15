@@ -69,13 +69,13 @@
     <a class="btn btn-{{ state_class }} btn-xs" style="pointer-events: none;">State: {{ cluster.state }}</a>
   </div>
   <div class="col-sm-3" id="progress">
-    {% if cluster.state in [config.CLUSTER_PROVISIONING_STATE, config.CLUSTER_RESIZING_STATE] %}
+    {% if cluster.state in config.CLUSTER_TRANSIENT_STATES %}
       {% set initial_progress = 0 %}
     {% else %}
       {% set initial_progress = 100 %}
     {% endif %}
     <div class="progress-bar-background {{ state_class }}">
-      <span>{% if not cluster.state in [config.CLUSTER_PROVISIONING_STATE, config.CLUSTER_RESIZING_STATE] %}Done{% endif %}</span>
+      <span>{% if not cluster.state in config.CLUSTER_TRANSIENT_STATES %}Done{% endif %}</span>
       <div class="bounce" style="display: none;"></div>
       <div class="ui-progress-bar" style="width: {{ initial_progress }}%;"></div>
     </div>
@@ -538,7 +538,7 @@
   // init Visualisation
   K8SVisualisations.init("{{ url_for('ui.cluster_topology_data', cluster_id=cluster.id) }}");
 </script>
-{% if cluster.state in [config.CLUSTER_PROVISIONING_STATE, config.CLUSTER_RESIZING_STATE] %}
+{% if cluster.state in config.CLUSTER_TRANSIENT_STATES %}
 <script>
 (function(){
   var progressRefreshFn = function(){
