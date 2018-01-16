@@ -43,6 +43,11 @@ class BaseConfig:
     CLUSTER_DEPROVISIONING_STATE = 'Destroying'
     CLUSTER_RESIZING_STATE = 'Resizing'
     CLUSTER_UNKNOWN_STATE = 'Unknown'
+    CLUSTER_TRANSIENT_STATES = [
+        CLUSTER_PROVISIONING_STATE,
+        CLUSTER_DEPROVISIONING_STATE,
+        CLUSTER_RESIZING_STATE
+    ]
 
     # Provisioner statuses
     PROVISIONER_ERROR_STATE = 'Error'
