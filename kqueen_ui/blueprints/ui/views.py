@@ -631,8 +631,8 @@ class ClusterRow(KQueenView):
 
     def handle(self, cluster_id, index):
         cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
-        if 'created_at' in cluster:
-            cluster['created_at'] = format_datetime(cluster['created_at'])
+        clusters, _, _ = sanitize_resource_metadata(session, [cluster], [])
+        cluster = clusters[0]
         data = {
             'response': 200,
             'cluster_status': cluster['state'],
