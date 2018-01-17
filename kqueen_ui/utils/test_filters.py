@@ -1,12 +1,11 @@
 import pytest
 
-from kqueen_ui.api import KQueenResponse
 # load constants
 from kqueen_ui.utils.filters import CLUSTER_STATE_MAP, PROVISIONER_STATE_MAP, USER_STATE_MAP
 # load filters
 from kqueen_ui.utils.filters import cluster_status_icon, provisioner_status_icon_class, user_status_icon_class
 # load context processors
-from kqueen_ui.utils.filters import base_url, policy_handler, sanitize_resource_metadata
+from kqueen_ui.utils.filters import base_url, policy_handler
 
 
 @pytest.mark.parametrize('state,icon_class', CLUSTER_STATE_MAP.items())
@@ -91,20 +90,3 @@ def test_policy_handler(
         'user': superadmin
     }
     assert authorized(session, policy_rule, resource) is True
-
-
-def test_sanitize_resource_metadata(app, user, cluster, provisioner, provisioner_engines, monkeypatch):
-    def mock_engines(self):
-        response = KQueenResponse()
-        response.data = provisioner_engines
-        return response
-    monkeypatch.setattr('kqueen_ui.api.ProvisionerManager.engines', mock_engines)
-    session = {'user': user}
-    _metaparser = sanitize_resource_metadata()
-    metaparser = _metaparser.get('sanitize_resource_metadata')
-    parsed_clusters, parsed_provisioners = metaparser(session, [cluster], [provisioner])
-    parsed_cluster_metadata = parsed_clusters[0]['metadata']
-    parsed_provisioner_parameters = parsed_provisioners[0]['parameters']
-    assert parsed_cluster_metadata == cluster['metadata']
-    assert parsed_provisioner_parameters['username'] == provisioner['parameters']['username']
-    assert parsed_provisioner_parameters['password'] == '*****************'
