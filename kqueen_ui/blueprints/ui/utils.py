@@ -1,4 +1,7 @@
 from collections import OrderedDict
+from flask_babel import format_datetime
+from kqueen_ui.api import get_kqueen_client
+from kqueen_ui.config import current_config
 
 try:
     from secrets import choice
@@ -6,6 +9,8 @@ except ImportError:
     from random import choice
 
 import string
+
+config = current_config()
 
 
 def status_for_cluster_detail(_status):
@@ -249,3 +254,104 @@ def prettify_engine_name(engine):
 def generate_password(length=20):
     alphabet = string.ascii_letters + string.digits
     return ''.join(choice(alphabet) for _ in range(length))
+
+
+def sanitize_resource_metadata(session, clusters, provisioners):
+    from kqueen_ui import cache
+
+    token = session.get('user', {}).get('token', None)
+    client = None
+    engines = cache.get('provisioner-engines')
+    deployed_clusters = 0
+    healthy_clusters = 0
+    healthy_provisioners = 0
+
+    if not engines:
+        abort = False
+        if token:
+            client = get_kqueen_client(token=token)
+        else:
+            abort = True
+        if client:
+            engines_res = client.provisioner.engines()
+            if engines_res.status > 200:
+                abort = True
+            else:
+                engines = engines_res.data
+                cache.set('provisioner-engines', engines, timeout=5 * 60)
+        if abort:
+            for cluster in clusters:
+                cluster['metadata'] = {}
+            for provisioner in provisioners:
+                provisioner['parameters'] = {}
+            return clusters, provisioners
+
+    for cluster in clusters:
+        if 'state' in cluster:
+            if config.get('CLUSTER_PROVISIONING_STATE') != cluster['state']:
+                deployed_clusters = deployed_clusters + 1
+            if cluster['state'] in [config.get('CLUSTER_RESIZING_STATE'), config.get('CLUSTER_OK_STATE')]:
+                healthy_clusters = healthy_clusters + 1
+        if 'created_at' in cluster:
+            cluster['created_at'] = format_datetime(cluster['created_at'])
+
+        cluster_engine = cluster.get('provisioner', {}).get('engine')
+        _engine_params = [e['parameters'] for e in engines if e['name'] == cluster_engine]
+        if not len(_engine_params) == 1:
+            del cluster['metadata']
+            continue
+        engine_params = _engine_params[0].get('cluster')
+        for param_name, param in engine_params.items():
+            if param['type'] not in ['text', 'integer', 'select']:
+                try:
+                    cluster['metadata'][param_name] = '*****************'
+                except KeyError:
+                    pass
+        cluster['metadata'] = OrderedDict(sorted(cluster['metadata'].items(), key=lambda t: t[0]))
+
+    for provisioner in provisioners:
+        if 'state' in provisioner:
+            if config.get('PROVISIONER_ERROR_STATE') != provisioner['state']:
+                healthy_provisioners = healthy_provisioners + 1
+        if 'created_at' in provisioner:
+            provisioner['created_at'] = format_datetime(provisioner['created_at'])
+
+        provisioner_engine = provisioner.get('engine')
+        _engine_params = [e['parameters'] for e in engines if e['name'] == provisioner_engine]
+        if not len(_engine_params) == 1:
+            del provisioner['parameters']
+            continue
+        engine_params = _engine_params[0].get('provisioner')
+        for param_name, param in engine_params.items():
+            if param['type'] not in ['text', 'integer', 'select']:
+                try:
+                    provisioner['parameters'][param_name] = '*****************'
+                except KeyError:
+                    pass
+        provisioner['parameters'] = OrderedDict(sorted(provisioner['parameters'].items(), key=lambda t: t[0]))
+
+    # sort clusters by date
+    if isinstance(clusters, list):
+        clusters.sort(key=lambda k: (k['created_at'], k['name']))
+
+    # sort provisioners by date
+    if isinstance(provisioners, list):
+        provisioners.sort(key=lambda k: (k['created_at'], k['name']))
+
+    cluster_health = 0
+    if healthy_clusters and deployed_clusters:
+        cluster_health = int((healthy_clusters / deployed_clusters) * 100)
+    provisioner_health = 0
+    if healthy_provisioners and provisioners:
+        provisioner_health = int((healthy_provisioners / len(provisioners)) * 100)
+
+    overview = {
+        'cluster_count': len(clusters),
+        'cluster_max': len(clusters) if len(clusters) else 1,
+        'cluster_health': cluster_health,
+        'provisioner_count': len(provisioners),
+        'provisioner_max': len(provisioners) if len(provisioners) else 1,
+        'provisioner_health': provisioner_health,
+    }
+
+    return clusters, provisioners, overview

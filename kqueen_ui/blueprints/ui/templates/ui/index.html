@@ -1,41 +1,15 @@
 {% extends "ui/base.html" %}
 {% from "ui/partial/modal.html" import render_delete_modal %}
-{% from "ui/partial/tableaction.html" import render_cluster_table_actions, render_cluster_row_actions, render_provisioner_table_actions, render_provisioner_row_actions with context %}
+{% from "ui/partial/tableaction.html" import render_cluster_table_actions, render_provisioner_table_actions, render_provisioner_row_actions with context %}
+{% from "ui/partial/_cluster_row.html" import render_cluster_row with context %}
+{% from "ui/partial/_overview_pies.html" import render_overview_pies with context %}
 
 {% block page_header %}Overview{% endblock %}
 
 {% block content %}
+{{ render_overview_pies(overview) }}
 
-{% set clusters, provisioners = sanitize_resource_metadata(session, clusters, provisioners) %}
-
-<div class="overview">
-  <div class="col-sm-3 clearfix">
-    <div class="pie_progress_static" role="progressbar" data-goal="{{ overview.cluster_count }}" aria-valuemax="{{ overview.cluster_max }}">
-      <div class="pie_progress__number"></div>
-      <div class="pie_progress__label">Clusters</div>
-    </div>
-  </div>
-  <div class="col-sm-3 clearfix">
-    <div class="pie_progress" role="progressbar" data-goal="{{ overview.cluster_health }}"{% if overview.cluster_health < 100 %} data-barcolor="#e02d3a"{% endif %}>
-      <div class="pie_progress__number"></div>
-      <div class="pie_progress__label">Cluster Health</div>
-    </div>
-  </div>
-  <div class="col-sm-3 clearfix">
-    <div class="pie_progress_static" role="progressbar" data-goal="{{ overview.provisioner_count }}" aria-valuemax="{{ overview.provisioner_max }}">
-      <div class="pie_progress__number"></div>
-      <div class="pie_progress__label">Provisioners</div>
-    </div>
-  </div>
-  <div class="col-sm-3 clearfix">
-    <div class="pie_progress" role="progressbar" data-goal="{{ overview.provisioner_health }}"{% if overview.provisioner_health < 100 %} data-barcolor="#e02d3a"{% endif %}>
-      <div class="pie_progress__number"></div>
-      <div class="pie_progress__label" style="line-height: 1.1; margin-top: 36px;">Provisioner<br>Health</div>
-    </div>
-  </div>
-</div>
-
-<h3>Running clusters</h3>
+<h3>Running Clusters</h3>
 
 <div class="table-container">
   <div class="table-actions">
@@ -51,46 +25,7 @@
     </thead>
     <tbody>
       {% for cluster in clusters %}
-        <tr>
-          <td class="table-col-4">
-            {% if is_authorized(session, 'cluster:get', cluster) %}
-            <a href="{{ url_for('ui.cluster_detail', cluster_id=cluster.id) }}">{{ cluster.name }}</a>
-            {% else %}
-            {{ cluster.name }}
-            {% endif %}
-          </td>
-          <td class="table-col-4">{{ cluster.provisioner.name }}</td>
-          <td class="table-col-4">{{ cluster.created_at }}</td>
-          <td class="status_column">
-            {{ cluster.state|cluster_status_icon|safe }}
-          </td>
-          <td class="action_column">
-            {% if cluster.metadata %}
-            <a data-toggle="collapse" data-target="#cluster-{{ loop.index }}" class="clickable" title="More informations">
-              <i class="mdi mdi-information-outline"></i>
-            </a>
-            {% endif %}
-            {{ render_cluster_row_actions(cluster) }}
-          </td>
-        </tr>
-        {% if cluster.metadata %}
-        <tr>
-          <td colspan="5" style="padding: 0px; border-top: 0px;">
-            <div style="margin: 8px;" id="cluster-{{ loop.index }}" class="collapse">
-              <table class="table table-hover no-actions" id="table-clustermeta">
-                <tbody>
-                  {% for key, value in cluster.metadata.items() %}
-                  <tr>
-                    <th style="width: 300px;">{{ key }}</th>
-                    <td>{{ value }}</td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </td>
-        </tr>
-        {% endif %}
+        {{ render_cluster_row(cluster, loop.index) }}
       {% else %}
         <tr style="pointer-events: none;"><td colspan="5" class="text-center">No Items</td></tr>
       {% endfor %}
@@ -98,7 +33,7 @@
   </table>
 </div>
 
-<h3>Available provisioners</h3>
+<h3>Available Provisioners</h3>
 
 <div class="table-container">
   <div class="table-actions">
@@ -171,7 +106,7 @@
 
 {% block extrajs %}
 <script>
-jQuery(document).ready(function($){
+function setupPieProgress(){
   $('.pie_progress_static').asPieProgress({
     namespace: 'pieProgress',
     barsize: '2',
@@ -182,17 +117,57 @@ jQuery(document).ready(function($){
       return n;
     }
   });
-  $('.pie_progress').asPieProgress('start');
-});
-jQuery(document).ready(function($){
-  $('.pie_progress').asPieProgress({
+  $('.pie_progress_percentage').asPieProgress({
     namespace: 'pieProgress',
     barsize: '2',
     size: '120',
     trackcolor: '#ececea',
     barcolor: '#83d3c8'
   });
+}
+function initPieProgress(){
+  setupPieProgress();
+  $('.pie_progress').asPieProgress('start');
+}
+function reinitPieProgress(){
+  $('.pie_progress').asPieProgress('destroy');
+  $('.pie_progress .pie_progress__svg').remove();
+  setupPieProgress();
+  $('.pie_progress').asPieProgress('start');
+}
+jQuery(document).ready(function($){
+  initPieProgress();
   $('.pie_progress').asPieProgress('start');
 });
+</script>
+
+<script>
+setInterval(function(){
+  $('table > tbody > tr.in-transition').each(function(){
+    var row = $(this),
+        href = row.data('href'),
+        index = row.data('index'),
+        state = row.data('status'),
+        metaRow = $('table > tbody > tr#metadata-cluster-' + index);
+
+    $.get(href, function(data){
+      if( data.response == 200 && data.cluster_status != state ){
+        if( metaRow ) {
+          metaRow.remove();
+        }
+        row.replaceWith(data.cluster_row);
+        console.log('Cluster row updated.');
+
+        $.get('{{ url_for("ui.overview_pies") }}', function(data){
+          if( data.response == 200 ){
+            $('.overview').replaceWith(data.overview_pies);
+            reinitPieProgress();
+          }
+        });
+        console.log('Overview pies updated.');
+      }
+    });
+  });
+}, 15000);
 </script>
 {% endblock %}

@@ -1,6 +1,4 @@
-from collections import OrderedDict
 from flask import request
-from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.auth import is_authorized
 from kqueen_ui.config import current_config
 from urllib.parse import urlsplit
@@ -68,69 +66,7 @@ def policy_handler():
     return dict(is_authorized=authorized)
 
 
-def sanitize_resource_metadata():
-    from kqueen_ui import cache
-
-    def metaparser(session, clusters=[], provisioners=[]):
-        token = session.get('user', {}).get('token', None)
-        client = None
-        engines = cache.get('provisioner-engines')
-        if not engines:
-            abort = False
-            if token:
-                client = get_kqueen_client(token=token)
-            else:
-                abort = True
-            if client:
-                engines_res = client.provisioner.engines()
-                if engines_res.status > 200:
-                    abort = True
-                else:
-                    engines = engines_res.data
-                    cache.set('provisioner-engines', engines, timeout=5 * 60)
-            if abort:
-                for cluster in clusters:
-                    cluster['metadata'] = {}
-                for provisioner in provisioners:
-                    provisioner['parameters'] = {}
-                return clusters, provisioners
-
-        for cluster in clusters:
-            cluster_engine = cluster.get('provisioner', {}).get('engine')
-            _engine_params = [e['parameters'] for e in engines if e['name'] == cluster_engine]
-            if not len(_engine_params) == 1:
-                del cluster['metadata']
-                continue
-            engine_params = _engine_params[0].get('cluster')
-            for param_name, param in engine_params.items():
-                if param['type'] not in ['text', 'integer', 'select']:
-                    try:
-                        cluster['metadata'][param_name] = '*****************'
-                    except KeyError:
-                        pass
-            cluster['metadata'] = OrderedDict(sorted(cluster['metadata'].items(), key=lambda t: t[0]))
-
-        for provisioner in provisioners:
-            provisioner_engine = provisioner.get('engine')
-            _engine_params = [e['parameters'] for e in engines if e['name'] == provisioner_engine]
-            if not len(_engine_params) == 1:
-                del provisioner['parameters']
-                continue
-            engine_params = _engine_params[0].get('provisioner')
-            for param_name, param in engine_params.items():
-                if param['type'] not in ['text', 'integer', 'select']:
-                    try:
-                        provisioner['parameters'][param_name] = '*****************'
-                    except KeyError:
-                        pass
-            provisioner['parameters'] = OrderedDict(sorted(provisioner['parameters'].items(), key=lambda t: t[0]))
-
-        return clusters, provisioners
-    return dict(sanitize_resource_metadata=metaparser)
-
-
 context_processors = [
     base_url,
-    policy_handler,
-    sanitize_resource_metadata
+    policy_handler
 ]
