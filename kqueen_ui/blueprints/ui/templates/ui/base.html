@@ -68,6 +68,7 @@
 
     <script src="{{ url_for('static', filename='js/vendor.js') }}"></script>
     <script src="{{ url_for('static', filename='js/all.min.js') }}"></script>
+    
     {% block extrajs %}{% endblock %}
 
     {# START PREALOADER #}
@@ -75,17 +76,19 @@
     {% if config.PRELOADER == 'simple' %}
       {% include "ui/partial/simpleload.html" %}
     {% elif config.PRELOADER == 'hexagon' %}
+      <script src="{{ url_for('static', filename='js/particles.min.js') }}"></script>
       {% include "ui/partial/hexaload.html" %}
     {% endif %}
     </div>
 
-    <script src="{{ url_for('static', filename='js/particles.min.js') }}"></script>
     <script>
       $(window).bind('beforeunload', function(){
         setTimeout(function(){
           $('body').css('overflow', 'hidden');
           $('.loading-backdrop').css('display', 'initial');
+          {% if config.PRELOADER == 'hexagon' %}
           particlesJS.load('particles', "{{ url_for('static', filename='js/particles.json') }}");
+          {% endif %}
         }, 200);
       });
     </script>

@@ -11,7 +11,7 @@ from kqueen_ui.utils.wrappers import login_required
 from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
                     ChangePasswordForm, UserInviteForm, RequestPasswordResetForm,
                     PasswordResetForm)
-from .utils import generate_password, prettify_engine_name, status_for_cluster_detail
+from .utils import generate_password, prettify_engine_name, status_for_cluster_detail, sanitize_resource_metadata
 
 import logging
 
@@ -59,56 +59,33 @@ class Index(KQueenView):
     def handle(self):
         clusters = self.kqueen_request('cluster', 'list')
         provisioners = self.kqueen_request('provisioner', 'list')
-        deployed_clusters = 0
-        healthy_clusters = 0
-        healthy_provisioners = 0
-
-        # sort clusters by date
-        if isinstance(clusters, list):
-            clusters.sort(key=lambda k: (k['created_at'], k['name']))
-
-        for cluster in clusters:
-            if 'state' in cluster:
-                if app.config['CLUSTER_PROVISIONING_STATE'] != cluster['state']:
-                    deployed_clusters = deployed_clusters + 1
-                if cluster['state'] in [app.config['CLUSTER_RESIZING_STATE'], app.config['CLUSTER_OK_STATE']]:
-                    healthy_clusters = healthy_clusters + 1
-            if 'created_at' in cluster:
-                cluster['created_at'] = format_datetime(cluster['created_at'])
-
-        # sort provisioners by date
-        if isinstance(provisioners, list):
-            provisioners.sort(key=lambda k: (k['created_at'], k['name']))
-
-        for provisioner in provisioners:
-            if 'state' in provisioner:
-                if app.config['PROVISIONER_ERROR_STATE'] != provisioner['state']:
-                    healthy_provisioners = healthy_provisioners + 1
-            if 'created_at' in provisioner:
-                provisioner['created_at'] = format_datetime(provisioner['created_at'])
-
-        cluster_health = 0
-        if healthy_clusters and deployed_clusters:
-            cluster_health = int((healthy_clusters / deployed_clusters) * 100)
-        provisioner_health = 0
-        if healthy_provisioners and provisioners:
-            provisioner_health = int((healthy_provisioners / len(provisioners)) * 100)
-
-        overview = {
-            'cluster_count': len(clusters),
-            'cluster_max': len(clusters) if len(clusters) else 1,
-            'cluster_health': cluster_health,
-            'provisioner_count': len(provisioners),
-            'provisioner_max': len(provisioners) if len(provisioners) else 1,
-            'provisioner_health': provisioner_health,
-        }
+        clusters, provisioners, overview = sanitize_resource_metadata(session, clusters, provisioners)
         return render_template('ui/index.html',
                                overview=overview,
                                clusters=clusters,
                                provisioners=provisioners)
 
 
+class OverviewPies(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
+
+    def handle(self):
+        clusters = self.kqueen_request('cluster', 'list')
+        provisioners = self.kqueen_request('provisioner', 'list')
+        _, _, overview = sanitize_resource_metadata(session, clusters, provisioners)
+        data = {
+            'response': 200,
+            'overview_pies': render_template(
+                'ui/partial/overview_pies.html',
+                overview=overview
+            )
+        }
+        return jsonify(data)
+
+
 ui.add_url_rule('/', view_func=Index.as_view('index'))
+ui.add_url_rule('/overviewpies', view_func=OverviewPies.as_view('overview_pies'))
 
 
 # Auth
@@ -648,6 +625,26 @@ class ClusterTopologyData(KQueenView):
         return jsonify(topology)
 
 
+class ClusterRow(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
+
+    def handle(self, cluster_id, index):
+        cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
+        if 'created_at' in cluster:
+            cluster['created_at'] = format_datetime(cluster['created_at'])
+        data = {
+            'response': 200,
+            'cluster_status': cluster['state'],
+            'cluster_row': render_template(
+                'ui/partial/cluster_row.html',
+                cluster=cluster,
+                index=index
+            )
+        }
+        return jsonify(data)
+
+
 ui.add_url_rule('/clusters/create', view_func=ClusterCreate.as_view('cluster_create'))
 ui.add_url_rule('/clusters/<cluster_id>/delete', view_func=ClusterDelete.as_view('cluster_delete'))
 ui.add_url_rule('/clusters/<cluster_id>/deployment-status', view_func=ClusterDeploymentStatus.as_view('cluster_deployment_status'))
@@ -655,3 +652,4 @@ ui.add_url_rule('/clusters/<cluster_id>/detail', view_func=ClusterDetail.as_view
 ui.add_url_rule('/clusters/<cluster_id>/resize', view_func=ClusterResize.as_view('cluster_resize'))
 ui.add_url_rule('/clusters/<cluster_id>/kubeconfig', view_func=ClusterKubeconfig.as_view('cluster_kubeconfig'))
 ui.add_url_rule('/clusters/<cluster_id>/topology-data', view_func=ClusterTopologyData.as_view('cluster_topology_data'))
+ui.add_url_rule('/clusters/<cluster_id>/row/<index>', view_func=ClusterRow.as_view('cluster_row'))
