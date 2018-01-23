@@ -194,6 +194,20 @@ class ClusterManager(BaseManager):
         }
         return self.request('%s/resize' % uuid, method='PATCH', payload=payload)
 
+    def helm_install(self, uuid, name):
+        payload = {
+            'name': name
+        }
+        return self.request('%s/helm/install' % uuid, method='POST', payload=payload)
+
+    def helm_delete(self, uuid, name):
+        payload = {
+            'name': name
+        }
+        return self.request('%s/helm/delete' % uuid, method='POST', payload=payload)
+
+    def helm_list(self, uuid):
+        return self.request('%s/helm/list' % uuid)
 
 class ProvisionerManager(BaseManager):
     resource_url = 'provisioners/'

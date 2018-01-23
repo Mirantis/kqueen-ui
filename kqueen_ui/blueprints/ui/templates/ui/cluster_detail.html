@@ -88,6 +88,7 @@
   {% if config.ENABLE_ADDONS %}
   <li role="presentation"><a data-toggle="tab" href="#addons" data-tabcode="#addonsTab">Addons</a></li>
   {% endif %}
+  <li role="presentation"><a data-toggle="tab" href="#helm_charts" data-tabcode="#helm_chartsTab">Helm</a></li>
 </ul>
 
 <div class="tab-content clearfix{% if cluster.state != config.CLUSTER_OK_STATE %} hidden{% endif %}">
@@ -472,6 +473,62 @@
     </div>
   </div>
   {% endif %}
+
+  <div class="tab-pane" id="helm_charts">
+    <h3>Installed Releases</h3>
+
+    <div class="table-container">
+      <table class="table table-hover no-actions">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Revision</th>
+            <th>Updated</th>
+            <th>Status</th>
+            <th>Chart</th>
+            <th>Namespace</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for release in helm.list %}
+          <tr>
+            <td>{{ release.name }}</td>
+            <td>{{ release.revision }}</td>
+            <td>{{ release.updated }}</td>
+            <td>{{ release.status }}</td>
+            <td>{{ release.chart }}</td>
+            <td>{{ release.namespace }}</td>
+            <td class="action_column"><a href="{{ url_for('ui.cluster_helm_delete', cluster_id=cluster.id, name=release.name) }}"><i class="mdi mdi-delete-forever"></i></a></td>
+          </tr>
+          {% else %}
+          <tr style="pointer-events: none;"><td colspan="6" class="text-center">No Items</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Helm Charts</h3>
+    <div class="filter-box clearfix">
+      <div id="filters" class="btn-group btn-group-sm" role="group">
+        <a class="btn btn-default" data-filter="*">All</a>
+        {% set tags = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
+        {% for tag in tags %}
+        <a class="btn btn-default" data-filter=".{{ tag }}">{{ tag }}</a>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="grid clearfix">
+      {% for chart in helm.catalog %}
+      <a href="{{ url_for('ui.cluster_helm_install', cluster_id=cluster.id, name='stable/' + chart.name) }}" class="addon-item {{ chart.tag }}" data-category="{{ chart.tag }}">
+        <div class="item-icon" style="background-image: url('{{ chart.icon }}');"></div>
+        <div class="item-label">
+          <span>{{ chart.name }}</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
 </div>
 
 <svg class="kube-topology" hidden>

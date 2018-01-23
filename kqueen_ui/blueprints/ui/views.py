@@ -578,12 +578,22 @@ class ClusterDetail(KQueenView):
             # obj.apply(form.apply.data)
             pass
 
+        from kqueen_ui.helm import HelmHandler
+        helm_handler = HelmHandler()
+        helm_catalog = helm_handler.get_catalog()
+        helm_list = self.kqueen_request('cluster', 'helm_list', fnargs=(cluster_id,))
+        helm = {
+            'catalog': helm_catalog,
+            'list': helm_list
+        }
+
         return render_template(
             'ui/cluster_detail.html',
             cluster=cluster,
             status=status,
             state_class=state_class,
-            form=form
+            form=form,
+            helm=helm
         )
 
 
@@ -645,6 +655,24 @@ class ClusterRow(KQueenView):
         return jsonify(data)
 
 
+class ClusterHelmInstall(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
+
+    def handle(self, cluster_id, name):
+        self.kqueen_request('cluster', 'helm_install', fnargs=(cluster_id, name))
+        return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
+
+
+class ClusterHelmDelete(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
+
+    def handle(self, cluster_id, name):
+        self.kqueen_request('cluster', 'helm_delete', fnargs=(cluster_id, name))
+        return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
+
+
 ui.add_url_rule('/clusters/create', view_func=ClusterCreate.as_view('cluster_create'))
 ui.add_url_rule('/clusters/<cluster_id>/delete', view_func=ClusterDelete.as_view('cluster_delete'))
 ui.add_url_rule('/clusters/<cluster_id>/deployment-status', view_func=ClusterDeploymentStatus.as_view('cluster_deployment_status'))
@@ -653,3 +681,5 @@ ui.add_url_rule('/clusters/<cluster_id>/resize', view_func=ClusterResize.as_view
 ui.add_url_rule('/clusters/<cluster_id>/kubeconfig', view_func=ClusterKubeconfig.as_view('cluster_kubeconfig'))
 ui.add_url_rule('/clusters/<cluster_id>/topology-data', view_func=ClusterTopologyData.as_view('cluster_topology_data'))
 ui.add_url_rule('/clusters/<cluster_id>/row/<index>', view_func=ClusterRow.as_view('cluster_row'))
+ui.add_url_rule('/clusters/<cluster_id>/helm/install/<path:name>', view_func=ClusterHelmInstall.as_view('cluster_helm_install'))
+ui.add_url_rule('/clusters/<cluster_id>/helm/delete/<path:name>', view_func=ClusterHelmDelete.as_view('cluster_helm_delete'))
