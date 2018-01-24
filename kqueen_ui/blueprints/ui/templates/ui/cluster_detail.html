@@ -1,6 +1,7 @@
 {% extends "ui/base.html" %}
 
 {% from "ui/partial/form.html" import render_form %}
+{% from "ui/partial/_helm_tab.html" import render_helm_tab with context %}
 
 {% block page_header %}Cluster {{ cluster.name }} detail{% endblock %}
 
@@ -475,59 +476,7 @@
   {% endif %}
 
   <div class="tab-pane" id="helm_charts">
-    <h3>Installed Releases</h3>
-
-    <div class="table-container">
-      <table class="table table-hover no-actions">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Revision</th>
-            <th>Updated</th>
-            <th>Status</th>
-            <th>Chart</th>
-            <th>Namespace</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for release in helm.list %}
-          <tr>
-            <td>{{ release.name }}</td>
-            <td>{{ release.revision }}</td>
-            <td>{{ release.updated }}</td>
-            <td>{{ release.status }}</td>
-            <td>{{ release.chart }}</td>
-            <td>{{ release.namespace }}</td>
-            <td class="action_column"><a href="{{ url_for('ui.cluster_helm_delete', cluster_id=cluster.id, name=release.name) }}"><i class="mdi mdi-delete-forever"></i></a></td>
-          </tr>
-          {% else %}
-          <tr style="pointer-events: none;"><td colspan="6" class="text-center">No Items</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <h3>Helm Charts</h3>
-    <div class="filter-box clearfix">
-      <div id="filters" class="btn-group btn-group-sm" role="group">
-        <a class="btn btn-default" data-filter="*">All</a>
-        {% set tags = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
-        {% for tag in tags %}
-        <a class="btn btn-default" data-filter=".{{ tag }}">{{ tag }}</a>
-        {% endfor %}
-      </div>
-    </div>
-    <div class="grid clearfix">
-      {% for chart in helm.catalog %}
-      <a href="{{ url_for('ui.cluster_helm_install', cluster_id=cluster.id, name='stable/' + chart.name) }}" class="addon-item {{ chart.tag }}" data-category="{{ chart.tag }}">
-        <div class="item-icon" style="background-image: url('{{ chart.icon }}');"></div>
-        <div class="item-label">
-          <span>{{ chart.name }}</span>
-        </div>
-      </a>
-      {% endfor %}
-    </div>
+    {{ render_helm_tab(cluster.id, status) }}
   </div>
 </div>
 
@@ -558,6 +507,47 @@
 {% endblock %}
 
 {% block extrajs %}
+<script>
+var helmTabRefreshFn = function(){
+  $.get("{{ url_for('ui.cluster_helm_tab', cluster_id=cluster.id) }}", function(data){
+    if( data.response == 200 ){
+      $('#helm_charts').html(data.helm_tab);
+    }
+  });
+};
+var pollHelmTabFn = function(){
+  var timer = setInterval(function(){
+    console.log('Checking Tiller deployment ...')
+    $.get("{{ url_for('ui.cluster_helm_tab', cluster_id=cluster.id) }}", function(data){
+      if( data.response == 200 && data.tiller_status >= 1 ){
+        $('#helm_charts').html(data.helm_tab);
+        var $grid = $('.grid').isotope({
+          itemSelector: '.addon-item',
+          layoutMode: 'fitRows',
+          filter: '.A'
+        });
+        $('.grid').each(function() {
+          var $grid = $( this );
+          $grid.css('min-height', $grid.innerHeight());
+        });
+        // bind filter button click
+        $('#filters a').on( 'click', function(ev) {
+          ev.preventDefault();
+          var filterValue = $( this ).attr('data-filter');
+          $grid.isotope({ filter: filterValue });
+        });
+        clearInterval(timer);
+      }
+    });
+  }, 10000);
+}
+$('body').on('click','a#enableHelm',function(btn){
+  btn.preventDefault();
+  $.get("{{ url_for('ui.cluster_helm_init', cluster_id=cluster.id) }}");
+  helmTabRefreshFn();
+  pollHelmTabFn();
+});
+</script>
 <script>
   // init Clipboard
   new Clipboard('.clipboard');
@@ -600,7 +590,6 @@
 (function(){
   var progressRefreshFn = function(){
     $.get("{{ url_for('ui.cluster_deployment_status', cluster_id=cluster.id) }}", function(res){
-      console.log(JSON.stringify(res));
       if(res.response == 200){
         $('#progress .ui-progress-bar').css('width', res.progress + '%')
         $('#progress .progress-bar-background > span').html(res.progress + '%');

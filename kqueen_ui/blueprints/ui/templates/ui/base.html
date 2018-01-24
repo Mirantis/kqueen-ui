@@ -63,8 +63,7 @@
       </div>
     </div>
 
-    {% block modals %}
-    {% endblock %}
+    {% block modals %}{% endblock %}
 
     <script src="{{ url_for('static', filename='js/vendor.js') }}"></script>
     <script src="{{ url_for('static', filename='js/all.min.js') }}"></script>
@@ -93,6 +92,13 @@
       });
     </script>
     {# END PRELOADER #}
+
+    <script>
+    $('body').on('click','.async-modal',function(e){
+      e.preventDefault();
+      $('#asyncModal').modal('show').find('.modal-body').load($(this).attr('href'));
+    });
+    </script>
 
     {#
     {% include "ui/partial/footer.html" %}

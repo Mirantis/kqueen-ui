@@ -25,7 +25,8 @@ var K8SVisualisations = function(K8SVisualisations) {
       $(document).one("shown.bs.tab", "a[href='#helm_charts']", function(e) {
         var $grid = $('.grid').isotope({
           itemSelector: '.addon-item',
-          layoutMode: 'fitRows'
+          layoutMode: 'fitRows',
+          filter: '.A'
         });
         $('.grid').each(function() {
           var $grid = $( this );

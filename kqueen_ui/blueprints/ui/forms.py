@@ -9,6 +9,8 @@ from kqueen_ui.utils.fields import (
 from kqueen_ui.utils.forms import FlaskExtendableForm
 from wtforms.validators import DataRequired, Email, EqualTo, Length
 
+import yaml
+
 
 class LoginForm(FlaskExtendableForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -109,3 +111,24 @@ class ClusterCreateForm(FlaskExtendableForm):
 
 class ClusterApplyForm(FlaskExtendableForm):
     apply = TextAreaField('Apply Resource', validators=[DataRequired()])
+
+
+class ClusterHelmCreateForm(FlaskExtendableForm):
+    name = StringField('Name')
+    overrides = TextAreaField('Value Overrides')
+
+    def validate(self):
+        if not FlaskExtendableForm.validate(self):
+            return False
+
+        error = 'Value Overrides must be valid YAML key/value pairs.'
+        if self.overrides.data:
+            try:
+                overrides = yaml.load(self.overrides.data)
+                if not isinstance(overrides, dict):
+                    self.overrides.errors.append(error)
+                    return False
+            except Exception:
+                self.overrides.errors.append(error)
+                return False
+        return True
