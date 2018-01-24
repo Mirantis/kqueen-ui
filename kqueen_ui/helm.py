@@ -1,5 +1,3 @@
-from kqueen_ui import cache
-
 import asyncio
 import concurrent.futures
 import requests
@@ -37,6 +35,7 @@ class HelmHandler:
         return requests.get(url, headers=headers, timeout=3)
 
     def _get_chart(self, name):
+        from kqueen_ui import cache
         cache_key = 'helm-{}'.format(name)
         cached_chart = cache.get(cache_key)
         if cached_chart:
