@@ -194,9 +194,14 @@ class ClusterManager(BaseManager):
         }
         return self.request('%s/resize' % uuid, method='PATCH', payload=payload)
 
-    def helm_install(self, uuid, name):
+    def helm_init(self, uuid):
+        return self.request('%s/helm/init' % uuid, method='GET')
+
+    def helm_install(self, uuid, name, release_name=None, overrides=None):
         payload = {
-            'name': name
+            'chart': name,
+            'release_name': release_name,
+            'overrides': overrides
         }
         return self.request('%s/helm/install' % uuid, method='POST', payload=payload)
 
