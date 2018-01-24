@@ -127,7 +127,7 @@
               {% endfor %}
             </td>
             <td class="action_column">
-              <div class="progress-bar-background">
+              <div class="progress-bar-background primary">
                 <span>{{ node.pods.pods }}/{{ node.pods.maxpods }}</span>
                 <div class="ui-progress-bar" style="width: {{ node.pods.percentage }}%;"></div>
               </div>
@@ -157,7 +157,7 @@
             <td>{{ deployment.name }}</td>
             <td>{{ deployment.namespace }}</td>
             <td>
-              <div class="progress-bar-background">
+              <div class="progress-bar-background primary">
                 <span>{{ deployment.replicas.ready }}/{{ deployment.replicas.desired }}</span>
                 <div class="ui-progress-bar" style="width: {{ deployment.replicas.percentage }}%;"></div>
               </div>
