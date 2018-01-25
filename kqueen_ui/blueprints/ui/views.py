@@ -730,6 +730,7 @@ class ClusterHelmCreate(KQueenView):
     methods = ['GET', 'POST']
 
     def handle(self, cluster_id, name):
+        is_json = request.headers['Accept'] == 'application/json'
         action = url_for('ui.cluster_helm_create', cluster_id=cluster_id, name=name)
         form = ClusterHelmCreateForm()
         if form.validate_on_submit():
@@ -741,8 +742,17 @@ class ClusterHelmCreate(KQueenView):
             }
             self.kqueen_request('cluster', 'helm_install', fnkwargs=fnkwargs)
             flash('Chart {} successfully installed.'.format(name), 'success')
+            if is_json:
+                data = {
+                    'response': 301,
+                    'redirect': url_for('ui.cluster_detail', cluster_id=cluster_id) + '#helm_chartsTab'
+                }
+                return jsonify(data)
+            return redirect(url_for('ui.cluster_detail', cluster_id=cluster_id) + '#helm_chartsTab')
+        if is_json:
             data = {
-                'redirect': url_for('ui.cluster_detail', cluster_id=cluster_id) + '#helm_chartsTab'
+                'response': 200,
+                'body': render_template('ui/cluster_helm_create.html', form=form, action=action)
             }
             return jsonify(data)
         return render_template('ui/cluster_helm_create.html', form=form, action=action)

@@ -541,8 +541,9 @@ var pollHelmTabFn = function(){
     });
   }, 10000);
 }
-$('body').on('click','a#enableHelm',function(btn){
-  btn.preventDefault();
+$('body').on('click','a#enableHelm',function(ev){
+  ev.preventDefault();
+  $('#enableHelm').addClass('disabled');
   $.get("{{ url_for('ui.cluster_helm_init', cluster_id=cluster.id) }}");
   helmTabRefreshFn();
   pollHelmTabFn();

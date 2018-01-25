@@ -114,7 +114,7 @@ class ClusterApplyForm(FlaskExtendableForm):
 
 
 class ClusterHelmCreateForm(FlaskExtendableForm):
-    name = StringField('Name')
+    name = StringField('Name', render_kw={'placeholder': 'Will be generated if left empty'})
     overrides = TextAreaField('Value Overrides')
 
     def validate(self):

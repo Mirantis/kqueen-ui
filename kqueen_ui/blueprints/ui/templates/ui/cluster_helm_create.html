@@ -7,17 +7,30 @@ $('.modal input[type=submit]').click(function(ev){
   var form = $('.modal input[type=submit]').closest('form'),
       btn = $('.modal input[type=submit]');
   ev.preventDefault();
-  $.post(form.attr('action'), form.serialize(), function(data){
-    if( typeof data === 'object' ){
+  btn.addClass('disabled');
+  $.ajax({
+    url: form.attr('action'),
+    method: 'POST',
+    data: form.serialize(),
+    headers: {
+      'Accept': 'application/json'
+    }
+  })
+  .done(function(data, responseStatus, xhr){
+    if( data.response === 200 ){
+      btn.off();
+      $('#asyncModal .modal-body').html(data.body);
+    }
+    if( data.response === 301 ){
       if( window.location.href.endsWith(data.redirect) ){
         window.location.reload(1);
       }else{
         window.location.replace(data.redirect);
       }
-    }else{
-      btn.off();
-      $('#asyncModal .modal-body').html(data);
     }
-  ;})
-;});
+  })
+  .fail(function(data, responseStatus, xhr){
+    window.location.reload(1);
+  });
+});
 </script>
