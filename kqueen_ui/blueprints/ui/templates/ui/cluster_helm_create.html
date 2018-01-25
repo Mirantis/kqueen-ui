@@ -4,21 +4,22 @@
 
 <script>
 $('.modal input[type=submit]').click(function(ev){
-  var form = $('.modal input[type=submit]').closest('form'),
-      btn = $('.modal input[type=submit]');
+  var $btn = $('.modal input[type=submit]')
+   ,  $form = $btn.closest('form')
+   ;
   ev.preventDefault();
-  btn.addClass('disabled');
+  $btn.addClass('disabled');
   $.ajax({
-    url: form.attr('action'),
+    url: $form.attr('action'),
     method: 'POST',
-    data: form.serialize(),
+    data: $form.serialize(),
     headers: {
       'Accept': 'application/json'
     }
   })
   .done(function(data, responseStatus, xhr){
     if( data.response === 200 ){
-      btn.off();
+      $btn.off();
       $('#asyncModal .modal-body').html(data.body);
     }
     if( data.response === 301 ){

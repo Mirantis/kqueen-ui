@@ -96,7 +96,28 @@
     <script>
     $('body').on('click','.async-modal',function(e){
       e.preventDefault();
-      $('#asyncModal').modal('show').find('.modal-body').load($(this).attr('href'));
+      $.ajax({
+        url: $(this).attr('href'),
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
+      .done(function(data, responseStatus, xhr){
+        if( data.response === 200 ){
+          $('#asyncModal').modal('show').find('.modal-body').html(data.body);
+        }
+        if( data.response === 301 ){
+          if( window.location.href.endsWith(data.redirect) ){
+            window.location.reload(1);
+          }else{
+            window.location.replace(data.redirect);
+          }
+        }
+      })
+      .fail(function(data, responseStatus, xhr){
+        window.location.reload(1);
+      });
     });
     </script>
 

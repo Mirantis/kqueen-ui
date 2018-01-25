@@ -14,6 +14,7 @@ from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
 from .utils import generate_password, prettify_engine_name, status_for_cluster_detail, sanitize_resource_metadata
 
 import logging
+import yaml
 
 logger = logging.getLogger(__name__)
 mail = Mail()
@@ -738,7 +739,7 @@ class ClusterHelmCreate(KQueenView):
                 'uuid': cluster_id,
                 'name': name,
                 'release_name': form.name.data or None,
-                'overrides': form.overrides.data or None
+                'overrides': yaml.load(form.overrides.data) or None
             }
             self.kqueen_request('cluster', 'helm_install', fnkwargs=fnkwargs)
             flash('Chart {} successfully installed.'.format(name), 'success')
