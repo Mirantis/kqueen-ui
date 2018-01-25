@@ -6,7 +6,6 @@ from flask_mail import Mail, Message
 from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.auth import authenticate, confirm_token, generate_confirmation_token
 from kqueen_ui.generic_views import KQueenView
-from kqueen_ui.helm import HelmHandler
 from kqueen_ui.utils.wrappers import login_required
 
 from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
@@ -580,8 +579,16 @@ class ClusterDetail(KQueenView):
             pass
 
         if status['tiller'] >= 1:
-            helm_handler = HelmHandler()
-            helm_catalog = helm_handler.get_catalog()
+            from kqueen_ui import cache
+            cache_key = 'helm-catalog-{}'.format(cluster_id)
+            _catalog = cache.get(cache_key)
+            if not _catalog:
+                _catalog = self.kqueen_request('cluster', 'helm_catalog', fnargs=(cluster_id,))
+                cache.set(cache_key, _catalog, 60 * 60)
+            helm_catalog = [c['chart'] for c in _catalog if c.get('chart')]
+            # patch tags for now
+            for chart in helm_catalog:
+                chart['tag'] = chart['name'][0].capitalize()
             helm_list = self.kqueen_request('cluster', 'helm_list', fnargs=(cluster_id,))
             helm = {
                 'catalog': helm_catalog,
@@ -689,8 +696,16 @@ class ClusterHelmTab(KQueenView):
         status = status_for_cluster_detail(_status_data)
 
         if status['tiller'] >= 1:
-            helm_handler = HelmHandler()
-            helm_catalog = helm_handler.get_catalog()
+            from kqueen_ui import cache
+            cache_key = 'helm-catalog-{}'.format(cluster_id)
+            _catalog = cache.get(cache_key)
+            if not _catalog:
+                _catalog = self.kqueen_request('cluster', 'helm_catalog', fnargs=(cluster_id,))
+                cache.set(cache_key, _catalog, 60 * 60)
+            helm_catalog = [c['chart'] for c in _catalog if c.get('chart')]
+            # patch tags for now
+            for chart in helm_catalog:
+                chart['tag'] = chart['name'][0].capitalize()
             helm_list = self.kqueen_request('cluster', 'helm_list', fnargs=(cluster_id,))
             helm = {
                 'catalog': helm_catalog,

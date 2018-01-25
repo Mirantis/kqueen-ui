@@ -214,6 +214,10 @@ class ClusterManager(BaseManager):
     def helm_list(self, uuid):
         return self.request('%s/helm/list' % uuid)
 
+    def helm_catalog(self, uuid):
+        return self.request('%s/helm/catalog' % uuid)
+
+
 class ProvisionerManager(BaseManager):
     resource_url = 'provisioners/'
 
