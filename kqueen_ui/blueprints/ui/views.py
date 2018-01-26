@@ -731,7 +731,14 @@ class ClusterHelmCreate(KQueenView):
     methods = ['GET', 'POST']
 
     def handle(self, cluster_id, name):
+        from kqueen_ui import cache
         is_json = request.headers['Accept'] == 'application/json'
+        cache_key = 'helm-chart-{}-values-{}'.format(name, cluster_id)
+        values = cache.get(cache_key)
+        if not values:
+            response = self.kqueen_request('cluster', 'helm_inspect', fnargs=(cluster_id, name,))
+            values = response.get('values')
+            cache.set(cache_key, values, 60 * 60)
         action = url_for('ui.cluster_helm_create', cluster_id=cluster_id, name=name)
         form = ClusterHelmCreateForm()
         if form.validate_on_submit():
@@ -753,10 +760,10 @@ class ClusterHelmCreate(KQueenView):
         if is_json:
             data = {
                 'response': 200,
-                'body': render_template('ui/cluster_helm_create.html', form=form, action=action)
+                'body': render_template('ui/cluster_helm_create.html', form=form, action=action, values=values)
             }
             return jsonify(data)
-        return render_template('ui/cluster_helm_create.html', form=form, action=action)
+        return render_template('ui/cluster_helm_create.html', form=form, action=action, values=values)
 
 
 ui.add_url_rule('/clusters/create', view_func=ClusterCreate.as_view('cluster_create'))

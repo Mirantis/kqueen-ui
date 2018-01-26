@@ -197,6 +197,9 @@ class ClusterManager(BaseManager):
     def helm_init(self, uuid):
         return self.request('%s/helm/init' % uuid, method='GET')
 
+    def helm_inspect(self, uuid, chart):
+        return self.request('%s/helm/inspect/%s' % (uuid, chart), method='GET')
+
     def helm_install(self, uuid, name, release_name=None, overrides=None):
         payload = {
             'chart': name,
