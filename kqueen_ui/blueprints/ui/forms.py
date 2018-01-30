@@ -115,7 +115,7 @@ class ClusterApplyForm(FlaskExtendableForm):
 
 class ClusterHelmCreateForm(FlaskExtendableForm):
     name = StringField('Name', render_kw={'placeholder': 'Will be generated if left empty'})
-    overrides = TextAreaField('Value Overrides', render_kw={'rows': 10})
+    overrides = TextAreaField('Value Overrides', render_kw={'rows': 10, 'class': 'form-control yaml-field'})
 
     def validate(self):
         if not FlaskExtendableForm.validate(self):
