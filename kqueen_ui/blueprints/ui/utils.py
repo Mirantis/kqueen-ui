@@ -15,6 +15,8 @@ config = current_config()
 
 def status_for_cluster_detail(_status):
     status = {}
+    # Check Helm Tiller status
+    status['tiller'] = -1
     podcount = 0
     images = []
 
@@ -180,6 +182,10 @@ def status_for_cluster_detail(_status):
                 'replicas': deployment_replicas,
                 'containers': deployment_containers
             })
+            # Check for Helm Tiller status here, while we are iteration over deployments anyways
+            if deployment_namespace == 'kube-system' and deployment_name == 'tiller-deploy':
+                _available = deployment.get('status', {}).get('ready_replicas', '0')
+                status['tiller'] = int(_available) if _available else 0
     status['deployments'] = deployments
 
     services = []

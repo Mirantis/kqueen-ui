@@ -3,6 +3,8 @@ from kqueen_ui.auth import is_authorized
 from kqueen_ui.config import current_config
 from urllib.parse import urlsplit
 
+import yaml as pyaml
+
 config = current_config().to_dict()
 
 CLUSTER_STATE_MAP = {
@@ -47,10 +49,15 @@ def user_status_icon_class(status):
     return USER_STATE_MAP.get(status, 'mdi-alert-outline')
 
 
+def yaml(string):
+    return pyaml.safe_dump(string, indent=2, default_flow_style=False)
+
+
 filters = {
     'cluster_status_icon': cluster_status_icon,
     'provisioner_status_icon_class': provisioner_status_icon_class,
-    'user_status_icon_class': user_status_icon_class
+    'user_status_icon_class': user_status_icon_class,
+    'yaml': yaml
 }
 
 

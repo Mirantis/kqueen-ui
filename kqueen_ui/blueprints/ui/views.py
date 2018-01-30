@@ -10,10 +10,11 @@ from kqueen_ui.utils.wrappers import login_required
 
 from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
                     ChangePasswordForm, UserInviteForm, RequestPasswordResetForm,
-                    PasswordResetForm)
+                    PasswordResetForm, ClusterHelmCreateForm)
 from .utils import generate_password, prettify_engine_name, status_for_cluster_detail, sanitize_resource_metadata
 
 import logging
+import yaml
 
 logger = logging.getLogger(__name__)
 mail = Mail()
@@ -578,6 +579,24 @@ class ClusterDetail(KQueenView):
             # obj.apply(form.apply.data)
             pass
 
+        if status['tiller'] >= 1:
+            from kqueen_ui import cache
+            cache_key = 'helm-catalog-{}'.format(cluster_id)
+            _catalog = cache.get(cache_key)
+            if not _catalog:
+                _catalog = self.kqueen_request('cluster', 'helm_catalog', fnargs=(cluster_id,))
+                cache.set(cache_key, _catalog, 60 * 60)
+            helm_catalog = [c['chart'] for c in _catalog if c.get('chart')]
+            # patch tags for now
+            for chart in helm_catalog:
+                chart['tag'] = chart['name'][0].capitalize()
+            helm_list = self.kqueen_request('cluster', 'helm_list', fnargs=(cluster_id,))
+            helm = {
+                'catalog': helm_catalog,
+                'list': helm_list
+            }
+            status['helm'] = helm
+
         return render_template(
             'ui/cluster_detail.html',
             cluster=cluster,
@@ -645,6 +664,108 @@ class ClusterRow(KQueenView):
         return jsonify(data)
 
 
+class ClusterHelmInit(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
+
+    def handle(self, cluster_id):
+        self.kqueen_request('cluster', 'helm_init', fnargs=(cluster_id,))
+        return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
+
+
+class ClusterHelmDelete(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
+
+    def handle(self, cluster_id, name):
+        self.kqueen_request('cluster', 'helm_delete', fnargs=(cluster_id, name))
+        flash('Release {} successfully deleted.'.format(name), 'success')
+        return redirect(url_for('ui.cluster_detail', cluster_id=cluster_id) + '#helm_chartsTab')
+
+
+class ClusterHelmTab(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
+
+    def handle(self, cluster_id):
+        cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
+        _status_data = {}
+
+        if cluster['state'] == app.config['CLUSTER_OK_STATE']:
+            _status_data = self.kqueen_request('cluster', 'status', fnargs=(cluster_id,))
+
+        status = status_for_cluster_detail(_status_data)
+
+        if status['tiller'] >= 1:
+            from kqueen_ui import cache
+            cache_key = 'helm-catalog-{}'.format(cluster_id)
+            _catalog = cache.get(cache_key)
+            if not _catalog:
+                _catalog = self.kqueen_request('cluster', 'helm_catalog', fnargs=(cluster_id,))
+                cache.set(cache_key, _catalog, 60 * 60)
+            helm_catalog = [c['chart'] for c in _catalog if c.get('chart')]
+            # patch tags for now
+            for chart in helm_catalog:
+                chart['tag'] = chart['name'][0].capitalize()
+            helm_list = self.kqueen_request('cluster', 'helm_list', fnargs=(cluster_id,))
+            helm = {
+                'catalog': helm_catalog,
+                'list': helm_list
+            }
+            status['helm'] = helm
+
+        data = {
+            'response': 200,
+            'tiller_status': status['tiller'],
+            'helm_tab': render_template(
+                'ui/partial/helm_tab.html',
+                cluster_id=cluster_id,
+                status=status
+            )
+        }
+        return jsonify(data)
+
+
+class ClusterHelmCreate(KQueenView):
+    decorators = [login_required]
+    methods = ['GET', 'POST']
+
+    def handle(self, cluster_id, name):
+        from kqueen_ui import cache
+        is_json = request.headers['Accept'] == 'application/json'
+        cache_key = 'helm-chart-{}-values-{}'.format(name, cluster_id)
+        values = cache.get(cache_key)
+        if not values:
+            response = self.kqueen_request('cluster', 'helm_inspect', fnargs=(cluster_id, name,))
+            values = response.get('values')
+            cache.set(cache_key, values, 60 * 60)
+        action = url_for('ui.cluster_helm_create', cluster_id=cluster_id, name=name)
+        form = ClusterHelmCreateForm()
+        if form.validate_on_submit():
+            fnkwargs = {
+                'uuid': cluster_id,
+                'name': name,
+                'release_name': form.name.data or None,
+                'overrides': yaml.load(form.overrides.data) or None
+            }
+            self.kqueen_request('cluster', 'helm_install', fnkwargs=fnkwargs)
+            flash('Chart {} successfully installed.'.format(name), 'success')
+            if is_json:
+                data = {
+                    'response': 301,
+                    'redirect': url_for('ui.cluster_detail', cluster_id=cluster_id) + '#helm_chartsTab'
+                }
+                return jsonify(data)
+            return redirect(url_for('ui.cluster_detail', cluster_id=cluster_id) + '#helm_chartsTab')
+        if is_json:
+            data = {
+                'response': 200,
+                'body': render_template('ui/cluster_helm_create.html', form=form, action=action, values=values)
+            }
+            return jsonify(data)
+        return render_template('ui/cluster_helm_create.html', form=form, action=action, values=values)
+
+
 ui.add_url_rule('/clusters/create', view_func=ClusterCreate.as_view('cluster_create'))
 ui.add_url_rule('/clusters/<cluster_id>/delete', view_func=ClusterDelete.as_view('cluster_delete'))
 ui.add_url_rule('/clusters/<cluster_id>/deployment-status', view_func=ClusterDeploymentStatus.as_view('cluster_deployment_status'))
@@ -653,3 +774,7 @@ ui.add_url_rule('/clusters/<cluster_id>/resize', view_func=ClusterResize.as_view
 ui.add_url_rule('/clusters/<cluster_id>/kubeconfig', view_func=ClusterKubeconfig.as_view('cluster_kubeconfig'))
 ui.add_url_rule('/clusters/<cluster_id>/topology-data', view_func=ClusterTopologyData.as_view('cluster_topology_data'))
 ui.add_url_rule('/clusters/<cluster_id>/row/<index>', view_func=ClusterRow.as_view('cluster_row'))
+ui.add_url_rule('/clusters/<cluster_id>/helm/tab', view_func=ClusterHelmTab.as_view('cluster_helm_tab'))
+ui.add_url_rule('/clusters/<cluster_id>/helm/init', view_func=ClusterHelmInit.as_view('cluster_helm_init'))
+ui.add_url_rule('/clusters/<cluster_id>/helm/create/<path:name>', view_func=ClusterHelmCreate.as_view('cluster_helm_create'))
+ui.add_url_rule('/clusters/<cluster_id>/helm/delete/<path:name>', view_func=ClusterHelmDelete.as_view('cluster_helm_delete'))

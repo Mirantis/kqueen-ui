@@ -1,6 +1,7 @@
 {% extends "ui/base.html" %}
 
 {% from "ui/partial/form.html" import render_form %}
+{% from "ui/partial/_helm_tab.html" import render_helm_tab with context %}
 
 {% block page_header %}Cluster {{ cluster.name }} detail{% endblock %}
 
@@ -88,6 +89,7 @@
   {% if config.ENABLE_ADDONS %}
   <li role="presentation"><a data-toggle="tab" href="#addons" data-tabcode="#addonsTab">Addons</a></li>
   {% endif %}
+  <li role="presentation"><a data-toggle="tab" href="#helm_charts" data-tabcode="#helm_chartsTab">Helm</a></li>
 </ul>
 
 <div class="tab-content clearfix{% if cluster.state != config.CLUSTER_OK_STATE %} hidden{% endif %}">
@@ -472,6 +474,10 @@
     </div>
   </div>
   {% endif %}
+
+  <div class="tab-pane" id="helm_charts">
+    {{ render_helm_tab(cluster.id, status) }}
+  </div>
 </div>
 
 <svg class="kube-topology" hidden>
@@ -501,6 +507,48 @@
 {% endblock %}
 
 {% block extrajs %}
+<script>
+var helmTabRefreshFn = function(){
+  $.get("{{ url_for('ui.cluster_helm_tab', cluster_id=cluster.id) }}", function(data){
+    if( data.response == 200 ){
+      $('#helm_charts').html(data.helm_tab);
+    }
+  });
+};
+var pollHelmTabFn = function(){
+  var timer = setInterval(function(){
+    console.log('Checking Tiller deployment ...')
+    $.get("{{ url_for('ui.cluster_helm_tab', cluster_id=cluster.id) }}", function(data){
+      if( data.response == 200 && data.tiller_status >= 1 ){
+        $('#helm_charts').html(data.helm_tab);
+        var $grid = $('.grid').isotope({
+          itemSelector: '.addon-item',
+          layoutMode: 'fitRows',
+          filter: '.A'
+        });
+        $('.grid').each(function() {
+          var $grid = $( this );
+          $grid.css('min-height', $grid.innerHeight());
+        });
+        // bind filter button click
+        $('#filters a').on( 'click', function(ev) {
+          ev.preventDefault();
+          var filterValue = $( this ).attr('data-filter');
+          $grid.isotope({ filter: filterValue });
+        });
+        clearInterval(timer);
+      }
+    });
+  }, 10000);
+}
+$('body').on('click','a#enableHelm',function(ev){
+  ev.preventDefault();
+  $('#enableHelm').addClass('disabled');
+  $.get("{{ url_for('ui.cluster_helm_init', cluster_id=cluster.id) }}");
+  helmTabRefreshFn();
+  pollHelmTabFn();
+});
+</script>
 <script>
   // init Clipboard
   new Clipboard('.clipboard');
@@ -543,7 +591,6 @@
 (function(){
   var progressRefreshFn = function(){
     $.get("{{ url_for('ui.cluster_deployment_status', cluster_id=cluster.id) }}", function(res){
-      console.log(JSON.stringify(res));
       if(res.response == 200){
         $('#progress .ui-progress-bar').css('width', res.progress + '%')
         $('#progress .progress-bar-background > span').html(res.progress + '%');

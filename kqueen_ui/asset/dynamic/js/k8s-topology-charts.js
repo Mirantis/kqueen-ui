@@ -16,7 +16,24 @@ var K8SVisualisations = function(K8SVisualisations) {
           $grid.css('min-height', $grid.innerHeight());
         });
         // bind filter button click
-        $('#filters').on( 'click', 'a', function(ev) {
+        $('#filters a').on( 'click', function(ev) {
+        ev.preventDefault();
+        var filterValue = $( this ).attr('data-filter');
+          $grid.isotope({ filter: filterValue });
+        });
+      });
+      $(document).one("shown.bs.tab", "a[href='#helm_charts']", function(e) {
+        var $grid = $('.grid').isotope({
+          itemSelector: '.addon-item',
+          layoutMode: 'fitRows',
+          filter: '.A'
+        });
+        $('.grid').each(function() {
+          var $grid = $( this );
+          $grid.css('min-height', $grid.innerHeight());
+        });
+        // bind filter button click
+        $('#filters a').on( 'click', function(ev) {
         ev.preventDefault();
         var filterValue = $( this ).attr('data-filter');
           $grid.isotope({ filter: filterValue });

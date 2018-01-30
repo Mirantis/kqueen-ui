@@ -267,6 +267,11 @@ a.disabled {
   display: inline-block;
 }
 
+.yaml-field {
+  font-family: $font-family-monospace;
+  font-size: 15px;
+}
+
 label.error {
   @extend .help-block;
   color: $state-danger-text;

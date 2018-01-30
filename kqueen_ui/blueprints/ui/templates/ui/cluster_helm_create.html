@@ -1,0 +1,44 @@
+{% from "ui/partial/form.html" import render_form %}
+<div class="row">
+  <div class="col-md-6">
+  {{ render_form(form, action=action) }}
+  </div>
+  <div class="col-md-6">
+    <div style="font-weight: 700; margin-bottom: 10px;">Default Values</div>
+    <pre>{{ values|yaml }}</pre>
+  </div>
+</div>
+
+<script>
+$('.modal input[type=submit]').click(function(ev){
+  var $btn = $('.modal input[type=submit]')
+   ,  $form = $btn.closest('form')
+   ;
+  ev.preventDefault();
+  $btn.addClass('disabled');
+  $.ajax({
+    url: $form.attr('action'),
+    method: 'POST',
+    data: $form.serialize(),
+    headers: {
+      'Accept': 'application/json'
+    }
+  })
+  .done(function(data, responseStatus, xhr){
+    if( data.response === 200 ){
+      $btn.off();
+      $('#asyncModal .modal-body').html(data.body);
+    }
+    if( data.response === 301 ){
+      if( window.location.href.endsWith(data.redirect) ){
+        window.location.reload(1);
+      }else{
+        window.location.replace(data.redirect);
+      }
+    }
+  })
+  .fail(function(data, responseStatus, xhr){
+    window.location.reload(1);
+  });
+});
+</script>
