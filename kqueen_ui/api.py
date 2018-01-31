@@ -205,6 +205,9 @@ class ProvisionerManager(BaseManager):
 class OrganizationManager(BaseManager):
     resource_url = 'organizations/'
 
+    def deletable(self, uuid):
+        return self.request('%s/deletable' % uuid, method='GET')
+
     def policy(self, uuid):
         return self.request('%s/policy' % uuid, method='GET')
 
