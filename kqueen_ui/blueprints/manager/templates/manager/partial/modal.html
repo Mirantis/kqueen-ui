@@ -1,0 +1,19 @@
+{% macro render_delete_modal(resource, resource_name, name_key='name') %}
+<div id="delete-{{ resource.id }}" class="modal fade confirm-delete" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+      </div>
+      <div class="modal-body">
+        <p>Are you sure that you want to permanently delete {{ resource.get(name_key, 'UNKNOWN') }}?</p>
+      </div>
+      <div class="modal-footer">
+        {% set delete_view = 'manager.' + resource_name + '_delete' %}
+        {% set delete_kwargs = {resource_name + '_id': resource.id} %}
+        <a href="{{ url_for(delete_view, **delete_kwargs) }}" class="btn btn-danger btn-xs">Delete</a>
+        <button type="button" class="btn btn-default btn-xs" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endmacro %}
