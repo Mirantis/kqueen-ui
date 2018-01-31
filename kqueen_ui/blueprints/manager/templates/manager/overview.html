@@ -5,6 +5,8 @@
 {% block page_header %}Overview{% endblock %}
 
 {% block content %}
+<h3>Organizations</h3>
+
 <div class="table-container">
   <div class="table-actions">
     <a href="{{ url_for('manager.organization_create') }}" role="button" class="btn btn-primary btn-sm">Create Organization</a>
@@ -35,6 +37,8 @@
   </table>
 </div>
 
+<h3>Clusters</h3>
+
 <div class="table-container no-actions" id="tableClusters">
   <table class="table table-hover">
     <thead>
@@ -56,6 +60,8 @@
     </tbody>
   </table>
 </div>
+
+<h3>Provisioners</h3>
 
 <div class="table-container no-actions" id="tableProvisioners">
   <table class="table table-hover">
