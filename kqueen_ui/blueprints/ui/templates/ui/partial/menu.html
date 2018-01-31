@@ -5,6 +5,9 @@
             <ul class="dropdown-menu">
               <li><a href="{{ url_for('ui.user_change_password') }}">Change Password</a></li>
               <li><a href="{{ url_for('ui.organization_manage') }}">Manage Organization</a></li>
+              {% if session.user.get('role', 'member') == 'superadmin' %}
+              <li><a href="{{ url_for('manager.overview') }}">Killzone</a></li>
+              {% endif %}
 	      <li><a href="{{ url_for('ui.logout') }}">Logout</a></li>
             </ul>
           </li>
@@ -14,4 +17,3 @@
 	  <li><a href="{{ url_for('ui.login') }}">Login</a></li>
 	</ul>
 {% endif %}
-
