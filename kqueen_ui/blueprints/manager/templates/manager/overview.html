@@ -1,6 +1,112 @@
 {% extends "ui/base.html" %}
 
+{% from "manager/partial/modal.html" import render_delete_modal %}
+
 {% block page_header %}Overview{% endblock %}
 
 {% block content %}
+<div class="table-container">
+  <div class="table-actions">
+    <a href="{{ url_for('manager.organization_create') }}" role="button" class="btn btn-primary btn-sm">Create Organization</a>
+  </div>
+  <table class="table table-hover">
+    <thead>
+      <th class="table-col-4">Name</th>
+      <th class="table-col-4">Namespace</th>
+      <th class="table-col-4">Created</th>
+      <th class="action_column">Actions</th>
+    </thead>
+    <tbody>
+      {% for organization in organizations %}
+        <tr>
+          <td>{{ organization.name }}</td>
+          <td>{{ organization.namespace }}</td>
+          <td>{{ organization.created_at }}</td>
+          <td class="action_column">
+            <a data-toggle="modal" data-target="#delete-{{ organization.id }}" title="Delete organization">
+              <i class="mdi mdi-delete-forever"></i>
+            </a>
+          </td>
+        </tr>
+      {% else %}
+        <tr style="pointer-events: none;"><td colspan="4" class="text-center">No Items</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="table-container no-actions" id="tableClusters">
+  <table class="table table-hover">
+    <thead>
+      <th class="table-col-3">Namespace</th>
+      <th class="table-col-3">Name</th>
+      <th class="table-col-3">Provisioner</th>
+      <th class="table-col-3">Created</th>
+      <th class="status_column">Status</th>
+      <th class="action_column">Actions</th>
+    </thead>
+    <tbody>
+      <tr style="pointer-events: none;">
+        <td colspan="6" class="text-center">
+          <div class="icon-container">
+            <div class="loading-icon"></div>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-container no-actions" id="tableProvisioners">
+  <table class="table table-hover">
+    <thead>
+      <th class="table-col-3">Namespace</th>
+      <th class="table-col-3">Name</th>
+      <th class="table-col-3">Engine</th>
+      <th class="table-col-3">Created</th>
+      <th class="status_column">Status</th>
+      <th class="action_column">Actions</th>
+    </thead>
+    <tbody>
+      <tr style="pointer-events: none;">
+        <td colspan="6" class="text-center">
+          <div class="icon-container">
+            <div class="loading-icon"></div>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block modals %}
+
+{% for organization in organizations %}
+  {{ render_delete_modal(resource=organization, resource_name='organization') }}
+{% endfor %}
+
+{% endblock %}
+
+{% block extrajs %}
+<script>
+var loadClusters = function(){
+  $.get("{{ url_for('manager.data_clusters') }}", function(data){
+    if( data.response === 200 ){
+      $('#tableClusters').replaceWith(data.body);
+    }
+  });
+};
+var loadProvisioners = function(){
+  $.get("{{ url_for('manager.data_provisioners') }}", function(data){
+    if( data.response === 200 ){
+      $('#tableProvisioners').replaceWith(data.body);
+    }
+  });
+};
+(function(){
+  loadClusters();
+  loadProvisioners();
+})();
+</script>
 {% endblock %}
