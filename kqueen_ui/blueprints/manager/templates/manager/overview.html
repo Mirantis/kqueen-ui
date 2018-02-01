@@ -21,10 +21,15 @@
     <tbody>
       {% for organization in organizations %}
         <tr>
-          <td>{{ organization.namespace }}</td>
+          <td>
+            <a href="{{ url_for('manager.organization_detail', organization_id=organization.id) }}">{{ organization.namespace }}</a>
+          </td>
           <td>{{ organization.name }}</td>
           <td>{{ organization.created_at }}</td>
           <td class="action_column">
+            <a href="{{ url_for('manager.organization_detail', organization_id=organization.id) }}" title="Cluster detail">
+              <i class="mdi mdi-magnify"></i>
+            </a>
             <a data-toggle="modal" data-target="#delete-{{ organization.id }}" title="Delete organization">
               <i class="mdi mdi-delete-forever"></i>
             </a>
