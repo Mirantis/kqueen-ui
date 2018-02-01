@@ -1,0 +1,49 @@
+{% extends "ui/base.html" %}
+{% from "ui/partial/modal.html" import render_delete_modal %}
+{% from "ui/partial/tableaction.html" import render_member_row_actions with context %}
+
+{% block page_header %}Manage {{ organization.name }}{% endblock %}
+
+{% block content %}
+<h3>Members</h3>
+
+<div class="table-container">
+  <div class="table-actions">
+    <a href="{{ url_for('manager.member_create', organization_id=organization.id) }}" role="button" class="btn btn-primary btn-sm">Add Member</a>
+  </div>
+  <table class="table table-hover">
+    <thead>
+      <th>Name</th>
+      <th>E-mail</th>
+      <th>Role</th>
+      <th>Created</th>
+      <th class="status_column">Status</th>
+      <th class="action_column">Actions</th>
+    </thead>
+    <tbody>
+      {% for member in members %}
+        <tr>
+          <td>{{ member.username }}</td>
+          <td>{{ member.email }}</td>
+          <td>{{ member.role }}</td>
+          <td>{{ member.created_at }}</td>
+          <td class="status_column"><i class="mdi {{ member.state|user_status_icon_class }}" title="{{ member.state }}"></i></td>
+          <td class="action_column">
+            {{ render_member_row_actions(member) }}
+          </td>
+        </tr>
+      {% else %}
+        <tr style="pointer-events: none;"><td colspan="6" class="text-center">No Items</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block modals %}
+
+{% for member in members %}
+  {{ render_delete_modal(resource=member, resource_name='user', name_key='username') }}
+{% endfor %}
+
+{% endblock %}
