@@ -2,8 +2,14 @@ from flask import session
 from flask_wtf import FlaskForm
 from kqueen_ui.api import get_kqueen_client
 from slugify import slugify
-from wtforms import StringField
-from wtforms.validators import DataRequired
+from wtforms import SelectField, StringField
+from wtforms.validators import DataRequired, Email
+from wtforms.fields.html5 import EmailField
+
+ROLE_CHOICES = (
+    ('member', 'Member'),
+    ('admin', 'Admin')
+)
 
 
 class OrganizationCreateForm(FlaskForm):
@@ -31,6 +37,31 @@ class OrganizationCreateForm(FlaskForm):
         organization_namespaces = [o['namespace'] for o in organizations]
         if self.organization_name.data in organization_names or slugify(self.organization_name.data) in organization_namespaces:
             self.organization_name.errors.append('Organization {} already exists.'.format(self.organization_name.data))
+            return False
+
+        return True
+
+
+class MemberCreateForm(FlaskForm):
+    email = EmailField('Email', validators=[Email()])
+    role = SelectField('Role', choices=ROLE_CHOICES)
+
+    def validate(self):
+        if not FlaskForm.validate(self):
+            return False
+
+        # TODO: remove these uniqueness checks after introduction of unique constraint
+        # in ETCD storage class on backend
+        client = get_kqueen_client(token=session['user']['token'])
+        # Check if e-mail and username exists on backend
+        response = client.user.list()
+        if response.status > 200:
+            self.email.errors.append('Can not contact backend at this time.')
+            return False
+        users = response.data
+        user_emails = [u['email'] for u in users if 'email' in u]
+        if self.email.data in user_emails:
+            self.email.errors.append('This e-mail is already registered.')
             return False
 
         return True
