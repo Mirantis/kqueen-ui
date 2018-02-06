@@ -65,3 +65,7 @@ class MemberCreateForm(FlaskForm):
             return False
 
         return True
+
+
+class MemberChangeRoleForm(FlaskForm):
+    role = SelectField('Role', choices=ROLE_CHOICES)

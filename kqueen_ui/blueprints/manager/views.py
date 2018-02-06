@@ -1,4 +1,5 @@
-from .forms import MemberCreateForm, OrganizationCreateForm
+from .forms import MemberChangeRoleForm, MemberCreateForm, OrganizationCreateForm
+from .forms import ROLE_CHOICES
 from datetime import datetime
 from flask import Blueprint, current_app as app, flash, jsonify, redirect, render_template, request, session, url_for
 from flask_babel import format_datetime
@@ -143,6 +144,7 @@ class OrganizationDetail(KQueenView):
         # Patch members until we actually have these data for realsies
         for member in members:
             member['state'] = 'Active' if member['active'] else 'Disabled'
+            member['role'] = member['role'].capitalize()
             if 'email' not in member:
                 member['email'] = '-'
             if 'created_at' in member:
@@ -199,6 +201,21 @@ class MemberCreate(KQueenView):
         return render_template('manager/member_create.html', form=form)
 
 
+class MemberChangeRole(KQueenView):
+    methods = ['GET', 'POST']
+
+    def handle(self, organization_id, user_id):
+        user = self.kqueen_request('user', 'get', fnkwargs={'uuid': user_id})
+        form = MemberChangeRoleForm()
+        form.role.choices = tuple([rl for rl in ROLE_CHOICES if user['role'] not in rl])
+        if form.validate_on_submit():
+            user['role'] = form.role.data
+            self.kqueen_request('user', 'update', fnkwargs={'uuid': user_id, 'payload': user})
+            flash('Role of {} has been successfully updated.'.format(user['username']), 'success')
+            return redirect(url_for('manager.organization_detail', organization_id=organization_id))
+        return render_template('manager/member_change_role.html', form=form, username=user['username'])
+
+
 manager.add_url_rule('/', view_func=Overview.as_view('overview'))
 manager.add_url_rule('/data/clusters', view_func=DataClusters.as_view('data_clusters'))
 manager.add_url_rule('/data/provisioners', view_func=DataProvisioners.as_view('data_provisioners'))
@@ -206,3 +223,4 @@ manager.add_url_rule('/organization/create', view_func=OrganizationCreate.as_vie
 manager.add_url_rule('/organization/<organization_id>/delete', view_func=OrganizationDelete.as_view('organization_delete'))
 manager.add_url_rule('/organization/<organization_id>/detail', view_func=OrganizationDetail.as_view('organization_detail'))
 manager.add_url_rule('/organization/<organization_id>/member/create', view_func=MemberCreate.as_view('member_create'))
+manager.add_url_rule('/organization/<organization_id>/member/<user_id>/changerole', view_func=MemberChangeRole.as_view('member_change_role'))
