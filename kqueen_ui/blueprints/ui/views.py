@@ -175,6 +175,7 @@ class OrganizationManage(KQueenView):
         # Patch members until we actually have these data for realsies
         for member in members:
             member['state'] = 'Active' if member['active'] else 'Disabled'
+            member['role'] = member['role'].capitalize()
             if 'email' not in member:
                 member['email'] = '-'
             if 'created_at' in member:
