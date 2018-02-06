@@ -35,7 +35,12 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="/" target="_self"><img class="mirantis-logo" src="/static/img/mirantis-logo-vertical.png" alt="Mirantis"><span>KQueen</span></a>
+          {% if request.blueprint == 'manager' %}
+            {% set home_url = url_for('manager.overview') %}
+          {% else %}
+            {% set home_url = url_for('ui.index') %}
+          {% endif %}
+          <a class="navbar-brand" href="{{ home_url }}" target="_self"><img class="mirantis-logo" src="{{ url_for('static', filename='img/mirantis-logo-vertical.png') }}" alt="Mirantis"><span>KQueen</span></a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           {% include "ui/partial/menu.html" %}
@@ -57,14 +62,13 @@
     <div id="content">
       <div class="container">
         <div class="page-header">
-         <h2>{% block page_header %}{% endblock %}</h2>
+          <h2>{% block page_header %}{% endblock %}</h2>
         </div>
         {% block content %}{% endblock %}
       </div>
     </div>
 
-    {% block modals %}
-    {% endblock %}
+    {% block modals %}{% endblock %}
 
     <script src="{{ url_for('static', filename='js/vendor.js') }}"></script>
     <script src="{{ url_for('static', filename='js/all.min.js') }}"></script>
@@ -94,7 +98,7 @@
     });
     </script>
 
-    {# START PREALOADER #}
+    {# START PRELOADER #}
     <div class="loading-backdrop" style="display: none;">
     {% if config.PRELOADER == 'simple' %}
       {% include "ui/partial/simpleload.html" %}
