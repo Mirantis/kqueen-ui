@@ -799,15 +799,8 @@ footer {
 // Modal
 // *****************************************************************************
 
-.modal-footer {
-  padding: $modal-title-padding;
-}
-
-.modal.confirm-delete {
-  top: calc(50% - 93px);
-  .modal-body {
-    @extend .text-center;
-  }
+.swal-modal {
+  width: 578px;
 }
 
 // *****************************************************************************

@@ -70,6 +70,29 @@
     <script src="{{ url_for('static', filename='js/all.min.js') }}"></script>
     
     {% block extrajs %}{% endblock %}
+    <script>
+    $(document).ready(function(){
+      $('.confirm-delete').click(function(ev){
+        ev.preventDefault();
+        var $this = $( this )
+         ,  questionText = 'Press OK to permanently delete ' + $this.data('name') + '?'
+         ,  href = $this.data('target')
+         ;
+        swal({
+          title: 'Are you sure?',
+          text: questionText,
+          icon: 'warning',
+          buttons: true,
+          dangerMode: true,
+        })
+        .then((willDelete) => {
+          if (willDelete) {
+            window.location.replace(href);
+          }
+        });
+      });
+    });
+    </script>
 
     {# START PREALOADER #}
     <div class="loading-backdrop" style="display: none;">
