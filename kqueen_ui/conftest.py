@@ -217,6 +217,19 @@ def client_login(client, monkeypatch):
     return client
 
 
+@pytest.fixture
+def client_login_superadmin(client, monkeypatch):
+    def mock_authenticate(username, password):
+        return (superadmin(), None)
+    monkeypatch.setattr('kqueen_ui.blueprints.ui.views.authenticate', mock_authenticate)
+    _user = superadmin()
+    client.post(url_for('ui.login'), data={
+        'username': _user['username'],
+        'password': _user['password']
+    })
+    return client
+
+
 @pytest.fixture(autouse=True)
 def no_kqueen_requests(monkeypatch):
     def mock_kqueen_request(self, resource, action, fnargs=(), fnkwargs={}, service=False):
@@ -230,12 +243,16 @@ def no_kqueen_requests(monkeypatch):
             obj = user()
         else:
             raise NotImplementedError('Resource {} is not supported by mock_kqueen_request'.format(resource))
+
+        if fnkwargs.get('all_namespaces', True):
+            obj['namespace'] = 'pytestorg'
+
         if action == 'get':
             return obj
         elif action == 'list':
             return [obj]
         elif action == 'create':
-            obj.update(fnargs[0])
+            obj.update(fnkwargs.get('payload', {}))
             # patch object references
             if 'cluster' in obj:
                 obj['cluster'] = cluster()
@@ -261,6 +278,9 @@ def no_kqueen_requests(monkeypatch):
             return cluster_progress()
         elif action == 'resize':
             return obj
+        elif action == 'update':
+            obj.update(fnkwargs.get('payload', {}))
+            return obj
         else:
             raise NotImplementedError('Action {} is not supported by mock_kqueen_request'.format(action))
     monkeypatch.setattr('kqueen_ui.generic_views.KQueenView.kqueen_request', mock_kqueen_request)
@@ -271,3 +291,9 @@ def no_kqueen_requests(monkeypatch):
         response.data = default_policy()
         return response
     monkeypatch.setattr('kqueen_ui.api.OrganizationManager.policy', mock_policy)
+
+    def mock_engines(self):
+        response = KQueenResponse()
+        response.data = provisioner_engines()
+        return response
+    monkeypatch.setattr('kqueen_ui.api.ProvisionerManager.engines', mock_engines)
