@@ -25,10 +25,12 @@
           <td>{{ organization.name }}</td>
           <td>{{ organization.created_at }}</td>
           <td class="action_column">
-            <a href="{{ url_for('manager.organization_detail', organization_id=organization.id) }}" title="Cluster detail">
+            {% set detail_url = url_for('manager.organization_detail', organization_id=organization.id) %}
+            {% set delete_url = url_for('manager.organization_delete', organization_id=organization.id) %}
+            <a href="{{ detail_url }}" title="Cluster detail">
               <i class="mdi mdi-magnify"></i>
             </a>
-            <a class="confirm-delete" data-target="{{ url_for('manager.organization_delete', organization_id=organization.id) }}" data-name="{{ organization.name }}" title="Delete organization">
+            <a class="confirm-delete" data-target="{{ delete_url }}" data-name="{{ organization.name }}" title="Delete organization">
               <i class="mdi mdi-delete-forever"></i>
             </a>
           </td>
@@ -40,7 +42,8 @@
   </table>
 </div>
 
-<h3>Clusters</h3>
+<h3>Clusters <a id="refreshClusters" class="clickable disabled" title="Refresh Table"><i class="mdi mdi-refresh"></i></a></h3>
+
 <div class="table-container no-actions" id="tableClusters">
   <table class="table table-hover">
     <thead>
@@ -63,7 +66,7 @@
   </table>
 </div>
 
-<h3>Provisioners</h3>
+<h3>Provisioners <a id="refreshProvisioners" class="clickable disabled" title="Refresh Table"><i class="mdi mdi-refresh"></i></a></h3>
 
 <div class="table-container no-actions" id="tableProvisioners">
   <table class="table table-hover">
@@ -91,22 +94,32 @@
 {% block extrajs %}
 <script>
 var loadClusters = function(){
+  $('#refreshClusters').addClass('disabled');
   $.get("{{ url_for('manager.data_clusters') }}", function(data){
     if( data.response === 200 ){
       $('#tableClusters').replaceWith(data.body);
     }
+  })
+  .then(function(){
+    $('#refreshClusters').removeClass('disabled');
   });
 };
 var loadProvisioners = function(){
+  $('#refreshProvisioners').addClass('disabled');
   $.get("{{ url_for('manager.data_provisioners') }}", function(data){
     if( data.response === 200 ){
       $('#tableProvisioners').replaceWith(data.body);
     }
+  })
+  .then(function(){
+    $('#refreshProvisioners').removeClass('disabled');
   });
 };
 (function(){
   loadClusters();
+  $('#refreshClusters').click(loadClusters);
   loadProvisioners();
+  $('#refreshProvisioners').click(loadProvisioners);
 })();
 </script>
 {% endblock %}
