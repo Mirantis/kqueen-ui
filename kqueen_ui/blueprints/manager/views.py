@@ -107,6 +107,7 @@ class OrganizationDelete(KQueenView):
 
 
 class OrganizationCreate(KQueenView):
+    decorators = [superadmin_required]
     methods = ['GET', 'POST']
 
     def handle(self):
@@ -157,6 +158,7 @@ class OrganizationDetail(KQueenView):
 
 
 class MemberCreate(KQueenView):
+    decorators = [superadmin_required]
     methods = ['GET', 'POST']
 
     def handle(self, organization_id):
@@ -202,6 +204,7 @@ class MemberCreate(KQueenView):
 
 
 class MemberChangeRole(KQueenView):
+    decorators = [superadmin_required]
     methods = ['GET', 'POST']
 
     def handle(self, organization_id, user_id):
