@@ -1,7 +1,5 @@
 {% extends "ui/base.html" %}
 
-{% from "manager/partial/modal.html" import render_delete_modal %}
-
 {% block page_header %}Overview{% endblock %}
 
 {% block content %}
@@ -30,7 +28,7 @@
             <a href="{{ url_for('manager.organization_detail', organization_id=organization.id) }}" title="Cluster detail">
               <i class="mdi mdi-magnify"></i>
             </a>
-            <a data-toggle="modal" data-target="#delete-{{ organization.id }}" title="Delete organization">
+            <a class="confirm-delete" data-target="{{ url_for('manager.organization_delete', organization_id=organization.id) }}" data-name="{{ organization.name }}" title="Delete organization">
               <i class="mdi mdi-delete-forever"></i>
             </a>
           </td>
@@ -43,7 +41,6 @@
 </div>
 
 <h3>Clusters</h3>
-
 <div class="table-container no-actions" id="tableClusters">
   <table class="table table-hover">
     <thead>
@@ -89,14 +86,6 @@
     </tbody>
   </table>
 </div>
-{% endblock %}
-
-{% block modals %}
-
-{% for organization in organizations %}
-  {{ render_delete_modal(resource=organization, resource_name='organization') }}
-{% endfor %}
-
 {% endblock %}
 
 {% block extrajs %}

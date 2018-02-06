@@ -6,7 +6,7 @@
 <a href="{{ url_for('ui.cluster_detail', cluster_id=cluster.id) }}"{% if not is_authorized(session, 'cluster:get', cluster) %} class="disabled"{% endif %} title="Cluster detail">
   <i class="mdi mdi-magnify"></i>
 </a>
-<a data-toggle="modal" data-target="#delete-{{ cluster.id }}"{% if cluster.state == config.CLUSTER_PROVISIONING_STATE or not is_authorized(session, 'cluster:delete', cluster) %} class="disabled"{% endif %} title="Delete cluster">
+<a data-target="{{ url_for('ui.cluster_delete', cluster_id=cluster.id) }}" data-name="cluster {{ cluster.name }}" class="confirm-delete{% if cluster.state == config.CLUSTER_PROVISIONING_STATE or not is_authorized(session, 'cluster:delete', cluster) %} disabled{% endif %}" title="Delete cluster">
   <i class="mdi mdi-delete-forever"></i>
 </a>
 {% endmacro %}
@@ -16,7 +16,7 @@
 {% endmacro %}
 
 {% macro render_provisioner_row_actions(provisioner) %}
-<a data-toggle="modal" data-target="#delete-{{ provisioner.id }}"{% if not is_authorized(session, 'provisioner:delete', provisioner) %} class="disabled"{% endif %} title="Delete provisioner">
+<a data-target="{{ url_for('ui.provisioner_delete', provisioner_id=provisioner.id) }}" data-name="provisioner {{ provisioner.name }}" class="confirm-delete{% if not is_authorized(session, 'provisioner:delete', provisioner) %} disabled{% endif %}" title="Delete provisioner">
   <i class="mdi mdi-delete-forever"></i>
 </a>
 {% endmacro %}
@@ -31,7 +31,7 @@
   <i class="mdi mdi-email-alert"></i>
 </a>
 {% endif %}
-<a data-toggle="modal" data-target="#delete-{{ member.id }}"{% if not is_authorized(session, 'user:delete', member) %} class="disabled"{% endif %} title="Delete member">
+<a data-target="{{ url_for('ui.user_delete', user_id=member.id) }}" data-name="member {{ member.username }}" class="confirm-delete{% if not is_authorized(session, 'user:delete', member) %} disabled{% endif %}" title="Delete member">
   <i class="mdi mdi-delete-forever"></i>
 </a>
 {% endmacro %}
