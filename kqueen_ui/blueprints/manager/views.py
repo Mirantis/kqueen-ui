@@ -53,6 +53,7 @@ class Overview(KQueenView):
 
     def handle(self):
         organizations = self.kqueen_request('organization', 'list')
+        organizations.sort(key=lambda k: (k['namespace'], k['created_at'], k['name']))
         for organization in organizations:
             organization['created_at'] = format_datetime(organization['created_at'])
         return render_template('manager/overview.html', organizations=organizations)
@@ -117,7 +118,7 @@ class OrganizationCreate(KQueenView):
                 'created_at': datetime.utcnow()
             }
             organization = self.kqueen_request('organization', 'create', fnargs=(organization_kw,))
-            flash('Organization {} successfully created'.format(form.organization_name.data), 'success')
+            flash('Organization {} successfully created'.format(organization['name']), 'success')
             return redirect(url_for('manager.overview'))
         return render_template('manager/organization_create.html', form=form)
 
@@ -161,7 +162,6 @@ class MemberCreate(KQueenView):
     def handle(self, organization_id):
         form = MemberCreateForm()
         if form.validate_on_submit():
-            organization = self.kqueen_request('organization', 'get', fnkwargs={'uuid': organization_id})
             user_kw = {
                 'username': form.email.data,
                 'email': form.email.data,
