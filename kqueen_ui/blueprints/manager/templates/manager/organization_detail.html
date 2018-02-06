@@ -12,23 +12,36 @@
   </div>
   <table class="table table-hover">
     <thead>
-      <th>Name</th>
-      <th>E-mail</th>
-      <th>Role</th>
-      <th>Created</th>
+      <th class="table-col-3">Name</th>
+      <th class="table-col-3">E-mail</th>
+      <th class="table-col-3">Role</th>
+      <th class="table-col-3">Created</th>
       <th class="status_column">Status</th>
       <th class="action_column">Actions</th>
     </thead>
     <tbody>
       {% for member in members %}
         <tr>
-          <td>{{ member.username }}</td>
-          <td>{{ member.email }}</td>
-          <td>{{ member.role }}</td>
-          <td>{{ member.created_at }}</td>
+          <td class="table-col-3">{{ member.username }}</td>
+          <td class="table-col-3">{{ member.email }}</td>
+          <td class="table-col-3">{{ member.role }}</td>
+          <td class="table-col-3">{{ member.created_at }}</td>
           <td class="status_column"><i class="mdi {{ member.state|user_status_icon_class }}" title="{{ member.state }}"></i></td>
           <td class="action_column">
-            {{ render_member_row_actions(member) }}
+            {% set reinvite_url = url_for('ui.user_reinvite', user_id=member.id) %}
+            {% set change_role_url = url_for('manager.member_change_role', organization_id=organization.id, user_id=member.id) %}
+            {% set delete_url = url_for('ui.user_delete', user_id=member.id) %}
+            {% if not member.active %}
+            <a href="{{ reinvite_url }}" title="Resend invitation">
+              <i class="mdi mdi-email-alert"></i>
+            </a>
+            {% endif %}
+            <a href="{{ change_role_url }}" title="Change member role">
+              <i class="mdi mdi-account-edit"></i>
+            </a>
+            <a data-target="{{ delete_url }}" data-name="member {{ member.username }}" class="confirm-delete" title="Delete member">
+              <i class="mdi mdi-delete-forever"></i>
+            </a>
           </td>
         </tr>
       {% else %}
