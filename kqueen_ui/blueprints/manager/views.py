@@ -98,7 +98,7 @@ class OrganizationDelete(KQueenView):
         organization = self.kqueen_request('organization', 'get', fnargs=(organization_id,))
         deletable = self.kqueen_request('organization', 'deletable', fnargs=(organization_id,))
         if not deletable.get('deletable', False):
-            resources = ','.join(['{} {}'.format(r['object'], r['name']) for r in deletable.get('remaining', [])])
+            resources = ', '.join(['{} {}'.format(r['object'].lower(), r['name']) for r in deletable.get('remaining', [])])
             flash('Cannot delete organization {}, before deleting its resources: {}'.format(organization['name'], resources), 'warning')
             return redirect(request.environ.get('HTTP_REFERER', url_for('manager.overview')))
         self.kqueen_request('organization', 'delete', fnargs=(organization_id,))
