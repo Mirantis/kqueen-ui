@@ -8,4 +8,4 @@ if [ ! -z "${STATIC_DIR}" ]; then
 	cp -vr /code/kqueen_ui/asset/static/* "${STATIC_DIR}"
 fi
 
-exec gunicorn --bind 0.0.0.0:5080 --workers 4 kqueen_ui.wsgi
+exec gunicorn --config kqueen_ui/gunicorn.py kqueen_ui.wsgi
