@@ -10,7 +10,7 @@ import logging
 import urllib3
 import six
 
-logger = logging.getLogger('kqueen')
+logger = logging.getLogger('kqueen_ui')
 http = urllib3.PoolManager()
 
 

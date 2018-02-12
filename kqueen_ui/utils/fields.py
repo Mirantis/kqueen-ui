@@ -15,7 +15,7 @@ import json
 import logging
 import yaml
 
-logger = logging.getLogger('kqueen')
+logger = logging.getLogger('kqueen_ui')
 
 
 # MIXINS

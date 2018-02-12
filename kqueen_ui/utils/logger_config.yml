@@ -48,7 +48,7 @@ root:
     propogate: yes
 
 loggers:
-    kqueen:
+    kqueen_ui:
         level: INFO
         handlers: [console, error_file_handler, general_file_handler]
         propogate: yes

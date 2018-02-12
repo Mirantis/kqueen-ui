@@ -12,8 +12,7 @@ import logging
 
 # Logging configuration
 setup_logging('/code/kqueen_ui/utils/logger_config.yml')
-logger = logging.getLogger('kqueen')
-
+logger = logging.getLogger('kqueen_ui')
 
 
 def create_app(config_file=None):

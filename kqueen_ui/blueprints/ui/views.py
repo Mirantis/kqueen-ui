@@ -16,7 +16,7 @@ from .utils import generate_password, prettify_engine_name, status_for_cluster_d
 
 import logging
 
-logger = logging.getLogger('kqueen')
+logger = logging.getLogger('kqueen_ui')
 user_logger = logging.getLogger('user')
 mail = Mail()
 

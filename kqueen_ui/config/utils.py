@@ -3,7 +3,7 @@ import logging
 import os
 
 CONFIG_FILE_DEFAULT = 'config/dev.py'
-logger = logging.getLogger('kqueen')
+logger = logging.getLogger('kqueen_ui')
 
 
 def select_file(config_file=None):
