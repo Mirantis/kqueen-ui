@@ -1,17 +1,39 @@
 {% if session.get('user', None) %}
-	<ul class="nav navbar-nav navbar-right">
-          <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown" href="#">{{ session.user.username }}<span class="caret"></span></a>
-            <ul class="dropdown-menu">
-              <li><a href="{{ url_for('ui.user_change_password') }}">Change Password</a></li>
-              <li><a href="{{ url_for('ui.organization_manage') }}">Manage Organization</a></li>
-	      <li><a href="{{ url_for('ui.logout') }}">Logout</a></li>
-            </ul>
-          </li>
-	</ul>
+  {% set index_url = url_for('ui.index') %}
+  {% set manager_url = url_for('manager.overview') %}
+  {% set change_pw_url = url_for('ui.user_change_password') %}
+  {% set organization_url = url_for('ui.organization_manage') %}
+  {% set logout_url = url_for('ui.logout') %}
+  <ul class="nav navbar-nav navbar-right">
+    {% if session.user.get('role', 'member') == 'superadmin' %}
+    <li>
+      {% if request.blueprint == 'manager' %}
+      <a href="{{ index_url }}">User View</a>
+      {% else %}
+      <a href="{{ manager_url }}">SuperAdmin View</a>
+      {% endif %}
+    </li>
+    {% endif %}
+    <li class="dropdown">
+      <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+        <i class="mdi mdi-account" style="font-size: 22px; float: left; margin-right: 3px;"></i>{{ session.user.username }}<span class="caret"></span>
+      </a>
+      <ul class="dropdown-menu">
+        <li>
+          <a href="{{ change_pw_url }}">Change Password</a>
+        </li>
+        <li>
+          <a href="{{ organization_url }}">Manage Organization</a>
+        </li>
+        <li>
+          <a href="{{ logout_url }}">Logout</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
 {% else %}
-	<ul class="nav navbar-nav navbar-right">
-	  <li><a href="{{ url_for('ui.login') }}">Login</a></li>
-	</ul>
+  {% set login_url = url_for('ui.login') %}
+  <ul class="nav navbar-nav navbar-right">
+    <li><a href="{{ login_url }}">Login</a></li>
+  </ul>
 {% endif %}
-

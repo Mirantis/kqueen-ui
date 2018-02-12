@@ -1,0 +1,17 @@
+{% extends "ui/base.html" %}
+
+{% from "ui/partial/form.html" import render_form %}
+
+{% block page_header %}Change Role{% endblock %}
+
+{% block content %}
+<div class="box">
+  <div class="form-group">
+    <label for="username" class="control-label">
+      <label for="username">Username</label>
+    </label>
+    <input class="form-control" id="username" name="username" value="{{ username }}" type="text" readonly>
+  </div>
+  {{ render_form(form) }}
+</div>
+{% endblock %}

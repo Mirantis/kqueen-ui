@@ -1,0 +1,52 @@
+<div class="table-container no-actions" id="tableClusters">
+  <table class="table table-hover">
+    <thead>
+      <th class="table-col-3">Namespace</th>
+      <th class="table-col-3">Name</th>
+      <th class="table-col-3">Provisioner</th>
+      <th class="table-col-3">Created</th>
+      <th class="status_column">Status</th>
+      <th class="action_column">Actions</th>
+    </thead>
+    <tbody>
+      {% for cluster in clusters %}
+        <tr {% if cluster.state in config.CLUSTER_TRANSIENT_STATES %} class="in-transition"{% endif %}>
+          <td class="table-col-3">{{ cluster._namespace }}</td>
+          <td class="table-col-3">{{ cluster.name }}</td>
+          <td class="table-col-3">{{ cluster.provisioner.name }}</td>
+          <td class="table-col-3">{{ cluster.created_at }}</td>
+          <td class="status_column">
+            {{ cluster.state|cluster_status_icon|safe }}
+          </td>
+          <td class="action_column">
+            {% if cluster.metadata %}
+            <a data-toggle="collapse" data-target="#cluster-{{ loop.index }}" class="clickable" title="More informations">
+              <i class="mdi mdi-information-outline"></i>
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% if cluster.metadata %}
+        <tr id="metadata-cluster-{{ loop.index }}">
+          <td colspan="5" style="padding: 0px; border-top: 0px;">
+            <div style="margin: 8px;" id="cluster-{{ loop.index }}" class="collapse">
+              <table class="table table-hover no-actions" id="table-clustermeta">
+                <tbody>
+                  {% for key, value in cluster.metadata.items() %}
+                  <tr>
+                    <th style="width: 300px;">{{ key }}</th>
+                    <td>{{ value }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </td>
+        </tr>
+        {% endif %}
+      {% else %}
+        <tr style="pointer-events: none;"><td colspan="6" class="text-center">No Items</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

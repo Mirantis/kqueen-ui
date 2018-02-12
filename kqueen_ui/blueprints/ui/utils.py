@@ -286,6 +286,10 @@ def sanitize_resource_metadata(session, clusters, provisioners):
                 provisioner['parameters'] = {}
             return clusters, provisioners
 
+    # sort clusters by date
+    if isinstance(clusters, list):
+        clusters.sort(key=lambda k: (k['created_at'], k['name']))
+
     for cluster in clusters:
         if 'state' in cluster:
             if config.get('CLUSTER_PROVISIONING_STATE') != cluster['state']:
@@ -309,6 +313,10 @@ def sanitize_resource_metadata(session, clusters, provisioners):
                     pass
         cluster['metadata'] = OrderedDict(sorted(cluster['metadata'].items(), key=lambda t: t[0]))
 
+    # sort provisioners by date
+    if isinstance(provisioners, list):
+        provisioners.sort(key=lambda k: (k['created_at'], k['name']))
+
     for provisioner in provisioners:
         if 'state' in provisioner:
             if config.get('PROVISIONER_ERROR_STATE') != provisioner['state']:
@@ -329,14 +337,6 @@ def sanitize_resource_metadata(session, clusters, provisioners):
                 except KeyError:
                     pass
         provisioner['parameters'] = OrderedDict(sorted(provisioner['parameters'].items(), key=lambda t: t[0]))
-
-    # sort clusters by date
-    if isinstance(clusters, list):
-        clusters.sort(key=lambda k: (k['created_at'], k['name']))
-
-    # sort provisioners by date
-    if isinstance(provisioners, list):
-        provisioners.sort(key=lambda k: (k['created_at'], k['name']))
 
     cluster_health = 0
     if healthy_clusters and deployed_clusters:

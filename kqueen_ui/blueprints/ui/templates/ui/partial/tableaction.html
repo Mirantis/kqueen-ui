@@ -1,37 +1,53 @@
 {% macro render_cluster_table_actions() %}
-<a href="{{ url_for('ui.cluster_create') }}" role="button" class="btn btn-primary btn-sm{% if not is_authorized(session, 'cluster:create') %} disabled{% endif %}">Deploy cluster</a>
+  {% set create_url = url_for('ui.cluster_create') %}
+  {% set cant_create = not is_authorized(session, 'cluster:create') %}
+  <a href="{{ create_url }}" role="button" class="btn btn-primary btn-sm{% if cant_create %} disabled{% endif %}">Deploy cluster</a>
 {% endmacro %}
 
 {% macro render_cluster_row_actions(cluster) %}
-<a href="{{ url_for('ui.cluster_detail', cluster_id=cluster.id) }}"{% if not is_authorized(session, 'cluster:get', cluster) %} class="disabled"{% endif %} title="Cluster detail">
-  <i class="mdi mdi-magnify"></i>
-</a>
-<a data-toggle="modal" data-target="#delete-{{ cluster.id }}"{% if cluster.state == config.CLUSTER_PROVISIONING_STATE or not is_authorized(session, 'cluster:delete', cluster) %} class="disabled"{% endif %} title="Delete cluster">
-  <i class="mdi mdi-delete-forever"></i>
-</a>
+  {% set detail_url = url_for('ui.cluster_detail', cluster_id=cluster.id) %}
+  {% set cant_get = not is_authorized(session, 'cluster:get', cluster) %}
+  {% set delete_url = url_for('ui.cluster_delete', cluster_id=cluster.id) %}
+  {% set cant_delete = ( cluster.state == config.CLUSTER_PROVISIONING_STATE or not is_authorized(session, 'cluster:delete', cluster) ) %}
+  <a href="{{ detail_url }}"{% if cant_get %} class="disabled"{% endif %} title="Cluster detail">
+    <i class="mdi mdi-magnify"></i>
+  </a>
+  <a data-target="{{ delete_url }}" data-name="cluster {{ cluster.name }}" class="confirm-delete{% if cant_delete %} disabled{% endif %}" title="Delete cluster">
+    <i class="mdi mdi-delete-forever"></i>
+  </a>
 {% endmacro %}
 
 {% macro render_provisioner_table_actions() %}
-<a href="{{ url_for('ui.provisioner_create') }}" role="button" class="btn btn-primary btn-sm{% if not is_authorized(session, 'provisioner:create') %} disabled{% endif %}">Create provisioner</a>
+  {% set create_url = url_for('ui.provisioner_create') %}
+  {% set cant_create = not is_authorized(session, 'provisioner:create') %}
+  <a href="{{ create_url }}" role="button" class="btn btn-primary btn-sm{% if cant_create %} disabled{% endif %}">Create provisioner</a>
 {% endmacro %}
 
 {% macro render_provisioner_row_actions(provisioner) %}
-<a data-toggle="modal" data-target="#delete-{{ provisioner.id }}"{% if not is_authorized(session, 'provisioner:delete', provisioner) %} class="disabled"{% endif %} title="Delete provisioner">
-  <i class="mdi mdi-delete-forever"></i>
-</a>
+  {% set delete_url = url_for('ui.provisioner_delete', provisioner_id=provisioner.id) %}
+  {% set cant_delete = not is_authorized(session, 'provisioner:delete', provisioner) %}
+  <a data-target="{{ delete_url }}" data-name="provisioner {{ provisioner.name }}" class="confirm-delete{% if cant_delete %} disabled{% endif %}" title="Delete provisioner">
+    <i class="mdi mdi-delete-forever"></i>
+  </a>
 {% endmacro %}
 
 {% macro render_member_table_actions() %}
-<a href="{{ url_for('ui.user_invite') }}" role="button" class="btn btn-primary btn-sm{% if not is_authorized(session, 'user:create') %} disabled{% endif %}">Invite member</a>
+  {% set invite_url = url_for('ui.user_invite') %}
+  {% set cant_create = not is_authorized(session, 'user:create') %}
+  <a href="{{ invite_url }}" role="button" class="btn btn-primary btn-sm{% if cant_create %} disabled{% endif %}">Invite member</a>
 {% endmacro %}
 
 {% macro render_member_row_actions(member) %}
-{% if not member.active %}
-<a href="{{ url_for('ui.user_reinvite', user_id=member.id) }}"{% if not is_authorized(session, 'user:create', member) %} class="disabled"{% endif %} title="Resend invitation">
-  <i class="mdi mdi-email-alert"></i>
-</a>
-{% endif %}
-<a data-toggle="modal" data-target="#delete-{{ member.id }}"{% if not is_authorized(session, 'user:delete', member) %} class="disabled"{% endif %} title="Delete member">
-  <i class="mdi mdi-delete-forever"></i>
-</a>
+  {% set reinvite_url = url_for('ui.user_reinvite', user_id=member.id) %}
+  {% set cant_create = not is_authorized(session, 'user:create', member) %}
+  {% set delete_url = url_for('ui.user_delete', user_id=member.id) %}
+  {% set cant_delete = not is_authorized(session, 'user:delete', member) %}
+  {% if not member.active %}
+  <a href="{{ reinvite_url }}"{% if cant_create %} class="disabled"{% endif %} title="Resend invitation">
+    <i class="mdi mdi-email-alert"></i>
+  </a>
+  {% endif %}
+  <a data-target="{{ delete_url }}" data-name="member {{ member.username }}" class="confirm-delete{% if cant_delete %} disabled{% endif %}" title="Delete member">
+    <i class="mdi mdi-delete-forever"></i>
+  </a>
 {% endmacro %}

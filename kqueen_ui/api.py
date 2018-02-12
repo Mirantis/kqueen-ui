@@ -3,7 +3,7 @@ from dateutil.parser import parse as dateutil_parse
 from flask import current_app as app
 from flask_babel import to_utc
 from functools import reduce
-from urllib.parse import urljoin
+from urllib.parse import urlencode, urljoin
 
 import json
 import logging
@@ -104,7 +104,7 @@ class BaseManager(ParserMixin):
             logger.warning('KQueen Client:: Could not get access token: {}'.format(r.error))
         return token, error
 
-    def _request(self, url_suffix, method='GET', payload=None, override_url=None, auth=True):
+    def _request(self, url_suffix, method='GET', payload=None, override_url=None, encode_kw=None, auth=True):
         headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -117,6 +117,8 @@ class BaseManager(ParserMixin):
         url = _url[:-1] if _url.endswith('/') else _url
         if override_url:
             url = override_url
+        if encode_kw:
+            url = url + '?' + urlencode(encode_kw)
 
         body = None
         if method in ['POST', 'PATCH']:
@@ -157,8 +159,17 @@ class BaseManager(ParserMixin):
             self.login()
         return self._request(*args, **kwargs)
 
-    def list(self):
-        return self.request('')
+    def list(self, namespace=None, all_namespaces=None):
+        encode_kw = None
+        if all_namespaces:
+            encode_kw = {
+                'all_namespaces': True
+            }
+        elif namespace:
+            encode_kw = {
+                'namespace': namespace
+            }
+        return self.request('', encode_kw=encode_kw)
 
     def get(self, uuid):
         return self.request(uuid)
@@ -204,6 +215,9 @@ class ProvisionerManager(BaseManager):
 
 class OrganizationManager(BaseManager):
     resource_url = 'organizations/'
+
+    def deletable(self, uuid):
+        return self.request('%s/deletable' % uuid, method='GET')
 
     def policy(self, uuid):
         return self.request('%s/policy' % uuid, method='GET')

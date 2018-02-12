@@ -1,0 +1,125 @@
+{% extends "ui/base.html" %}
+
+{% block page_header %}Overview{% endblock %}
+
+{% block content %}
+<h3>Organizations</h3>
+
+<div class="table-container">
+  <div class="table-actions">
+    <a href="{{ url_for('manager.organization_create') }}" role="button" class="btn btn-primary btn-sm">Create Organization</a>
+  </div>
+  <table class="table table-hover">
+    <thead>
+      <th class="table-col-4">Namespace</th>
+      <th class="table-col-4">Name</th>
+      <th class="table-col-4">Created</th>
+      <th class="action_column">Actions</th>
+    </thead>
+    <tbody>
+      {% for organization in organizations %}
+        <tr>
+          <td>
+            <a href="{{ url_for('manager.organization_detail', organization_id=organization.id) }}">{{ organization.namespace }}</a>
+          </td>
+          <td>{{ organization.name }}</td>
+          <td>{{ organization.created_at }}</td>
+          <td class="action_column">
+            {% set detail_url = url_for('manager.organization_detail', organization_id=organization.id) %}
+            {% set delete_url = url_for('manager.organization_delete', organization_id=organization.id) %}
+            <a href="{{ detail_url }}" title="Cluster detail">
+              <i class="mdi mdi-magnify"></i>
+            </a>
+            <a class="confirm-delete" data-target="{{ delete_url }}" data-name="{{ organization.name }}" title="Delete organization">
+              <i class="mdi mdi-delete-forever"></i>
+            </a>
+          </td>
+        </tr>
+      {% else %}
+        <tr style="pointer-events: none;"><td colspan="4" class="text-center">No Items</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h3>Clusters <a id="refreshClusters" class="clickable disabled" title="Refresh Table"><i class="mdi mdi-refresh"></i></a></h3>
+
+<div class="table-container no-actions" id="tableClusters">
+  <table class="table table-hover">
+    <thead>
+      <th class="table-col-3">Namespace</th>
+      <th class="table-col-3">Name</th>
+      <th class="table-col-3">Provisioner</th>
+      <th class="table-col-3">Created</th>
+      <th class="status_column">Status</th>
+      <th class="action_column">Actions</th>
+    </thead>
+    <tbody>
+      <tr style="pointer-events: none;">
+        <td colspan="6" class="text-center">
+          <div class="icon-container">
+            <div class="loading-icon"></div>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>Provisioners <a id="refreshProvisioners" class="clickable disabled" title="Refresh Table"><i class="mdi mdi-refresh"></i></a></h3>
+
+<div class="table-container no-actions" id="tableProvisioners">
+  <table class="table table-hover">
+    <thead>
+      <th class="table-col-3">Namespace</th>
+      <th class="table-col-3">Name</th>
+      <th class="table-col-3">Engine</th>
+      <th class="table-col-3">Created</th>
+      <th class="status_column">Status</th>
+      <th class="action_column">Actions</th>
+    </thead>
+    <tbody>
+      <tr style="pointer-events: none;">
+        <td colspan="6" class="text-center">
+          <div class="icon-container">
+            <div class="loading-icon"></div>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script>
+var loadClusters = function(){
+  $('#refreshClusters').addClass('disabled');
+  $.get("{{ url_for('manager.data_clusters') }}", function(data){
+    if( data.response === 200 ){
+      $('#tableClusters').replaceWith(data.body);
+    }
+  })
+  .then(function(){
+    $('#refreshClusters').removeClass('disabled');
+  });
+};
+var loadProvisioners = function(){
+  $('#refreshProvisioners').addClass('disabled');
+  $.get("{{ url_for('manager.data_provisioners') }}", function(data){
+    if( data.response === 200 ){
+      $('#tableProvisioners').replaceWith(data.body);
+    }
+  })
+  .then(function(){
+    $('#refreshProvisioners').removeClass('disabled');
+  });
+};
+(function(){
+  loadClusters();
+  $('#refreshClusters').click(loadClusters);
+  loadProvisioners();
+  $('#refreshProvisioners').click(loadProvisioners);
+})();
+</script>
+{% endblock %}

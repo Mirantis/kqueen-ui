@@ -1,5 +1,4 @@
 {% extends "ui/base.html" %}
-{% from "ui/partial/modal.html" import render_delete_modal %}
 {% from "ui/partial/tableaction.html" import render_member_table_actions, render_member_row_actions with context %}
 
 {% block page_header %}Manage {{ organization.name }}{% endblock %}
@@ -38,12 +37,4 @@
     </tbody>
   </table>
 </div>
-{% endblock %}
-
-{% block modals %}
-
-{% for member in members %}
-  {{ render_delete_modal(resource=member, resource_name='user', name_key='username') }}
-{% endfor %}
-
 {% endblock %}

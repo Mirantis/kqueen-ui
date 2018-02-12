@@ -1,5 +1,4 @@
 {% extends "ui/base.html" %}
-{% from "ui/partial/modal.html" import render_delete_modal %}
 {% from "ui/partial/tableaction.html" import render_cluster_table_actions, render_provisioner_table_actions, render_provisioner_row_actions with context %}
 {% from "ui/partial/_cluster_row.html" import render_cluster_row with context %}
 {% from "ui/partial/_overview_pies.html" import render_overview_pies with context %}
@@ -87,20 +86,6 @@
     </tbody>
   </table>
 </div>
-
-{% endblock %}
-
-{% block modals %}
-
-{% for cluster in clusters %}
-  {% if not cluster.state == config.CLUSTER_PROVISIONING_STATE %}
-  {{ render_delete_modal(resource=cluster, resource_name='cluster') }}
-  {% endif %}
-{% endfor %}
-
-{% for provisioner in provisioners %}
-  {{ render_delete_modal(resource=provisioner, resource_name='provisioner') }}
-{% endfor %}
 
 {% endblock %}
 

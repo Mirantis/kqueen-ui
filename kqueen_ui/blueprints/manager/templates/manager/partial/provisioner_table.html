@@ -1,0 +1,50 @@
+<div class="table-container no-actions" id="tableProvisioners">
+  <table class="table table-hover">
+    <thead>
+      <th class="table-col-3">Namespace</th>
+      <th class="table-col-3">Name</th>
+      <th class="table-col-3">Engine</th>
+      <th class="table-col-3">Created</th>
+      <th class="status_column">Status</th>
+      <th class="action_column">Actions</th>
+    </thead>
+    <tbody>
+      {% for provisioner in provisioners %}
+        <tr>
+          <td class="table-col-3">{{ provisioner._namespace }}</td>
+          <td class="table-col-3">{{ provisioner.name }}</td>
+          <td class="table-col-3">{{ provisioner.verbose_name }}</td>
+          <td class="table-col-3">{{ provisioner.created_at }}</td>
+          <td class="status_column"><i class="mdi {{ provisioner.state|provisioner_status_icon_class }}" title="{{ provisioner.state }}"></i></td>
+          <td class="action_column">
+            {% if provisioner.parameters %}
+            <a data-toggle="collapse" data-target="#provisioner-{{ loop.index }}" class="clickable" title="More informations">
+              <i class="mdi mdi-information-outline"></i>
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% if provisioner.parameters %}
+        <tr>
+          <td colspan="5" style="padding: 0px; border-top: 0px;">
+            <div style="margin: 8px;" id="provisioner-{{ loop.index }}" class="collapse">
+              <table class="table table-hover no-actions" id="table-provisionerparams">
+                <tbody>
+                  {% for key, value in provisioner.parameters.items() %}
+                  <tr>
+                    <th style="width: 300px;">{{ key }}</th>
+                    <td>{{ value }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </td>
+        </tr>
+        {% endif %}
+      {% else %}
+        <tr style="pointer-events: none;"><td colspan="6" class="text-center">No Items</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

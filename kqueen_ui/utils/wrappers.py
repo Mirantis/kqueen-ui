@@ -12,3 +12,12 @@ def login_required(f):
             return redirect(url_for('ui.login', next=request.url))
         return f(*args, **kwargs)
     return decorated_function
+
+
+def superadmin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('user', {}).get('role', 'member') == 'superadmin':
+            return redirect(url_for('ui.login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function

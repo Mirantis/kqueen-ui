@@ -169,16 +169,17 @@ class OrganizationManage(KQueenView):
             in users
             if u['organization']['id'] == organization_id and u['id'] != user_id
         ]
+        # sort members by date
+        members.sort(key=lambda k: (k['created_at'], k['username']))
+
         # Patch members until we actually have these data for realsies
         for member in members:
-            member['role'] = 'Member'
             member['state'] = 'Active' if member['active'] else 'Disabled'
+            member['role'] = member['role'].capitalize()
             if 'email' not in member:
                 member['email'] = '-'
             if 'created_at' in member:
                 member['created_at'] = format_datetime(member['created_at'])
-        # sort members by date
-        members.sort(key=lambda k: (k['created_at'], k['username']))
 
         return render_template('ui/organization_manage.html',
                                organization=organization,
