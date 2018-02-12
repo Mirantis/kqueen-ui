@@ -245,7 +245,7 @@ def no_kqueen_requests(monkeypatch):
             raise NotImplementedError('Resource {} is not supported by mock_kqueen_request'.format(resource))
 
         if fnkwargs.get('all_namespaces', True):
-            obj['namespace'] = 'pytestorg'
+            obj['_namespace'] = 'pytestorg'
 
         if action == 'get':
             return obj

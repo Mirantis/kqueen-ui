@@ -11,7 +11,7 @@
     <tbody>
       {% for cluster in clusters %}
         <tr {% if cluster.state in config.CLUSTER_TRANSIENT_STATES %} class="in-transition"{% endif %}>
-          <td class="table-col-3">{{ cluster.namespace }}</td>
+          <td class="table-col-3">{{ cluster._namespace }}</td>
           <td class="table-col-3">{{ cluster.name }}</td>
           <td class="table-col-3">{{ cluster.provisioner.name }}</td>
           <td class="table-col-3">{{ cluster.created_at }}</td>
