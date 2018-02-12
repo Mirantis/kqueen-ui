@@ -6,7 +6,7 @@ from uuid import UUID
 
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('kqueen_ui')
 
 
 class KQueenView(View):
