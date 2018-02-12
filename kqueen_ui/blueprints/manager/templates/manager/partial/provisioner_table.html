@@ -11,7 +11,7 @@
     <tbody>
       {% for provisioner in provisioners %}
         <tr>
-          <td class="table-col-3">{{ provisioner.namespace }}</td>
+          <td class="table-col-3">{{ provisioner._namespace }}</td>
           <td class="table-col-3">{{ provisioner.name }}</td>
           <td class="table-col-3">{{ provisioner.verbose_name }}</td>
           <td class="table-col-3">{{ provisioner.created_at }}</td>

@@ -66,7 +66,7 @@ class DataClusters(KQueenView):
     def handle(self):
         clusters = self.kqueen_request('cluster', 'list', fnkwargs={'all_namespaces': True})
         clusters, _, _ = sanitize_resource_metadata(session, clusters, [])
-        clusters.sort(key=lambda k: (k['namespace'], k['created_at'], k['name']))
+        clusters.sort(key=lambda k: (k['_namespace'], k['created_at'], k['name']))
         data = {
             'response': 200,
             'body': render_template('manager/partial/cluster_table.html', clusters=clusters)
@@ -81,7 +81,7 @@ class DataProvisioners(KQueenView):
     def handle(self):
         provisioners = self.kqueen_request('provisioner', 'list', fnkwargs={'all_namespaces': True})
         _, provisioners, _ = sanitize_resource_metadata(session, [], provisioners)
-        provisioners.sort(key=lambda k: (k['namespace'], k['created_at'], k['name']))
+        provisioners.sort(key=lambda k: (k['_namespace'], k['created_at'], k['name']))
         data = {
             'response': 200,
             'body': render_template('manager/partial/provisioner_table.html', provisioners=provisioners)
