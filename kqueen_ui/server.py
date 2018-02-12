@@ -6,10 +6,14 @@ from kqueen_ui.blueprints.registration.views import registration
 from kqueen_ui.blueprints.ui.views import ui
 from kqueen_ui.exceptions import KQueenAPIException
 from kqueen_ui.utils.filters import filters, context_processors
+from kqueen_ui.utils.loggers import setup_logging
 
 import logging
 
-logger = logging.getLogger(__name__)
+# Logging configuration
+setup_logging('/code/kqueen_ui/utils/logger_config.yml')
+logger = logging.getLogger('kqueen')
+
 
 
 def create_app(config_file=None):
@@ -54,3 +58,4 @@ def run():
         host=app.config.get('HOST'),
         port=int(app.config.get('PORT'))
     )
+

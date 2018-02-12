@@ -4,8 +4,7 @@ from kqueen_ui.api import get_kqueen_client
 
 import logging
 
-logger = logging.getLogger(__name__)
-
+logger = logging.getLogger('kqueen')
 
 def authenticate(username, password):
     user = {}
