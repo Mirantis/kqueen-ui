@@ -11,4 +11,4 @@ bind = "{host}:{port}".format(
 )
 timeout = 180
 workers = multiprocessing.cpu_count() * 2 + 1
-worker_class = 'gaiohttp'
+worker_class = 'gthread'
