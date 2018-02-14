@@ -8,12 +8,14 @@ from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.auth import generate_confirmation_token
 from kqueen_ui.blueprints.ui.utils import generate_password, sanitize_resource_metadata
 from kqueen_ui.generic_views import KQueenView
+from kqueen_ui.utils.loggers import user_prefix
 from kqueen_ui.utils.wrappers import superadmin_required
 from slugify import slugify
 
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('kqueen_ui')
+user_logger = logging.getLogger('user')
 mail = Mail()
 manager = Blueprint('manager', __name__, template_folder='templates')
 
@@ -102,7 +104,9 @@ class OrganizationDelete(KQueenView):
             flash('Cannot delete organization {}, before deleting its resources: {}'.format(organization['name'], resources), 'warning')
             return redirect(request.environ.get('HTTP_REFERER', url_for('manager.overview')))
         self.kqueen_request('organization', 'delete', fnargs=(organization_id,))
-        flash('Organization {} successfully deleted.'.format(organization['name']), 'success')
+        msg = 'Organization {} successfully deleted.'.format(organization['name'])
+        user_logger.debug('{}:{}'.format(user_prefix(session), msg))
+        flash(msg, 'success')
         return redirect(request.environ.get('HTTP_REFERER', url_for('manager.overview')))
 
 
@@ -119,7 +123,9 @@ class OrganizationCreate(KQueenView):
                 'created_at': datetime.utcnow()
             }
             organization = self.kqueen_request('organization', 'create', fnargs=(organization_kw,))
-            flash('Organization {} successfully created'.format(organization['name']), 'success')
+            msg = 'Organization {} successfully created.'.format(organization['name'])
+            user_logger.debug('{}:{}'.format(user_prefix(session), msg))
+            flash(msg, 'success')
             return redirect(url_for('manager.overview'))
         return render_template('manager/organization_create.html', form=form)
 
@@ -198,7 +204,9 @@ class MemberCreate(KQueenView):
                 flash('Could not send invitation e-mail, please try again later.', 'danger')
                 return render_template('manager/member_create.html', form=form)
 
-            flash('Member {} successfully added.'.format(user['username']), 'success')
+            msg = 'Member {} successfully added.'.format(user['username'])
+            user_logger.debug('{}:{}'.format(user_prefix(session), msg))
+            flash(msg, 'success')
             return redirect(url_for('manager.organization_detail', organization_id=organization_id))
         return render_template('manager/member_create.html', form=form)
 
@@ -214,7 +222,9 @@ class MemberChangeRole(KQueenView):
         if form.validate_on_submit():
             user['role'] = form.role.data
             self.kqueen_request('user', 'update', fnkwargs={'uuid': user_id, 'payload': user})
-            flash('Role of {} has been successfully updated.'.format(user['username']), 'success')
+            msg = 'Role of {} has been successfully updated.'.format(user['username'])
+            user_logger.debug('{}:{}'.format(user_prefix(session), msg))
+            flash(msg, 'success')
             return redirect(url_for('manager.organization_detail', organization_id=organization_id))
         return render_template('manager/member_change_role.html', form=form, username=user['username'])
 

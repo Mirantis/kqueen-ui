@@ -6,8 +6,8 @@ from flask_mail import Mail, Message
 from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.auth import authenticate, confirm_token, generate_confirmation_token
 from kqueen_ui.generic_views import KQueenView
-from kqueen_ui.utils.wrappers import login_required
 from kqueen_ui.utils.loggers import user_prefix
+from kqueen_ui.utils.wrappers import login_required
 
 from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
                     ChangePasswordForm, UserInviteForm, RequestPasswordResetForm,
