@@ -1,7 +1,6 @@
 from kqueen_ui.config import current_config
 
 import multiprocessing
-import os
 
 app_config = current_config()
 
