@@ -6,8 +6,8 @@ from flask_mail import Mail, Message
 from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.auth import authenticate, confirm_token, generate_confirmation_token
 from kqueen_ui.generic_views import KQueenView
-from kqueen_ui.utils.wrappers import login_required
 from kqueen_ui.utils.loggers import user_prefix
+from kqueen_ui.utils.wrappers import login_required
 
 from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
                     ChangePasswordForm, UserInviteForm, RequestPasswordResetForm,
@@ -231,9 +231,8 @@ class UserInvite(KQueenView):
             try:
                 mail.send(msg)
             except Exception as e:
-                self.logger('error', repr(e))
+                logger.exception('User {} from {} with id {} will be removed.'.format(user_kw['username'], user_kw['organization'], user['id']))
                 self.kqueen_request('user', 'delete', fnargs=(user['id'],))
-                logger.debug('User {} from {} with id {} will be removed.'.format(user_kw['username'], user_kw['organization'], user['id']))
                 flash('Could not send invitation e-mail, please try again later.', 'danger')
                 return render_template('ui/user_invite.html', form=form)
 
@@ -273,8 +272,7 @@ class UserReinvite(KQueenView):
         try:
             mail.send(msg)
         except Exception as e:
-            self.logger('error', repr(e))
-            logger.debug('User {} from {} with id {} will be removed.'.format(user['username'], user['organization'], user['id']))
+            logger.exception('User {} from {} with id {} will be removed.'.format(user['username'], user['organization'], user['id']))
             self.kqueen_request('user', 'delete', fnargs=(user['id'],))
             flash('Could not send activation e-mail, please try again later.', 'danger')
             return redirect(request.environ.get('HTTP_REFERER', url_for('ui.organization_manage')))
@@ -393,8 +391,9 @@ class UserRequestResetPassword(KQueenView):
             try:
                 mail.send(msg)
             except Exception as e:
-                self.logger('error', repr(e))
-                flash('Could not send password reset e-mail, please try again later.', 'danger')
+                msg = 'Could not send password reset e-mail, please try again later.'
+                logger.exception(msg)
+                flash(msg, 'danger')
             flash('Password reset link was sent to your e-mail address.', 'success')
             return redirect(url_for('ui.index'))
         return render_template('ui/user_request_password_reset.html', form=form)
@@ -443,9 +442,8 @@ class ProvisionerCreate(KQueenView):
                     if (hasattr(v, 'switchtag') and v.switchtag) and prettify_engine_name(form.engine.data) in k
                 }
             except Exception as e:
-                self.logger('error', repr(e))
                 msg = 'Failed to create Provisioner: Invalid parameters.'
-                user_logger.debug('{}:{}'.format(user_prefix(session), msg))
+                user_logger.exception('{}:{}'.format(user_prefix(session), msg))
                 flash(msg, 'danger')
                 render_template('ui/provisioner_create.html', form=form)
 
@@ -470,7 +468,6 @@ class ProvisionerDelete(KQueenView):
     decorators = [login_required]
     methods = ['GET']
     validation_hint = 'uuid'
-
 
     def handle(self, provisioner_id):
         # TODO: block deletion of used provisioner on backend, not here
@@ -534,7 +531,7 @@ class ClusterCreate(KQueenView):
                     if (hasattr(v, 'switchtag') and v.switchtag) and form.provisioner.data in k
                 }
             except Exception as e:
-                user_logger.error('{}:{}'.format(user_prefix(session), e))
+                user_logger.exception('{}:{}'.format(user_prefix(session), e))
                 flash('Invalid cluster metadata.', 'danger')
                 render_template('ui/cluster_create.html', form=form)
 

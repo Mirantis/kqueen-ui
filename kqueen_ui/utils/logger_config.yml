@@ -50,9 +50,9 @@ root:
 loggers:
     kqueen_ui:
         level: INFO
-        handlers: [console, error_file_handler, general_file_handler]
+        handlers: [error_file_handler, general_file_handler]
         propogate: yes
     user:
         level: DEBUG
-        handlers: [console, user_file_handler]
+        handlers: [user_file_handler]
         propogate: yes

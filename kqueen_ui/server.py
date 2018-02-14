@@ -11,7 +11,8 @@ from kqueen_ui.utils.loggers import setup_logging
 import logging
 
 # Logging configuration
-setup_logging('/code/kqueen_ui/utils/logger_config.yml')
+config = current_config(config_file=None)
+setup_logging(config.get('LOG_CONFIG'), config.get('LOG_LEVEL'))
 logger = logging.getLogger('kqueen_ui')
 
 
@@ -25,8 +26,7 @@ def create_app(config_file=None):
     # load configuration
     config = current_config(config_file)
     app.config.from_mapping(config.to_dict())
-    app.logger.setLevel(getattr(logging, app.config.get('LOG_LEVEL')))
-    app.logger.info('Loading configuration from {}'.format(config.source_file))
+    logger.info('Loading configuration from {}'.format(config.source_file))
 
     app.jinja_env.filters.update(filters)
     for cp in context_processors:
@@ -57,4 +57,3 @@ def run():
         host=app.config.get('HOST'),
         port=int(app.config.get('PORT'))
     )
-

@@ -49,7 +49,7 @@ class KQueenView(View):
             UUID(uuid, version=4)
         except ValueError:
             msg = 'Invalid UUID {}'.format(str(uuid))
-            self.logger('error', msg)
+            logger.exception(msg)
             flash(msg, 'warning')
             raise KQueenAPIException()
 
@@ -61,7 +61,7 @@ class KQueenView(View):
         return self.handle(*args, **kwargs)
 
     def graceful_exit(self, logger_message, user_message=''):
-        self.logger('error', logger_message)
+        logger.error('error: {}'.format(logger_message))
         if user_message:
             flash(user_message, 'danger')
         raise KQueenAPIException()
@@ -97,18 +97,6 @@ class KQueenView(View):
             msg = 'Unknown error during backend API request'
             self.graceful_exit(msg, user_msg)
         return self._handle_response(response, resource, action)
-
-    def logger(self, severity, message):
-        view = self.__class__.__name__
-        msg = '{} view: {}'.format(view, message)
-        severity_map = {
-            'critical': 50,
-            'error': 40,
-            'warning': 30,
-            'info': 20,
-            'debug': 10
-        }
-        logger.log(severity_map[severity], msg, exc_info=True)
 
     def validate(self, **kwargs):
         if self.validation_hint:
