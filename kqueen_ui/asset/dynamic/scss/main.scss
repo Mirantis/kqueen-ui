@@ -111,6 +111,7 @@ a.disabled {
 // *****************************************************************************
 
 .navbar-inverse {
+  margin-bottom: 0px;
   .navbar-header {
     padding-right: 50px;
     .navbar-brand {
@@ -796,11 +797,19 @@ footer {
 }
 
 // *****************************************************************************
-// Modal
+// SweetAlert
 // *****************************************************************************
 
 .swal-modal {
   width: 578px;
+}
+
+.swal-button--danger {
+  background-color: $brand-danger;
+}
+
+.swal-icon--warning {
+  border-color: $brand-warning;
 }
 
 // *****************************************************************************
@@ -920,31 +929,70 @@ footer {
 }
 
 // *****************************************************************************
+// Breadcrumb
+// *****************************************************************************
+
+.breadcrumb-container {
+  margin-bottom: 22px;
+  background-color: $mira-purple;
+  ol.breadcrumb {
+    margin-bottom: 0px;
+  }
+  .breadcrumb {
+    background-color: transparent;
+    > li + li::before {
+      content: "\F142";
+      display: inline-block;
+      font: normal normal normal 24px/1 "Material Design Icons";
+      font-size: inherit;
+      text-rendering: auto;
+      line-height: inherit;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  }
+  .breadcrumb-item a {
+    color: #fff;
+    text-decoration: none;
+    &:hover,
+    &:focus,
+    &:active {
+      text-decoration: underline
+    }
+  }
+}
+
+// *****************************************************************************
 // Manager
 // *****************************************************************************
 
-.bp-manager .navbar-inverse {
-  background-color: #861B22;
-  border-color: #861B22;
-  .navbar-nav > li > a:hover,
-  .navbar-nav > li > a:focus {
-    color: #fff;
-    background-color: $mira-red;
-  }
-  .navbar-nav > li .dropdown-menu {
-    background-color: $mira-red;
-    > li > a:hover,
-    > li > a:focus,
-    > li > a:active {
-      background-color: #861B22;
+.bp-manager {
+  .navbar-inverse {
+    background-color: $mira-red-dark;
+    border-color: $mira-red-dark;
+    .navbar-nav > li > a:hover,
+    .navbar-nav > li > a:focus {
+      color: #fff;
+      background-color: $mira-red;
+    }
+    .navbar-nav > li .dropdown-menu {
+      background-color: $mira-red;
+      > li > a:hover,
+      > li > a:focus,
+      > li > a:active {
+        background-color: $mira-red-dark;
+      }
+    }
+    .navbar-nav > .open > a,
+    .navbar-inverse .navbar-nav > .open > a:hover,
+    .navbar-inverse .navbar-nav > .open > a:focus {
+      background-color: $mira-red;
+    }
+    .navbar-brand > span::after {
+      content: ' SuperAdmin';
     }
   }
-  .navbar-nav > .open > a,
-  .navbar-inverse .navbar-nav > .open > a:hover,
-  .navbar-inverse .navbar-nav > .open > a:focus {
+  .breadcrumb-container {
     background-color: $mira-red;
-  }
-  .navbar-brand > span::after {
-    content: ' SuperAdmin';
   }
 }
