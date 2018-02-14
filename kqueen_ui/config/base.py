@@ -29,13 +29,13 @@ class BaseConfig:
     # Mail
     MAIL_SERVER = 'localhost'
     MAIL_PORT = 25
-    MAIL_USE_TLS = False
+    MAIL_CONN_TIMEOUT = 30
     MAIL_USE_SSL = False
+    MAIL_SSL_KEYFILE = None
+    MAIL_SSL_CERTFILE = None
     MAIL_USERNAME = None
     MAIL_PASSWORD = None
     MAIL_DEFAULT_SENDER = 'kqueen@mirantis.com'
-    MAIL_MAX_EMAILS = None
-    MAIL_ASCII_ATTACHMENTS = False
 
     # Cluster statuses
     CLUSTER_ERROR_STATE = 'Error'
