@@ -200,7 +200,7 @@ class MemberCreate(KQueenView):
 
             flash('Member {} successfully added.'.format(user['username']), 'success')
             return redirect(url_for('manager.organization_detail', organization_id=organization_id))
-        return render_template('manager/member_create.html', form=form)
+        return render_template('manager/member_create.html', form=form, organization_id=organization_id)
 
 
 class MemberChangeRole(KQueenView):

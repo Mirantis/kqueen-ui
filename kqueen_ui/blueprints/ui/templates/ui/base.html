@@ -48,6 +48,20 @@
       </div>
     </nav>
 
+    {% set ROOT_URLS = [url_for('ui.index'), url_for('ui.login'), url_for('manager.overview')] %}
+    <div class="breadcrumb-container">
+    {% if request.path not in ROOT_URLS %}
+      <div class="container">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ home_url }}">Overview</a></li>
+            {% block breadcrumb %}{% endblock %}
+          </ol>
+        </nav>
+      </div>
+    {% endif %}
+    </div>
+
     <input id="BaseURI" type="hidden" value="/">
     <div id="flash-container">
     {% for category, message in get_flashed_messages(with_categories=true) %}
