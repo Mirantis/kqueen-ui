@@ -21,7 +21,6 @@ setup(
         'Flask==0.12.2',
         'Flask-Babel==0.11.2',
         'Flask-Cache',
-        'Flask-Mail',
         'Flask-WTF',
         'gunicorn',
         'python-dateutil',
