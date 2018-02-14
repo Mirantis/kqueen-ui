@@ -3,11 +3,11 @@ from .forms import ROLE_CHOICES
 from datetime import datetime
 from flask import Blueprint, current_app as app, flash, jsonify, redirect, render_template, request, session, url_for
 from flask_babel import format_datetime
-from flask_mail import Mail, Message
 from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.auth import generate_confirmation_token
 from kqueen_ui.blueprints.ui.utils import generate_password, sanitize_resource_metadata
 from kqueen_ui.generic_views import KQueenView
+from kqueen_ui.utils.email import EmailMessage
 from kqueen_ui.utils.loggers import user_prefix
 from kqueen_ui.utils.wrappers import superadmin_required
 from slugify import slugify
@@ -17,6 +17,7 @@ import logging
 logger = logging.getLogger('kqueen_ui')
 user_logger = logging.getLogger('user')
 mail = Mail()
+
 manager = Blueprint('manager', __name__, template_folder='templates')
 
 
@@ -182,8 +183,7 @@ class MemberCreate(KQueenView):
             }
             user = self.kqueen_request('user', 'create', fnkwargs={'payload': user_kw})
 
-            # Init mail handler
-            mail.init_app(app)
+            # send mail
             token = generate_confirmation_token(user['email'])
             html = render_template(
                 'ui/email/user_invitation.html',
@@ -191,13 +191,13 @@ class MemberCreate(KQueenView):
                 token=token,
                 organization=user['organization']['name']
             )
-            msg = Message(
+            email = EmailMessage(
                 '[KQueen] Organization invitation',
                 recipients=[user['email']],
                 html=html
             )
             try:
-                mail.send(msg)
+                email.send()
             except Exception as e:
                 msg = 'Could not send invitation e-mail, please try again later.'
                 logger.exception(msg)

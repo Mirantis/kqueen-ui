@@ -1,9 +1,9 @@
 from datetime import datetime
 from flask import Blueprint, current_app as app, flash, redirect, render_template, url_for
-from flask_mail import Mail, Message
 from kqueen_ui.auth import confirm_token, generate_confirmation_token
 from kqueen_ui.exceptions import KQueenAPIException
 from kqueen_ui.generic_views import KQueenView
+from kqueen_ui.utils.email import EmailMessage
 from slugify import slugify
 
 from .forms import UserRegistrationForm
@@ -47,17 +47,16 @@ class Register(KQueenView):
                 self.kqueen_request('organization', 'delete', fnargs=(organization['id'],), service=True)
                 return render_template('registration/register.html', form=form)
 
-            # Init mail handler
-            mail.init_app(app)
+            # send mail
             token = generate_confirmation_token(user['email'])
             html = render_template('registration/email/verify_email.html', token=token)
-            msg = Message(
+            email = EmailMessage(
                 '[KQueen] E-mail verification',
                 recipients=[user['email']],
                 html=html
             )
             try:
-                mail.send(msg)
+                email.send()
             except Exception as e:
                 msg = 'Could not send verification e-mail, please try again later.'
                 logger.exception(msg)
