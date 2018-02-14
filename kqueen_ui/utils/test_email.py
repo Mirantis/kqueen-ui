@@ -1,5 +1,3 @@
-import pytest
-
 from .email import EmailMessage
 
 
