@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '0.6.1'
+version = '0.7'
 
 with open('README.rst') as f:
     long_description = ''.join(f.readlines())
@@ -21,10 +21,12 @@ setup(
         'Flask==0.12.2',
         'Flask-Babel==0.11.2',
         'Flask-Cache',
+        'Flask-Mail',
         'Flask-WTF',
         'gunicorn',
         'python-dateutil',
         'pyyaml',
+        'python-slugify',
         'urllib3'
     ],
     classifiers=[

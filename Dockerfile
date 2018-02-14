@@ -10,8 +10,7 @@ CMD echo "STATIC FILES BUILT"
 
 FROM python:3.6-slim
 WORKDIR /code
-COPY requirements.txt .
-RUN pip install -r requirements.txt
 COPY . .
 COPY --from=static_builder /app/kqueen_ui/asset/static/ /code/kqueen_ui/asset/static
+RUN pip install -e .
 CMD ./entrypoint.sh
