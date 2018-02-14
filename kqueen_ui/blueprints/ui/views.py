@@ -6,6 +6,7 @@ from flask_mail import Mail, Message
 from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.auth import authenticate, confirm_token, generate_confirmation_token
 from kqueen_ui.generic_views import KQueenView
+from kqueen_ui.utils.loggers import user_prefix
 from kqueen_ui.utils.wrappers import login_required
 
 from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
@@ -15,7 +16,8 @@ from .utils import generate_password, prettify_engine_name, status_for_cluster_d
 
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('kqueen_ui')
+user_logger = logging.getLogger('user')
 mail = Mail()
 
 ui = Blueprint('ui', __name__, template_folder='templates')
@@ -209,6 +211,7 @@ class UserInvite(KQueenView):
                 'created_at': datetime.utcnow(),
                 'active': False
             }
+            logger.debug('User {} from {} invited.'.format(user_kw['username'], user_kw['organization']))
             user = self.kqueen_request('user', 'create', fnargs=(user_kw,))
 
             # Init mail handler
@@ -230,9 +233,11 @@ class UserInvite(KQueenView):
             except Exception as e:
                 self.logger('error', repr(e))
                 self.kqueen_request('user', 'delete', fnargs=(user['id'],))
+                logger.debug('User {} from {} with id {} will be removed.'.format(user_kw['username'], user_kw['organization'], user['id']))
                 flash('Could not send invitation e-mail, please try again later.', 'danger')
                 return render_template('ui/user_invite.html', form=form)
 
+            logger.debug('User {} from {} created with id {}.'.format(user_kw['username'], user_kw['organization'], user['id']))
             flash('User {} successfully created.'.format(user['username']), 'success')
             return redirect(url_for('ui.organization_manage'))
         return render_template('ui/user_invite.html', form=form)
@@ -245,7 +250,9 @@ class UserReinvite(KQueenView):
 
     def handle(self, user_id):
         user = self.kqueen_request('user', 'get', fnargs=(user_id,))
+        logger.debug('User {} from {} with id {} re-invited.'.format(user['username'], user['organization'], user['id']))
         if user['active']:
+            logger.debug('User {} from {} with id {} is already active.'.format(user['username'], user['organization'], user['id']))
             flash('User {} is already active.'.format(user['username']), 'warning')
             return redirect(request.environ.get('HTTP_REFERER', url_for('ui.organization_manage')))
 
@@ -267,10 +274,12 @@ class UserReinvite(KQueenView):
             mail.send(msg)
         except Exception as e:
             self.logger('error', repr(e))
+            logger.debug('User {} from {} with id {} will be removed.'.format(user['username'], user['organization'], user['id']))
             self.kqueen_request('user', 'delete', fnargs=(user['id'],))
             flash('Could not send activation e-mail, please try again later.', 'danger')
             return redirect(request.environ.get('HTTP_REFERER', url_for('ui.organization_manage')))
 
+        logger.debug('Activation e-mail sent to user {} from {} with id {} will be removed.'.format(user['username'], user['organization'], user['id']))
         flash('Activation e-mail sent to user {}.'.format(user['username']), 'success')
         return redirect(request.environ.get('HTTP_REFERER', url_for('ui.organization_manage')))
 
@@ -283,6 +292,7 @@ class UserDelete(KQueenView):
     def handle(self, user_id):
         user = self.kqueen_request('user', 'get', fnargs=(user_id,))
         self.kqueen_request('user', 'delete', fnargs=(user_id,))
+        logger.debug('User {} from {} with id {} removed.'.format(user['username'], user['organization'], user['id']))
         flash('User {} successfully deleted.'.format(user['username']), 'success')
         return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
 
@@ -297,6 +307,9 @@ class UserChangePassword(KQueenView):
             user_id = session['user']['id']
             password = {'password': form.password_1.data}
             self.kqueen_request('user', 'updatepw', fnargs=(user_id, password))
+
+            user_logger.debug('Password updated for user {}'.format(session['user']['username']))
+
             flash('Password successfully updated. Please log in again.', 'success')
             return redirect(url_for('ui.logout'))
         return render_template('ui/user_change_password.html', form=form)
@@ -308,6 +321,7 @@ class UserResetPassword(KQueenView):
     def handle(self, token):
         email = confirm_token(token)
         if not email:
+            user_logger.debug('Password reset link expired for user {}'.format(session['user']['username']))
             flash('Password reset link is invalid or has expired.', 'danger')
             return redirect(url_for('ui.index'))
 
@@ -321,6 +335,7 @@ class UserResetPassword(KQueenView):
             if form.validate_on_submit():
                 password = {'password': form.password_1.data}
                 self.kqueen_request('user', 'updatepw', fnargs=(user['id'], password), service=True)
+                user_logger.debug('Password updated for user {}'.format(session['user']['username']))
                 flash('Password successfully updated.', 'success')
                 return redirect(url_for('ui.login'))
             return render_template('ui/user_reset_password.html', form=form)
@@ -335,6 +350,7 @@ class UserSetPassword(KQueenView):
     def handle(self, token):
         email = confirm_token(token)
         if not email:
+            user_logger.debug('Password reset link expired for user {}'.format(session['user']['username']))
             flash('Password reset link is invalid or has expired.', 'danger')
             return redirect(url_for('ui.index'))
 
@@ -350,6 +366,7 @@ class UserSetPassword(KQueenView):
                 self.kqueen_request('user', 'updatepw', fnargs=(user['id'], password), service=True)
                 user['active'] = True
                 self.kqueen_request('user', 'update', fnargs=(user['id'], user), service=True)
+                user_logger.debug('Password updated for user {}'.format(session['user']['username']))
                 flash('Password successfully updated.', 'success')
                 return redirect(url_for('ui.login'))
             return render_template('ui/user_reset_password.html', form=form)
@@ -427,7 +444,9 @@ class ProvisionerCreate(KQueenView):
                 }
             except Exception as e:
                 self.logger('error', repr(e))
-                flash('Invalid provisioner parameters.', 'danger')
+                msg = 'Failed to create Provisioner: Invalid parameters.'
+                user_logger.debug('{}:{}'.format(user_prefix(session), msg))
+                flash(msg, 'danger')
                 render_template('ui/provisioner_create.html', form=form)
 
             owner_ref = 'User:{}'.format(session['user']['id'])
@@ -440,7 +459,9 @@ class ProvisionerCreate(KQueenView):
                 'owner': owner_ref
             }
             provisioner = self.kqueen_request('provisioner', 'create', fnargs=(provisioner_kw,))
-            flash('Provisioner {} successfully created.'.format(provisioner['name']), 'success')
+            msg = 'Provisioner {} successfully created.'.format(provisioner['name'])
+            user_logger.debug('{}:{}'.format(user_prefix(session), msg))
+            flash(msg, 'success')
             return redirect(url_for('ui.index'))
         return render_template('ui/provisioner_create.html', form=form)
 
@@ -458,9 +479,13 @@ class ProvisionerDelete(KQueenView):
 
         if provisioner_id not in used_provisioners:
             self.kqueen_request('provisioner', 'delete', fnargs=(provisioner_id,))
-            flash('Provisioner {} successfully deleted.'.format(provisioner['name']), 'success')
+            msg = 'Provisioner {} successfully deleted.'.format(provisioner['name'])
+            user_logger.debug('{}:{}'.format(user_prefix(session), msg))
+            flash(msg, 'success')
         else:
-            flash('Provisioner {} is in use, cannot delete.'.format(provisioner['name']), 'warning')
+            msg = 'Provisioner {} is in use, cannot delete.'.format(provisioner['name'])
+            user_logger.debug('{}:{}'.format(user_prefix(session), msg))
+            flash(msg, 'warning')
 
         return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
 
@@ -508,7 +533,7 @@ class ClusterCreate(KQueenView):
                     if (hasattr(v, 'switchtag') and v.switchtag) and form.provisioner.data in k
                 }
             except Exception as e:
-                self.logger('error', repr(e))
+                user_logger.error('{}:{}'.format(user_prefix(session), e))
                 flash('Invalid cluster metadata.', 'danger')
                 render_template('ui/cluster_create.html', form=form)
 
@@ -522,7 +547,9 @@ class ClusterCreate(KQueenView):
                 'owner': owner_ref
             }
             cluster = self.kqueen_request('cluster', 'create', fnargs=(cluster_kw,))
-            flash('Provisioning of cluster {} is in progress.'.format(cluster['name']), 'success')
+            msg = 'Provisioning of cluster {} is in progress.'.format(cluster['name'])
+            user_logger.debug('{}:{}'.format(user_prefix(session), msg))
+            flash(msg, 'success')
             return redirect(url_for('ui.index'))
         return render_template('ui/cluster_create.html', form=form)
 
@@ -539,7 +566,9 @@ class ClusterDelete(KQueenView):
             flash('Cannot delete clusters during provisioning.', 'warning')
             return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
         self.kqueen_request('cluster', 'delete', fnargs=(cluster_id,))
-        flash('Cluster {} successfully deleted.'.format(cluster['name']), 'success')
+        msg = 'Cluster {} successfully deleted.'.format(cluster['name'])
+        user_logger.debug('{}:{}'.format(user_prefix(session), msg))
+        flash(msg, 'success')
         return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
 
 
@@ -603,6 +632,9 @@ class ClusterResize(KQueenView):
         if current_node_count == node_count:
             return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
         self.kqueen_request('cluster', 'resize', fnargs=(cluster_id, node_count))
+        msg = 'Cluster {} successfully resized.'.format(cluster['name'])
+        user_logger.debug('{}:{}'.format(user_prefix(session), msg))
+        flash(msg, 'success')
         return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
 
 
