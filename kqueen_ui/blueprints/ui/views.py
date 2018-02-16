@@ -2,10 +2,10 @@ from datetime import datetime
 from flask import (current_app as app, Blueprint, flash, jsonify, redirect,
                    render_template, request, session, url_for)
 from flask_babel import format_datetime
-from flask_mail import Mail, Message
 from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.auth import authenticate, confirm_token, generate_confirmation_token
 from kqueen_ui.generic_views import KQueenView
+from kqueen_ui.utils.email import EmailMessage
 from kqueen_ui.utils.loggers import user_prefix
 from kqueen_ui.utils.wrappers import login_required
 
@@ -18,7 +18,6 @@ import logging
 
 logger = logging.getLogger('kqueen_ui')
 user_logger = logging.getLogger('user')
-mail = Mail()
 
 ui = Blueprint('ui', __name__, template_folder='templates')
 
@@ -214,8 +213,7 @@ class UserInvite(KQueenView):
             logger.debug('User {} from {} invited.'.format(user_kw['username'], user_kw['organization']))
             user = self.kqueen_request('user', 'create', fnargs=(user_kw,))
 
-            # Init mail handler
-            mail.init_app(app)
+            # send mail
             token = generate_confirmation_token(user['email'])
             html = render_template(
                 'ui/email/user_invitation.html',
@@ -223,13 +221,13 @@ class UserInvite(KQueenView):
                 token=token,
                 organization=user['organization']['name']
             )
-            msg = Message(
+            email = EmailMessage(
                 '[KQueen] Organization invitation',
                 recipients=[user['email']],
                 html=html
             )
             try:
-                mail.send(msg)
+                email.send()
             except Exception as e:
                 logger.exception('User {} from {} with id {} will be removed.'.format(user_kw['username'], user_kw['organization'], user['id']))
                 self.kqueen_request('user', 'delete', fnargs=(user['id'],))
@@ -255,8 +253,7 @@ class UserReinvite(KQueenView):
             flash('User {} is already active.'.format(user['username']), 'warning')
             return redirect(request.environ.get('HTTP_REFERER', url_for('ui.organization_manage')))
 
-        # Init mail handler
-        mail.init_app(app)
+        # send mail
         token = generate_confirmation_token(user['email'])
         html = render_template(
             'ui/email/user_invitation.html',
@@ -264,13 +261,13 @@ class UserReinvite(KQueenView):
             token=token,
             organization=user['organization']['name']
         )
-        msg = Message(
+        email = EmailMessage(
             '[KQueen] Organization invitation',
             recipients=[user['email']],
             html=html
         )
         try:
-            mail.send(msg)
+            email.send()
         except Exception as e:
             logger.exception('User {} from {} with id {} will be removed.'.format(user['username'], user['organization'], user['id']))
             self.kqueen_request('user', 'delete', fnargs=(user['id'],))
@@ -379,17 +376,16 @@ class UserRequestResetPassword(KQueenView):
     def handle(self):
         form = RequestPasswordResetForm()
         if form.validate_on_submit():
-            # Init mail handler
-            mail.init_app(app)
+            # send mail
             token = generate_confirmation_token(form.email.data)
             html = render_template('ui/email/user_request_password_reset.html', token=token)
-            msg = Message(
+            email = EmailMessage(
                 '[KQueen] Password reset',
                 recipients=[form.email.data],
                 html=html
             )
             try:
-                mail.send(msg)
+                email.send()
             except Exception as e:
                 msg = 'Could not send password reset e-mail, please try again later.'
                 logger.exception(msg)
