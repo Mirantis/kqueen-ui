@@ -1,6 +1,7 @@
 class BaseConfig:
     DEBUG = False
     LOG_LEVEL = 'WARNING'
+    LOG_CONFIG = 'kqueen_ui/utils/logger_config.yml'
     CACHE = {'CACHE_TYPE': 'simple'}
     PRELOADER = 'simple'
 

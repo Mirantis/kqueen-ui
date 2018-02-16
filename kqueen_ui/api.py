@@ -10,7 +10,7 @@ import logging
 import urllib3
 import six
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('kqueen_ui')
 http = urllib3.PoolManager()
 
 
@@ -135,7 +135,7 @@ class BaseManager(ParserMixin):
         except Exception as e:
             response.error = repr(e)
             response.status = -1
-            logger.error('KQueen Client:: {}'.format(repr(e)))
+            logger.exception('KQueen Client:: {}'.format(repr(e)))
             return response
 
         response.status = raw.status
@@ -150,7 +150,7 @@ class BaseManager(ParserMixin):
             response.data = self._parse_response(data)
         except json.decoder.JSONDecodeError as e:
             response.error = 'JSONDecodeError: {}'.format(repr(e))
-            logger.error('KQueen Client:: {}'.format(repr(e)))
+            logger.exception('KQueen Client:: ')
 
         return response
 

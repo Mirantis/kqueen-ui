@@ -10,7 +10,7 @@ from .forms import UserRegistrationForm
 
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('kqueen_ui')
 mail = Mail()
 
 registration = Blueprint('registration', __name__, template_folder='templates')
@@ -59,10 +59,11 @@ class Register(KQueenView):
             try:
                 mail.send(msg)
             except Exception as e:
-                self.logger('error', repr(e))
+                msg = 'Could not send verification e-mail, please try again later.'
+                logger.exception(msg)
                 self.kqueen_request('user', 'delete', fnargs=(user['id'],), service=True)
                 self.kqueen_request('organization', 'delete', fnargs=(organization['id'],), service=True)
-                flash('Could not send verification e-mail, please try again later.', 'danger')
+                flash(msg, 'danger')
                 return render_template('registration/register.html', form=form)
 
             flash('Registration successful. Check your e-mail for the activation link!', 'success')
