@@ -5,7 +5,7 @@ from flask import current_app as app
 import logging
 import smtplib
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('kqueen_ui')
 
 
 class EmailMessage:
@@ -52,6 +52,7 @@ class EmailMessage:
 
     def send(self):
         message = self._get_message()
+        logger.debug('E-Mail with subject "{}" sent to {} containing following message: {}'.format(self.subject, self.recipients, message))
         if app.testing:
             logger.debug('E-Mail not sent, application is in testing mode')
             return
