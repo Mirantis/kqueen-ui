@@ -4,6 +4,13 @@
 
 {% block page_header %}Change Role{% endblock %}
 
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+  <a href="{{ url_for('manager.organization_detail', organization_id=organization_id) }}">Manage Organization</a>
+</li>
+<li class="breadcrumb-item active">Change Role</li>
+{% endblock %}
+
 {% block content %}
 <div class="box">
   <div class="form-group">

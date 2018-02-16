@@ -226,7 +226,7 @@ class MemberChangeRole(KQueenView):
             user_logger.debug('{}:{}'.format(user_prefix(session), msg))
             flash(msg, 'success')
             return redirect(url_for('manager.organization_detail', organization_id=organization_id))
-        return render_template('manager/member_change_role.html', form=form, username=user['username'])
+        return render_template('manager/member_change_role.html', form=form, username=user['username'], organization_id=organization_id)
 
 
 manager.add_url_rule('/', view_func=Overview.as_view('overview'))
