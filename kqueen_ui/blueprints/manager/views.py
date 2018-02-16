@@ -209,7 +209,7 @@ class MemberCreate(KQueenView):
             user_logger.debug('{}:{}'.format(user_prefix(session), msg))
             flash(msg, 'success')
             return redirect(url_for('manager.organization_detail', organization_id=organization_id))
-        return render_template('manager/member_create.html', form=form)
+        return render_template('manager/member_create.html', form=form, organization_id=organization_id)
 
 
 class MemberChangeRole(KQueenView):
