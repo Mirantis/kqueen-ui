@@ -11,7 +11,6 @@ from .forms import UserRegistrationForm
 import logging
 
 logger = logging.getLogger('kqueen_ui')
-mail = Mail()
 
 registration = Blueprint('registration', __name__, template_folder='templates')
 

@@ -16,7 +16,6 @@ import logging
 
 logger = logging.getLogger('kqueen_ui')
 user_logger = logging.getLogger('user')
-mail = Mail()
 
 manager = Blueprint('manager', __name__, template_folder='templates')
 
