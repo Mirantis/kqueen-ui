@@ -22,12 +22,13 @@ Development
 
 ::
 
-    mkvirtualenv -p /usr/bin/python3 kqueen-ui
+    virtualenv -p /usr/bin/python3 kqueen-ui
+    source ./kqueen-ui/bin/activate
     pip3 install -e ".[dev]"
     pip3 install --editable .
-    npm install
-    npm install -g gulp
-    gulp build
+    sudo npm install
+    sudo npm install -g gulp
+    sudo gulp build
     # optionally start mail server container
     docker-compose -f docker-compose.mail.yml up -d
     python -m kqueen_ui
