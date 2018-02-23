@@ -22,7 +22,7 @@ Requirements
 
  -  Python v3.6 and higher.
  -  Pip v3 and higher.
- -  NodeJS
+ -  NodeJS and npm
  -  Docker stable release (v17.03 and higher is preferable).
  -  Docker-compose stable release (v1.16.0 and higher is preferable).
 
@@ -55,14 +55,14 @@ Development
 
   ::
 
-    sudo npm install
-    sudo npm install -g gulp
+    npm install gulp
+    npm install
 
 - Run gulp tasks to handle static files and etc.
 
   ::
 
-    sudo gulp build
+    gulp build
 
 - Optionally start mail server container. It is used to send confirmation emails during new user creation.
 
