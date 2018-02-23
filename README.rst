@@ -13,24 +13,66 @@ KQueen UI - UI for Kubernetes cluster manager
 Overview
 --------
 
-UI project for Mirantis KQueen, more informations in KQueen repository `here <https://github.com/Mirantis/kqueen>`_.
+UI project for Mirantis KQueen, more information's in `KQueen repository <https://github.com/Mirantis/kqueen>`_.
+
+
+Requirements
+------------
+
+
+ -  Python v3.6 and higher.
+ -  Pip v3 and higher.
+ -  NodeJS
+ -  Docker stable release (v17.03 and higher is preferable).
+ -  Docker-compose stable release (v1.16.0 and higher is preferable).
+
 
 Development
 -----------
 
--  Bootstrap kqueen-ui environment. You need running KQueen backend app to connect to, to run it, please refer to KQueen project documentation.
+- Bootstrap kqueen-ui environment. You need running KQueen backend app to connect to.
+   To run it, please refer to `KQueen project documentation <https://github.com/Mirantis/kqueen/blob/master/README.rst>`_
 
-::
+  ::
+
+    virtualenv -p /usr/bin/python3 kqueen-ui
+    source ./kqueen-ui/bin/activate
+
+    or if you have *virtualenvwrapper* installed
+
+  ::
 
     mkvirtualenv -p /usr/bin/python3 kqueen-ui
+
+- Install Python dependencies
+
+  ::
+
     pip3 install -e ".[dev]"
     pip3 install --editable .
-    npm install
-    npm install -g gulp
-    gulp build
-    # optionally start mail server container
+
+- Install npm and gulp
+
+  ::
+
+    sudo npm install
+    sudo npm install -g gulp
+
+- Run gulp tasks to handle static files and etc.
+
+  ::
+
+    sudo gulp build
+
+- Optionally start mail server container. It is used to send confirmation emails during new user creation.
+
     docker-compose -f docker-compose.mail.yml up -d
-    python -m kqueen_ui
+
+- Start UI service by typing
+
+  ::
+
+    kqueen_ui
 
 Configuration
 -------------
