@@ -453,7 +453,7 @@ class ProvisionerCreate(KQueenView):
                 'owner': owner_ref
             }
             provisioner = self.kqueen_request('provisioner', 'create', fnargs=(provisioner_kw,))
-            msg = 'Provisioner {} successfully created.'.format(provisioner['name'])
+            msg = 'Provisioner {} created.'.format(provisioner['name'])
             user_logger.debug('{}:{}'.format(user_prefix(session), msg))
             flash(msg, 'success')
             return redirect(url_for('ui.index'))
@@ -473,7 +473,7 @@ class ProvisionerDelete(KQueenView):
 
         if provisioner_id not in used_provisioners:
             self.kqueen_request('provisioner', 'delete', fnargs=(provisioner_id,))
-            msg = 'Provisioner {} successfully deleted.'.format(provisioner['name'])
+            msg = 'Provisioner {} deleted.'.format(provisioner['name'])
             user_logger.debug('{}:{}'.format(user_prefix(session), msg))
             flash(msg, 'success')
         else:
