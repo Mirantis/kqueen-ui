@@ -619,7 +619,8 @@ class ClusterResize(KQueenView):
     def handle(self, cluster_id):
         cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
         if 'node_count' not in cluster.get('metadata', {}):
-            flash("This cluster doesn't support scaling.", 'warning')
+            engine = cluster.get('provisioner', {}).get('engine', '<unknown>')
+            flash("{} engine doesn't support scaling.".format(prettify_engine_name(engine)), 'warning')
             return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
         current_node_count = cluster['metadata']['node_count']
         node_count = request.form['node_count']
