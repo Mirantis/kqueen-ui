@@ -206,7 +206,7 @@ def status_for_cluster_detail(_status):
                         4430: 'https',
                         6443: 'https'
                     }
-                    hostname = endpoint.get('hostname', '')
+                    hostname = endpoint.get('hostname') or endpoint.get('ip', '<none>')
                     if hostname:
                         for port in ports:
                             _port = port['port']
