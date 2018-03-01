@@ -93,6 +93,19 @@ document.addEventListener("DOMContentLoaded", function() {
       {%- for field in tagged_fields %}
       "{{ field.id }}": {{ field.jsvalidators|tojson|safe }},
       {%- endfor %}
+    },
+    invalidHandler: function(event, validator) {
+      var $submits = $(this).find('input[type=submit]')
+       ,  errors = validator.numberOfInvalids()
+       ;
+      setTimeout(function() {
+        $submits.each(function() {
+          if (errors) {
+            $(this).prop('disabled', false);
+            $(this).removeClass('disabled');
+          }
+        });
+      }, 1);
     }
   });
 });
