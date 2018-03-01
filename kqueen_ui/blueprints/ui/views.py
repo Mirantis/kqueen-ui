@@ -453,7 +453,7 @@ class ProvisionerCreate(KQueenView):
                 'owner': owner_ref
             }
             provisioner = self.kqueen_request('provisioner', 'create', fnargs=(provisioner_kw,))
-            msg = 'Provisioner {} successfully created.'.format(provisioner['name'])
+            msg = 'Provisioner {} created.'.format(provisioner['name'])
             user_logger.debug('{}:{}'.format(user_prefix(session), msg))
             flash(msg, 'success')
             return redirect(url_for('ui.index'))
@@ -473,7 +473,7 @@ class ProvisionerDelete(KQueenView):
 
         if provisioner_id not in used_provisioners:
             self.kqueen_request('provisioner', 'delete', fnargs=(provisioner_id,))
-            msg = 'Provisioner {} successfully deleted.'.format(provisioner['name'])
+            msg = 'Provisioner {} deleted.'.format(provisioner['name'])
             user_logger.debug('{}:{}'.format(user_prefix(session), msg))
             flash(msg, 'success')
         else:
@@ -624,7 +624,8 @@ class ClusterResize(KQueenView):
     def handle(self, cluster_id):
         cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
         if 'node_count' not in cluster.get('metadata', {}):
-            flash("This cluster doesn't support scaling.", 'warning')
+            engine = cluster.get('provisioner', {}).get('engine', '<unknown>')
+            flash("{} engine doesn't support scaling.".format(prettify_engine_name(engine)), 'warning')
             return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
         current_node_count = cluster['metadata']['node_count']
         node_count = request.form['node_count']
