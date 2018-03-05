@@ -150,5 +150,15 @@
     {#
     {% include "ui/partial/footer.html" %}
     #}
+
+    {# Prevent caching in Safary #}
+    <script>
+      $(window).bind("pageshow", function(event) {
+          if (event.originalEvent.persisted) {
+              window.location.reload()
+          }
+      });
+    </script>
+
   </body>
 </html>
