@@ -112,6 +112,18 @@
     });
     </script>
 
+    <script>
+    $(document).ready(function(){
+      $('form').submit(function(event) {
+        var $submits = $(this).find('input[type=submit]');
+        $submits.each(function() {
+          $(this).prop('disabled', true);
+          $(this).addClass('disabled');
+        });
+      });
+    });
+    </script>
+
     {# START PRELOADER #}
     <div class="loading-backdrop" style="display: none;">
     {% if config.PRELOADER == 'simple' %}
