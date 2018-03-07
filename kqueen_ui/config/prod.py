@@ -3,7 +3,6 @@ from .base import BaseConfig
 
 class Config(BaseConfig):
     DEBUG = False
-    LOG_LEVEL = 'INFO'
     LOG_CONFIG = 'kqueen_ui/utils/logger_config.yml'
 
     # KQueen UI endpoints
