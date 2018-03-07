@@ -1,1 +1,2 @@
 recursive-include kqueen_ui/blueprints/ *.html
+include kqueen_ui/utils/logger_config.yml

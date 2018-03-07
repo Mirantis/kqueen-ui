@@ -12,7 +12,8 @@ import logging
 
 # Logging configuration
 config = current_config(config_file=None)
-setup_logging(config.get('LOG_CONFIG'), config.get('LOG_LEVEL'))
+
+setup_logging(config.get('LOG_CONFIG', 'kqueen_ui/utils/logger_config.yml'), config.get('DEBUG'))
 logger = logging.getLogger('kqueen_ui')
 
 
@@ -26,7 +27,6 @@ def create_app(config_file=None):
     # load configuration
     config = current_config(config_file)
     app.config.from_mapping(config.to_dict())
-    logger.info('Loading configuration from {}'.format(config.source_file))
 
     app.jinja_env.filters.update(filters)
     for cp in context_processors:
