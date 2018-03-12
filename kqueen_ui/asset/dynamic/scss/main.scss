@@ -466,15 +466,6 @@ footer {
     z-index: 3;
     font-size: 14px;
   }
-  > .bounce {
-    width: 50px;
-    height: 100%;
-    position: relative;
-    animation-name: bounce;
-    animation-duration: 1s;
-    animation-direction: alternate;
-    animation-iteration-count: infinite;
-  }
 }
 
 .progress-bar-background.primary {
@@ -487,7 +478,6 @@ footer {
 
 .progress-bar-background.success {
   background-color: lighten($brand-success, 15%);
-  > .bounce,
   > .ui-progress-bar {
     background-color: $brand-success;
   }
@@ -495,7 +485,6 @@ footer {
 
 .progress-bar-background.warning {
   background-color: lighten($brand-warning, 15%);
-  > .bounce,
   > .ui-progress-bar {
     background-color: $brand-warning;
   }
@@ -503,7 +492,6 @@ footer {
 
 .progress-bar-background.danger {
   background-color: lighten($brand-danger, 15%);
-  > .bounce,
   > .ui-progress-bar {
     background-color: $brand-danger;
   }
@@ -511,18 +499,8 @@ footer {
 
 .progress-bar-background.info {
   background-color: lighten($brand-info, 15%);
-  > .bounce,
   > .ui-progress-bar {
     background-color: $brand-info;
-  }
-}
-
-@keyframes bounce {
-  from {
-    left: 0%;
-  }
-  to {
-    left: calc(100% - 50px);
   }
 }
 
@@ -543,6 +521,44 @@ footer {
   font-size: 12px;
   margin-top: -20px;
   margin-right: 10px;
+}
+
+// Default BS progress bar override
+
+.bs-override.progress {
+  position: relative;
+  margin-bottom: 0px;
+  .progress-title {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #fff;
+    z-index: 3;
+    font-size: 14px;
+    height: 100%;
+    line-height: 22px;
+  }
+}
+
+.bs-override.progress {
+  &.progress-primary {
+    background-color: lighten($brand-primary, 25%);
+  }
+  &.progress-success {
+    background-color: lighten($brand-success, 25%);
+  }
+  &.progress-danger {
+    background-color: lighten($brand-danger, 25%);
+  }
+  &.progress-warning {
+    background-color: lighten($brand-warning, 25%);
+  }
+  &.progress-info {
+    background-color: lighten($brand-info, 25%);
+  }
 }
 
 // Radial progress bar

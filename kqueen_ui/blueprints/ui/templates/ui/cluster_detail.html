@@ -76,10 +76,9 @@
     {% else %}
       {% set initial_progress = 100 %}
     {% endif %}
-    <div class="progress-bar-background {{ state_class }}">
-      <span>{% if not cluster.state in config.CLUSTER_TRANSIENT_STATES %}Done{% endif %}</span>
-      <div class="bounce" style="display: none;"></div>
-      <div class="ui-progress-bar" style="width: {{ initial_progress }}%;"></div>
+    <div class="progress progress-{{ state_class }} bs-override">
+      <div class="progress-title">{% if not cluster.state in config.CLUSTER_TRANSIENT_STATES %}100%{% endif %}</div>
+      <div class="progress-bar progress-bar-{{ state_class }} progress-bar-striped" role="progressbar" style="width: {{ initial_progress }}%;"></div>
     </div>
   </div>
 </div>
@@ -545,14 +544,13 @@
 (function(){
   var progressRefreshFn = function(){
     $.get("{{ url_for('ui.cluster_deployment_status', cluster_id=cluster.id) }}", function(res){
-      console.log(JSON.stringify(res));
+      $('.bs-override.progress .progress-bar').addClass('active');
       if(res.response == 200){
-        $('#progress .ui-progress-bar').css('width', res.progress + '%')
-        $('#progress .progress-bar-background > span').html(res.progress + '%');
+        $('.bs-override.progress .progress-bar').css('width', res.progress + '%')
+        $('.bs-override.progress .progress-title').html(res.progress + '%');
       }else{
-        $('#progress .ui-progress-bar').css('width', 0)
-        $('#progress .progress-bar-background > span').hide();
-        $('#progress .progress-bar-background > .bounce').show();
+        $('.bs-override.progress .progress-bar').css('width', '100%')
+        $('.bs-override.progress .progress-title').html('Please wait');
       }
       if(! (res.result == '{{ config.CLUSTER_PROVISIONING_STATE }}' || res.result == '{{ config.CLUSTER_RESIZING_STATE }}')){
         window.location.reload(1);
