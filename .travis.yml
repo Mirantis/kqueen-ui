@@ -8,6 +8,7 @@ service:
 stages:
 - name: test
 - name: build
+  if: fork = false
 jobs:
   include:
   - stage: test
