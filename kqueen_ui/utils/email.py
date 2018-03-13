@@ -27,6 +27,8 @@ class EmailMessage:
         self.ssl_certfile = app.config.get('MAIL_SSL_CERTFILE')
         self.username = app.config.get('MAIL_USERNAME', '')
         self.password = app.config.get('MAIL_PASSWORD', '')
+        logger.debug('Email server: {server}, port: {port}, initialized with username: {name}, password: {pwd}'.format(
+                     server=self.server, port=self.port, name=self.username, pwd=self.password))
 
     def _get_message(self):
         message = MIMEMultipart('alternative')
@@ -39,6 +41,7 @@ class EmailMessage:
 
         message.attach(part1)
         message.attach(part2)
+        logger.debug('Email message generated for {}'.format(message['To']))
         return message
 
     def _get_server(self):
