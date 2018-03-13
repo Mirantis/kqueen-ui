@@ -496,7 +496,13 @@ class ClusterCreate(KQueenView):
 
     def handle(self):
         # Get all necessary objects from backend
-        provisioners = self.kqueen_request('provisioner', 'list')
+        _provisioners = self.kqueen_request('provisioner', 'list')
+        provisioners = [
+            p
+            for p
+            in _provisioners
+            if p.get('state', app.config['PROVISIONER_UNKNOWN_STATE']) == app.config['PROVISIONER_OK_STATE']
+        ]
         engines = self.kqueen_request('provisioner', 'engines')
         engine_dict = dict([(e.pop('name'), e) for e in engines])
 
