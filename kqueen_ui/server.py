@@ -48,7 +48,7 @@ def handle_kqueen_api_exception(e):
     redirect_to = url_for('ui.index')
     if request.url.endswith(redirect_to):
         redirect_to = url_for('ui.logout')
-    return redirect(request.environ.get('HTTP_REFERER', redirect_to))
+    return redirect(redirect_to)
 
 
 def run():
