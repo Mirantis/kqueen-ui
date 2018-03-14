@@ -303,7 +303,7 @@ class UserChangePassword(KQueenView):
             password = {'password': form.password_1.data}
             self.kqueen_request('user', 'updatepw', fnargs=(user_id, password))
 
-            user_logger.debug('Password updated for user {}'.format(session['user']['username']))
+            user_logger.debug('Password changed for user {}'.format(session['user']['username']))
 
             flash('Password successfully updated. Please log in again.', 'success')
             return redirect(url_for('ui.logout'))
@@ -330,7 +330,7 @@ class UserResetPassword(KQueenView):
             if form.validate_on_submit():
                 password = {'password': form.password_1.data}
                 self.kqueen_request('user', 'updatepw', fnargs=(user['id'], password), service=True)
-                user_logger.debug('Password updated for user {}'.format(session['user']['username']))
+                user_logger.debug('Password reseted for user {}'.format(session['user']['username']))
                 flash('Password successfully updated.', 'success')
                 return redirect(url_for('ui.login'))
             return render_template('ui/user_reset_password.html', form=form)
@@ -361,7 +361,7 @@ class UserSetPassword(KQueenView):
                 self.kqueen_request('user', 'updatepw', fnargs=(user['id'], password), service=True)
                 user['active'] = True
                 self.kqueen_request('user', 'update', fnargs=(user['id'], user), service=True)
-                user_logger.debug('Password updated for user {}'.format(session['user']['username']))
+                user_logger.debug('Password setted for user {}'.format(user['username']))
                 flash('Password successfully updated.', 'success')
                 return redirect(url_for('ui.login'))
             return render_template('ui/user_reset_password.html', form=form)
