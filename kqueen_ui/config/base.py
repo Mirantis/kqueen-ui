@@ -22,7 +22,7 @@ class BaseConfig:
     ENABLE_ADDONS = True
 
     # Registration
-    ENABLE_PUBLIC_REGISTRATION = False
+    ENABLE_PUBLIC_REGISTRATION = 'False'
     KQUEEN_SERVICE_USER_USERNAME = 'admin'
     KQUEEN_SERVICE_USER_PASSWORD = 'default'
 

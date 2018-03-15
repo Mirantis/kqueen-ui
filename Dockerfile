@@ -12,5 +12,6 @@ FROM python:3.6-slim
 WORKDIR /code
 COPY . .
 COPY --from=static_builder /app/kqueen_ui/asset/static/ /code/kqueen_ui/asset/static
-RUN pip install -e .
+RUN pip install -e . && \
+    mkdir /var/log/kqueen-ui
 CMD ./entrypoint.sh
