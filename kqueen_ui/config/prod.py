@@ -17,4 +17,4 @@ class Config(BaseConfig):
     ENABLE_ADDONS = False
 
     # Registration
-    ENABLE_PUBLIC_REGISTRATION = True
+    ENABLE_PUBLIC_REGISTRATION = 'True'

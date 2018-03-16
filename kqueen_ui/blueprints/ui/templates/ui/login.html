@@ -39,7 +39,7 @@
   </div>
   <div class="panel panel-default text-center">
     <div class="panel-body" style="font-size: 0.9em;">
-      {% if config.ENABLE_PUBLIC_REGISTRATION %}
+      {% if config.ENABLE_PUBLIC_REGISTRATION == 'True' %}
       <span>Not registered yet? Click <a href="{{ url_for('registration.register') }}">here</a> to set up your user account.</span><br>
       {% endif %}
       <span>Forgot your password? <a href="{{ url_for('ui.user_request_reset_password') }}">Request password reset</a>.</span>
