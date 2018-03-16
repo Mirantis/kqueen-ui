@@ -1,7 +1,7 @@
-{% macro render_cluster_table_actions() %}
+{% macro render_cluster_table_actions(provisioners) %}
   {% set create_url = url_for('ui.cluster_create') %}
   {% set cant_create = not is_authorized(session, 'cluster:create') %}
-  <a href="{{ create_url }}" role="button" class="btn btn-primary btn-sm{% if cant_create %} disabled{% endif %}">Deploy cluster</a>
+  <a href="{{ create_url }}" role="button" class="btn btn-primary btn-sm{% if cant_create or not provisioners %} disabled{% endif %}">Deploy cluster</a>
 {% endmacro %}
 
 {% macro render_cluster_row_actions(cluster) %}
