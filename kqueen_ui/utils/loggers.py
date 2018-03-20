@@ -17,8 +17,7 @@ def setup_logging(path, debug_mode):
                         loggers[logger]['level'] = 'DEBUG'
                     else:
                         current_level = value.get('level')
-                        is_level_not_set = value['level'] == 0 or current_level is None
-                        loggers[logger]['level'] = default_level if is_level_not_set else current_level
+                        loggers[logger]['level'] = default_level if not current_level else current_level
 
                 logging.config.dictConfig(config)
             except Exception as e:
