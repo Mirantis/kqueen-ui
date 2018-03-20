@@ -13,7 +13,7 @@ import logging
 # Logging configuration
 config = current_config(config_file=None)
 
-setup_logging(config.get('LOG_CONFIG', 'kqueen_ui/utils/logger_config.yml'), config.get('DEBUG'))
+setup_logging(config.get('LOG_CONFIG'), config.get('DEBUG'))
 logger = logging.getLogger('kqueen_ui')
 
 
