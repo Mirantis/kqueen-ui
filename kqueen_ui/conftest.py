@@ -1,8 +1,10 @@
 from datetime import datetime
 from flask import url_for
-from kqueen_ui.api import KQueenResponse
-from kqueen_ui import app as application
+from flask_babel import Babel
+from flask_cache import Cache
 from kqueen_ui import auth
+from kqueen_ui.api import KQueenResponse
+from kqueen_ui.server import create_app
 from uuid import uuid4
 
 import json
@@ -20,10 +22,11 @@ superadmin_uuid = '59142471-8334-45e4-b632-653692f0523f'
 
 @pytest.fixture
 def app():
-    application.testing = True
-    application.config['CSRF_ENABLED'] = False
-    application.config['WTF_CSRF_ENABLED'] = False
-    return application
+    app = create_app(config_file=config_file)
+    app.testing = True
+    Babel(app)
+    Cache(app, config=app.config['CACHE'])
+    return app
 
 
 @pytest.fixture
