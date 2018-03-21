@@ -197,10 +197,37 @@ class UserInvite(KQueenView):
     methods = ['GET', 'POST']
 
     def handle(self):
-        form = UserInviteForm()
+        form_cls = UserInviteForm
+        auth_options = app.config.get('AUTH_OPTIONS', {})
+        if auth_options:
+            auth_choices = []
+            for name, options in auth_options.items():
+                choice = (name, options.get('label', name))
+                auth_choices.append(choice)
+            field_kw = {
+                'auth_method': {
+                    'type': 'select',
+                    'label': 'Authentication Method',
+                    'choices': auth_choices,
+                    'validators': {
+                        'required': True
+                    }
+                }
+            }
+            form_cls.append_fields(field_kw)
+        form = form_cls()
         if form.validate_on_submit():
             organization = 'Organization:{}'.format(session['user']['organization']['id'])
-            password = generate_password()
+            auth_method = 'local'
+            notify = True
+            if hasattr(form, 'auth_method'):
+                auth_method = form.auth_method.data
+                notify = auth_options.get(auth_method, {}).get('notify', True)
+            password = ''
+            active = True
+            if auth_method == 'local':
+                password = generate_password()
+                active = False
             user_kw = {
                 'username': form.email.data,
                 'password': password,
@@ -208,32 +235,34 @@ class UserInvite(KQueenView):
                 'organization': organization,
                 'role': 'member',
                 'created_at': datetime.utcnow(),
-                'active': False
+                'auth': auth_method,
+                'active': active
             }
             logger.debug('User {} from {} invited.'.format(user_kw['username'], user_kw['organization']))
             user = self.kqueen_request('user', 'create', fnargs=(user_kw,))
 
             # send mail
-            token = generate_confirmation_token(user['email'])
-            html = render_template(
-                'ui/email/user_invitation.html',
-                username=user['username'],
-                token=token,
-                organization=user['organization']['name'],
-                year=datetime.utcnow().year
-            )
-            email = EmailMessage(
-                '[KQueen] Organization invitation',
-                recipients=[user['email']],
-                html=html
-            )
-            try:
-                email.send()
-            except Exception as e:
-                logger.exception('User {} from {} with id {} will be removed.'.format(user_kw['username'], user_kw['organization'], user['id']))
-                self.kqueen_request('user', 'delete', fnargs=(user['id'],))
-                flash('Could not send invitation e-mail, please try again later.', 'danger')
-                return render_template('ui/user_invite.html', form=form)
+            if notify:
+                token = generate_confirmation_token(user['email'])
+                html = render_template(
+                    'ui/email/user_invitation.html',
+                    username=user['username'],
+                    token=token,
+                    organization=user['organization']['name'],
+                    year=datetime.utcnow().year
+                )
+                email = EmailMessage(
+                    '[KQueen] Organization invitation',
+                    recipients=[user['email']],
+                    html=html
+                )
+                try:
+                    email.send()
+                except Exception as e:
+                    logger.exception('User {} from {} with id {} will be removed.'.format(user_kw['username'], user_kw['organization'], user['id']))
+                    self.kqueen_request('user', 'delete', fnargs=(user['id'],))
+                    flash('Could not send invitation e-mail, please try again later.', 'danger')
+                    return render_template('ui/user_invite.html', form=form)
 
             logger.debug('User {} from {} created with id {}.'.format(user_kw['username'], user_kw['organization'], user['id']))
             flash('User {} successfully created.'.format(user['username']), 'success')
