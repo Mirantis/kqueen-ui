@@ -89,7 +89,8 @@ def test_member_create(client_login_superadmin, user, monkeypatch):
 
     form_data = {
         'email': 'newuser@pytest.org',
-        'role': 'admin'
+        'role': 'admin',
+        'auth_method': 'local'
     }
     organization_id = user['organization']['id']
     response = client_login_superadmin.post(url_for('manager.member_create', organization_id=organization_id), data=form_data)
