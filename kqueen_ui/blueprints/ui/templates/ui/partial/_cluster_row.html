@@ -32,7 +32,7 @@
                   {% for key, value in cluster.metadata.items() %}
                   <tr>
                     <th style="width: 300px;">{{ key }}</th>
-                    <td>{{ value }}</td>
+                    <td>{{ value|urlize(40, target="_blank") }}</td>
                   </tr>
                   {% endfor %}
                 </tbody>
