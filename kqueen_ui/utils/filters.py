@@ -43,6 +43,10 @@ def provisioner_status_icon_class(status):
     return PROVISIONER_STATE_MAP.get(status, 'mdi-alert-outline')
 
 
+def healthy_provisioners(provisioners):
+    return [p for p in provisioners if p['state'] == config['CLUSTER_OK_STATE']]
+
+
 def user_status_icon_class(status):
     return USER_STATE_MAP.get(status, 'mdi-alert-outline')
 
@@ -50,7 +54,8 @@ def user_status_icon_class(status):
 filters = {
     'cluster_status_icon': cluster_status_icon,
     'provisioner_status_icon_class': provisioner_status_icon_class,
-    'user_status_icon_class': user_status_icon_class
+    'user_status_icon_class': user_status_icon_class,
+    'healthy_provisioners': healthy_provisioners
 }
 
 
