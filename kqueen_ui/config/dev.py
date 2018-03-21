@@ -10,3 +10,15 @@ class Config(BaseConfig):
     SECURITY_PASSWORD_SALT = 'secret_salt'
 
     ENABLE_PUBLIC_REGISTRATION = True
+
+    # Authentication choices
+    AUTH_OPTIONS = {
+        'local': {
+            'label': 'Local',
+            'notify': True
+        },
+        'ldap': {
+            'label': 'LDAP',
+            'notify': False
+        }
+    }

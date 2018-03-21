@@ -55,6 +55,9 @@ class BaseConfig:
     PROVISIONER_OK_STATE = 'OK'
     PROVISIONER_UNKNOWN_STATE = 'Not Reachable'
 
+    # Authentication choices
+    AUTH_OPTIONS = {}
+
     @classmethod
     def get(cls, name, default=None):
         """Emulate get method from dict"""
