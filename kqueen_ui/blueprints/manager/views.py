@@ -168,42 +168,72 @@ class MemberCreate(KQueenView):
     methods = ['GET', 'POST']
 
     def handle(self, organization_id):
-        form = MemberCreateForm()
+        form_cls = MemberCreateForm
+        auth_options = app.config.get('AUTH_OPTIONS', {})
+        if auth_options:
+            auth_choices = []
+            for name, options in auth_options.items():
+                choice = (name, options.get('label', name))
+                auth_choices.append(choice)
+            field_kw = {
+                'auth_method': {
+                    'type': 'select',
+                    'label': 'Authentication Method',
+                    'choices': auth_choices,
+                    'validators': {
+                        'required': True
+                    }
+                }
+            }
+            form_cls.append_fields(field_kw)
+        form = form_cls()
         if form.validate_on_submit():
+            auth_method = 'local'
+            notify = True
+            if hasattr(form, 'auth_method'):
+                auth_method = form.auth_method.data
+                notify = auth_options.get(auth_method, {}).get('notify', True)
+            password = ''
+            active = True
+            if auth_method == 'local':
+                password = generate_password()
+                active = False
             user_kw = {
                 'username': form.email.data,
                 'email': form.email.data,
-                'password': generate_password(),
+                'password': password,
                 'organization': 'Organization:{}'.format(organization_id),
                 'created_at': datetime.utcnow(),
                 'role': form.role.data,
-                'active': True,
+                'auth': auth_method,
+                'active': active,
                 'metadata': {}
             }
             user = self.kqueen_request('user', 'create', fnkwargs={'payload': user_kw})
 
             # send mail
-            token = generate_confirmation_token(user['email'])
-            html = render_template(
-                'ui/email/user_invitation.html',
-                username=user['username'],
-                token=token,
-                organization=user['organization']['name'],
-                year=datetime.utcnow().year
-            )
-            email = EmailMessage(
-                '[KQueen] Organization invitation',
-                recipients=[user['email']],
-                html=html
-            )
-            try:
-                email.send()
-            except Exception as e:
-                msg = 'Could not send invitation e-mail, please try again later.'
-                logger.exception(msg)
-                self.kqueen_request('user', 'delete', fnargs={'uuid', user['id']})
-                flash(msg, 'danger')
-                return render_template('manager/member_create.html', form=form)
+            if notify:
+                token = generate_confirmation_token(user['email'])
+                html = render_template(
+                    'ui/email/user_invitation.html',
+                    username=user['username'],
+                    token=token,
+                    organization=user['organization']['name'],
+                    year=datetime.utcnow().year
+                )
+                email = EmailMessage(
+                    '[KQueen] Organization invitation',
+                    recipients=[user['email']],
+                    html=html
+                )
+                try:
+                    email.send()
+                except Exception as e:
+                    msg = 'Could not send invitation e-mail, please try again later.'
+                    logger.exception(msg)
+                    self.kqueen_request('user', 'delete', fnargs={'uuid', user['id']})
+                    flash(msg, 'danger')
+                    return render_template('manager/member_create.html', form=form)
 
             msg = 'Member {} successfully added.'.format(user['username'])
             user_logger.debug('{}:{}'.format(user_prefix(session), msg))
