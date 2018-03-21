@@ -219,7 +219,8 @@ class UserInvite(KQueenView):
                 'ui/email/user_invitation.html',
                 username=user['username'],
                 token=token,
-                organization=user['organization']['name']
+                organization=user['organization']['name'],
+                year=datetime.utcnow().year
             )
             email = EmailMessage(
                 '[KQueen] Organization invitation',
@@ -259,7 +260,8 @@ class UserReinvite(KQueenView):
             'ui/email/user_invitation.html',
             username=user['username'],
             token=token,
-            organization=user['organization']['name']
+            organization=user['organization']['name'],
+            year=datetime.utcnow().year
         )
         email = EmailMessage(
             '[KQueen] Organization invitation',

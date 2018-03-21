@@ -188,7 +188,8 @@ class MemberCreate(KQueenView):
                 'ui/email/user_invitation.html',
                 username=user['username'],
                 token=token,
-                organization=user['organization']['name']
+                organization=user['organization']['name'],
+                year=datetime.utcnow().year
             )
             email = EmailMessage(
                 '[KQueen] Organization invitation',
