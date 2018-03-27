@@ -53,10 +53,12 @@
     {% if request.path not in ROOT_URLS %}
       <div class="container">
         <nav aria-label="breadcrumb">
+          {% block breadcrumb_override %}
           <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ home_url }}">Overview</a></li>
             {% block breadcrumb %}{% endblock %}
           </ol>
+          {% endblock %}
         </nav>
       </div>
     {% endif %}
@@ -93,7 +95,7 @@
       $('.confirm-delete').click(function(ev){
         ev.preventDefault();
         var $this = $( this )
-         ,  questionText = 'Press OK to permanently delete ' + $this.data('name') + '?'
+         ,  questionText = 'Do you wish to permanently delete ' + $this.data('name') + '?'
          ,  href = $this.data('target')
          ;
         swal({

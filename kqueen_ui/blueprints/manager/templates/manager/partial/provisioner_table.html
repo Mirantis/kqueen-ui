@@ -18,7 +18,7 @@
           <td class="status_column"><i class="mdi {{ provisioner.state|provisioner_status_icon_class }}" title="{{ provisioner.state }}"></i></td>
           <td class="action_column">
             {% if provisioner.parameters %}
-            <a data-toggle="collapse" data-target="#provisioner-{{ loop.index }}" class="clickable" title="More informations">
+            <a data-toggle="collapse" data-target="#provisioner-{{ loop.index }}" class="clickable" title="More information">
               <i class="mdi mdi-information-outline"></i>
             </a>
             {% endif %}
