@@ -96,6 +96,7 @@
 $columns: 12;
 
 @mixin table-col-x {
+  table-layout: fixed;
   @for $i from 1 through $columns {
       .table-col-#{$i} { width: col-width($i); }
   }
