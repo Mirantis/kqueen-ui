@@ -95,7 +95,7 @@
       $('.confirm-delete').click(function(ev){
         ev.preventDefault();
         var $this = $( this )
-         ,  questionText = 'Press OK to permanently delete ' + $this.data('name') + '?'
+         ,  questionText = 'Do you wish to permanently delete ' + $this.data('name') + '?'
          ,  href = $this.data('target')
          ;
         swal({
