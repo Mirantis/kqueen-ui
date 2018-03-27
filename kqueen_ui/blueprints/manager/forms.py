@@ -1,6 +1,7 @@
 from flask import session
 from flask_wtf import FlaskForm
 from kqueen_ui.api import get_kqueen_client
+from kqueen_ui.utils.forms import FlaskExtendableForm
 from slugify import slugify
 from wtforms import SelectField, StringField
 from wtforms.validators import DataRequired, Email
@@ -42,7 +43,7 @@ class OrganizationCreateForm(FlaskForm):
         return True
 
 
-class MemberCreateForm(FlaskForm):
+class MemberCreateForm(FlaskExtendableForm):
     email = EmailField('Email', validators=[Email()])
     role = SelectField('Role', choices=ROLE_CHOICES)
 

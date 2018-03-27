@@ -50,7 +50,8 @@ def test_logout(client_login, app):
 
 def test_user_invite(client_login):
     form_data = {
-        'email': 'test@test.org'
+        'email': 'test@test.org',
+        'auth_method': 'local'
     }
     response = client_login.post(url_for('ui.user_invite'), data=form_data)
     assert response.status_code == 302
