@@ -31,9 +31,4 @@
       </ul>
     </li>
   </ul>
-{% else %}
-  {% set login_url = url_for('ui.login') %}
-  <ul class="nav navbar-nav navbar-right">
-    <li><a href="{{ login_url }}">Login</a></li>
-  </ul>
 {% endif %}
