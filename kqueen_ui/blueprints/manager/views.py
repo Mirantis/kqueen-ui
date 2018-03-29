@@ -4,6 +4,7 @@ from datetime import datetime
 from flask import Blueprint, current_app as app, flash, jsonify, redirect, render_template, request, session, url_for
 from flask_babel import format_datetime
 from kqueen_ui.api import get_kqueen_client
+from kqueen_ui.config.auth import AuthModules
 from kqueen_ui.auth import generate_confirmation_token
 from kqueen_ui.blueprints.ui.utils import generate_password, sanitize_resource_metadata
 from kqueen_ui.generic_views import KQueenView
@@ -169,7 +170,11 @@ class MemberCreate(KQueenView):
 
     def handle(self, organization_id):
         form_cls = MemberCreateForm
-        auth_options = app.config.get('AUTH_OPTIONS', {})
+
+        modules = AuthModules()
+        auth_options = modules.__dict__
+        logger.debug('Available Auth options {}'.format(auth_options))
+
         if auth_options:
             auth_choices = []
             for name, options in auth_options.items():
@@ -213,6 +218,7 @@ class MemberCreate(KQueenView):
 
             # send mail
             if notify:
+                logger.debug('User {} from {} with id {} will be notified through email.'.format(user_kw['username'], user_kw['organization'], user['id']))
                 token = generate_confirmation_token(user['email'])
                 html = render_template(
                     'ui/email/user_invitation.html',

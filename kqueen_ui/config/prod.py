@@ -10,11 +10,15 @@ class Config(BaseConfig):
     PORT = 5080
 
     # App secret
-    SECRET_KEY = 'secret'
+    SECRET_KEY = 'secret123secret123secret123'
     SECURITY_PASSWORD_SALT = 'secret_salt'
 
     # Addons
     ENABLE_ADDONS = False
+    ENABLE_PUBLIC_REGISTRATION = True
 
-    # Registration
-    ENABLE_PUBLIC_REGISTRATION = 'True'
+    # Auth configuration
+
+    # Enable email notifications to user
+    LDAP_AUTH_NOTIFY = True
+    LOCAL_AUTH_NOTIFY = True
