@@ -30,6 +30,12 @@ $(document).ready(function() {
     $(document.body).on("click", "a[data-toggle]", function(event) {
         location.hash = this.getAttribute("data-tabcode");
     });
+
+    // Hide flash message after 3 seconds
+    setTimeout(function () {
+        $(".alert.fade").alert('close');
+    }, 3000);
+
 });
 $(window).on("popstate", function() {
     var anchor = location.hash;
