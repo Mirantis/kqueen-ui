@@ -36,6 +36,15 @@ $(document).ready(function() {
         $(".alert.fade").alert('close');
     }, 3000);
 
+    $.validator.addMethod(
+        "uuid",
+	function(value, element, condition) {
+	    var result  = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+	    return this.optional(element) || result == condition
+	},
+	"Entered value is not a valid UUID."
+    );
+
 });
 $(window).on("popstate", function() {
     var anchor = location.hash;
