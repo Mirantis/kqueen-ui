@@ -3,6 +3,7 @@ from flask import (current_app as app, Blueprint, flash, jsonify, redirect,
                    render_template, request, session, url_for)
 from flask_babel import format_datetime
 from kqueen_ui.api import get_kqueen_client
+from kqueen_ui.config.auth import AuthModules
 from kqueen_ui.auth import authenticate, confirm_token, generate_confirmation_token
 from kqueen_ui.generic_views import KQueenView
 from kqueen_ui.utils.email import EmailMessage
@@ -198,7 +199,11 @@ class UserInvite(KQueenView):
 
     def handle(self):
         form_cls = UserInviteForm
-        auth_options = app.config.get('AUTH_OPTIONS', {})
+
+        modules = AuthModules()
+
+        auth_options = modules.__dict__
+
         if auth_options:
             auth_choices = []
             for name, options in auth_options.items():
@@ -215,6 +220,7 @@ class UserInvite(KQueenView):
                 }
             }
             form_cls.append_fields(field_kw)
+
         form = form_cls()
         if form.validate_on_submit():
             organization = 'Organization:{}'.format(session['user']['organization']['id'])
@@ -243,6 +249,7 @@ class UserInvite(KQueenView):
 
             # send mail
             if notify:
+                logger.debug('User {} from {} with id {} will be notified through email.'.format(user_kw['username'], user_kw['organization'], user['id']))
                 token = generate_confirmation_token(user['email'])
                 html = render_template(
                     'ui/email/user_invitation.html',

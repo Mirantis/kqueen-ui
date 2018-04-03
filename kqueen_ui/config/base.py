@@ -1,3 +1,4 @@
+
 class BaseConfig:
     DEBUG = False
     LOG_LEVEL = 'WARNING'
@@ -56,6 +57,8 @@ class BaseConfig:
     PROVISIONER_UNKNOWN_STATE = 'Not Reachable'
 
     # Authentication choices
+    LDAP_AUTH_NOTIFY = False
+    LOCAL_AUTH_NOTIFY = True
     AUTH_OPTIONS = {}
 
     @classmethod
