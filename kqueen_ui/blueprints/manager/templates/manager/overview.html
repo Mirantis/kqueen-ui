@@ -27,7 +27,7 @@
           <td class="action_column">
             {% set detail_url = url_for('manager.organization_detail', organization_id=organization.id) %}
             {% set delete_url = url_for('manager.organization_delete', organization_id=organization.id) %}
-            <a href="{{ detail_url }}" title="Cluster detail">
+            <a href="{{ detail_url }}" title="Organization detail">
               <i class="mdi mdi-file-document-box"></i>
             </a>
             <a class="confirm-delete" data-target="{{ delete_url }}" data-name="{{ organization.name }}" title="Delete organization">
