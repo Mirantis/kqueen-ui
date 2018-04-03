@@ -41,7 +41,7 @@
   {% set reinvite_url = url_for('ui.user_reinvite', user_id=member.id) %}
   {% set cant_create = not is_authorized(session, 'user:create', member) %}
   {% set delete_url = url_for('ui.user_delete', user_id=member.id) %}
-  {% set cant_delete = not is_authorized(session, 'user:delete', member) %}
+  {% set cant_delete = not is_authorized(session, 'user:delete_{}'.format(member.role.lower()), member) %}
   {% if not member.active %}
   <a href="{{ reinvite_url }}"{% if cant_create %} class="disabled"{% endif %} title="Resend invitation">
     <i class="mdi mdi-email-alert"></i>

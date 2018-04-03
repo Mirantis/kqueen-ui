@@ -46,7 +46,9 @@ def test_base_url(app):
     ('provisioner', 'list', True, True),
     ('provisioner', 'update', True, True),
     ('user', 'create', True, False),
-    ('user', 'delete', True, False),
+    ('user', 'delete_member', True, False),
+    ('user', 'delete_admin', True, False),
+    ('user', 'delete_superadmin', False, False),
     ('user', 'get', True, True),
     ('user', 'list', True, True),
     ('user', 'update', True, False)
@@ -72,6 +74,8 @@ def test_policy_handler(
     }
     resource = resources.get(resource_name)
     policy_rule = '{}:{}'.format(resource_name, action)
+    if policy_rule == 'user:delete':
+        policy_rule = '{}_{}'.format(policy_rule, resource.role)
     _authorized = policy_handler()
     authorized = _authorized.get('is_authorized')
 
