@@ -15,14 +15,8 @@ class Config(BaseConfig):
 
     ENABLE_PUBLIC_REGISTRATION = True
 
-    # Authentication choices
-    AUTH_OPTIONS = {
-        'local': {
-            'label': 'Local',
-            'notify': True
-        },
-        'ldap': {
-            'label': 'LDAP',
-            'notify': False
-        }
-    }
+    # Auth configuration
+
+    # Enable email notifications to user
+    LDAP_AUTH_NOTIFY = False
+    LOCAL_AUTH_NOTIFY = True
