@@ -57,9 +57,11 @@ class JsonFileField(FileField):
             try:
                 data = self.data.read()
                 self.data = json.loads(data.decode('utf-8'))
-            except Exception as e:
+            except Exception:
                 self.data = {}
-                logger.error('Could not load JSON file: {}'.format(repr(e)))
+                msg = 'Provided file is not a JSON'
+                logger.exception(msg)
+                raise ValueError(msg)
 
 
 class PasswordField(SelectableMixin, WTPasswordField):
@@ -89,6 +91,8 @@ class YamlFileField(FileField):
         if self.data and isinstance(self.data, FileStorage):
             try:
                 self.data = yaml.load(self.data.stream)
-            except Exception as e:
+            except Exception:
                 self.data = {}
-                logger.error('Could not load YAML file: {}'.format(repr(e)))
+                msg = 'Provided file is not a YAML'
+                logger.exception(msg)
+                raise ValueError(msg)
