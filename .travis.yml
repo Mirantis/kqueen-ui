@@ -27,7 +27,7 @@ jobs:
     - pip3 install --editable .
     - kqueen-ui &
     - sleep 2
-    - wget -O - http://localhost:8000/
+    - wget -O - http://localhost:5080/
 
   - stage: build
     install:
