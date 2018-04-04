@@ -26,6 +26,7 @@ setup(
         'python-dateutil',
         'pyyaml',
         'python-slugify',
+        'pytz',
         'urllib3'
     ],
     classifiers=[
