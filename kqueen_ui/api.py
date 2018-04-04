@@ -150,7 +150,7 @@ class BaseManager(ParserMixin):
             response.data = self._parse_response(data)
         except json.decoder.JSONDecodeError as e:
             response.error = 'JSONDecodeError: {}'.format(repr(e))
-            logger.exception('KQueen Client:: ')
+            logger.exception('KQueen Client: {}'.format(response.error))
 
         return response
 
