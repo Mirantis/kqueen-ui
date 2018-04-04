@@ -250,6 +250,7 @@ class UserInvite(KQueenView):
 
             # send mail
             if notify:
+                logger.debug('User {} from {} with id {} will be notified through email.'.format(user_kw['username'], user_kw['organization'], user['id']))
                 token = generate_confirmation_token(user['email'])
                 html = render_template(
                     'ui/email/user_invitation.html',
