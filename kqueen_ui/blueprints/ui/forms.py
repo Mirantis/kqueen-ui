@@ -9,10 +9,16 @@ from kqueen_ui.utils.fields import (
 from kqueen_ui.utils.forms import FlaskExtendableForm
 from wtforms.validators import DataRequired, Email, EqualTo, Length
 
+import pytz
+
 
 class LoginForm(FlaskExtendableForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
+
+
+class UserProfileForm(FlaskExtendableForm):
+    timezone = SelectField('Timezone', validators=[DataRequired()], choices=[(x, x) for x in pytz.common_timezones])
 
 
 class ChangePasswordForm(FlaskExtendableForm):
