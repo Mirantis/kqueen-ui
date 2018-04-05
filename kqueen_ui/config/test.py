@@ -2,7 +2,7 @@ from .base import BaseConfig
 
 
 class Config(BaseConfig):
-    DEBUG = False
+    DEBUG = True
     LOG_CONFIG = 'kqueen_ui/utils/logger_config.yml'
 
     # CSRF settings

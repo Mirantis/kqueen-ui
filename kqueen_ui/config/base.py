@@ -59,7 +59,6 @@ class BaseConfig:
     # Authentication choices
     LDAP_AUTH_NOTIFY = False
     LOCAL_AUTH_NOTIFY = True
-    AUTH_OPTIONS = {}
 
     @classmethod
     def get(cls, name, default=None):

@@ -4,7 +4,7 @@ from datetime import datetime
 from flask import Blueprint, current_app as app, flash, jsonify, redirect, render_template, request, session, url_for
 from flask_babel import format_datetime
 from kqueen_ui.api import get_kqueen_client
-from kqueen_ui.config.auth import AuthModules
+from kqueen_ui.auth import AUTH_MODULES
 from kqueen_ui.auth import generate_confirmation_token
 from kqueen_ui.blueprints.ui.utils import generate_password, sanitize_resource_metadata
 from kqueen_ui.generic_views import KQueenView
@@ -171,33 +171,31 @@ class MemberCreate(KQueenView):
     def handle(self, organization_id):
         form_cls = MemberCreateForm
 
-        modules = AuthModules()
-        auth_options = modules.__dict__
-        logger.debug('Available Auth options {}'.format(auth_options))
+        logger.debug('Available Auth options {}'.format(AUTH_MODULES))
 
-        if auth_options:
-            auth_choices = []
-            for name, options in auth_options.items():
-                choice = (name, options.get('label', name))
-                auth_choices.append(choice)
-            field_kw = {
-                'auth_method': {
-                    'type': 'select',
-                    'label': 'Authentication Method',
-                    'choices': auth_choices,
-                    'validators': {
-                        'required': True
-                    }
+        auth_choices = []
+        for name, options in AUTH_MODULES.items():
+            choice = (name, options.get('label', name))
+            auth_choices.append(choice)
+        field_kw = {
+            'auth_method': {
+                'type': 'select',
+                'label': 'Authentication Method',
+                'choices': auth_choices,
+                'validators': {
+                    'required': True
                 }
             }
-            form_cls.append_fields(field_kw)
+        }
+
+        form_cls.append_fields(field_kw)
         form = form_cls()
         if form.validate_on_submit():
             auth_method = 'local'
             notify = True
             if hasattr(form, 'auth_method'):
                 auth_method = form.auth_method.data
-                notify = auth_options.get(auth_method, {}).get('notify', True)
+                notify = AUTH_MODULES.get(auth_method, {}).get('notify', True)
             password = ''
             active = True
             if auth_method == 'local':
