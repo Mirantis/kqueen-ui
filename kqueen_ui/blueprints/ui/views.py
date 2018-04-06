@@ -10,10 +10,11 @@ from kqueen_ui.utils.loggers import user_prefix
 from kqueen_ui.utils.wrappers import login_required
 
 from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
-                    ChangePasswordForm, UserInviteForm, RequestPasswordResetForm,
+                    ChangePasswordForm, UserInviteForm, UserProfileForm, RequestPasswordResetForm,
                     PasswordResetForm)
 from .utils import generate_password, prettify_engine_name, status_for_cluster_detail, sanitize_resource_metadata
 
+import copy
 import logging
 
 logger = logging.getLogger('kqueen_ui')
@@ -323,6 +324,39 @@ class UserDelete(KQueenView):
         return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
 
 
+class UserProfile(KQueenView):
+    decorators = [login_required]
+    methods = ['GET', 'POST']
+
+    def handle(self):
+        form_cls = UserProfileForm
+
+        # set default for timezone field
+        user = copy.deepcopy(session['user'])
+        user_metadata = user.get('metadata', {})
+        timezone_field = getattr(form_cls, 'timezone')
+        timezone_field.kwargs['default'] = app.config.get('BABEL_DEFAULT_TIMEZONE', 'UTC')
+        if 'timezone' in user_metadata:
+            timezone_field.kwargs['default'] = user_metadata.get('timezone')
+
+        form = form_cls()
+        if form.validate_on_submit():
+            # update current user timezone
+            user_metadata['timezone'] = form.timezone.data
+            user_id = session['user']['id']
+            self.kqueen_request('user', 'update', fnargs=(user_id, user))
+
+            # update current session
+            if 'metadata' not in session['user']:
+                session['user']['metadata'] = {}
+            session['user']['metadata']['timezone'] = form.timezone.data
+
+            user_logger.debug('User profile updated for user {}'.format(session['user']['username']))
+            flash('User profile successfully updated.', 'success')
+            return redirect(url_for('ui.index'))
+        return render_template('ui/user_profile.html', form=form)
+
+
 class UserChangePassword(KQueenView):
     decorators = [login_required]
     methods = ['GET', 'POST']
@@ -421,12 +455,14 @@ class UserRequestResetPassword(KQueenView):
                 msg = 'Could not send password reset e-mail, please try again later.'
                 logger.exception(msg)
                 flash(msg, 'danger')
-            flash('Password reset link was sent to your e-mail address.', 'success')
+            else:
+                flash('Password reset link was sent to your e-mail address.', 'success')
             return redirect(url_for('ui.index'))
         return render_template('ui/user_request_password_reset.html', form=form)
 
 
 ui.add_url_rule('/users/invite', view_func=UserInvite.as_view('user_invite'))
+ui.add_url_rule('/users/profile', view_func=UserProfile.as_view('user_profile'))
 ui.add_url_rule('/users/<user_id>/reinvite', view_func=UserReinvite.as_view('user_reinvite'))
 ui.add_url_rule('/users/<user_id>/delete', view_func=UserDelete.as_view('user_delete'))
 ui.add_url_rule('/users/changepw', view_func=UserChangePassword.as_view('user_change_password'))

@@ -6,4 +6,5 @@ gunicorn
 python-dateutil
 pyyaml
 python-slugify
+pytz
 urllib3
