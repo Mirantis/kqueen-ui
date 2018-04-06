@@ -48,7 +48,9 @@ class FlaskExtendableForm(FlaskForm):
                 }
             }
         '''
-        fields = OrderedDict(sorted(ctx.items(), key=lambda k: k[0]))
+        # Sort engine parameters by order if set and by name in the second turn
+        fields = OrderedDict(sorted(ctx.items(), key=lambda k: (k[1].get('order', 0), k[0])))
+
         for field_name, field_params in fields.items():
             field_class = TYPE_MAP.get(field_params['type'], None)
             if field_class:
