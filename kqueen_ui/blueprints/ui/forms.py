@@ -1,3 +1,4 @@
+from datetime import datetime
 from kqueen_ui.api import get_service_client
 from kqueen_ui.utils.fields import (
     EmailField,
@@ -7,9 +8,25 @@ from kqueen_ui.utils.fields import (
     TextAreaField,
 )
 from kqueen_ui.utils.forms import FlaskExtendableForm
+from pytz import common_timezones, timezone
 from wtforms.validators import DataRequired, Email, EqualTo, Length
 
-import pytz
+
+def get_datetime_choices():
+    now = datetime.utcnow()
+    tmpl = '(GMT{offset}) {name}'
+    choices = []
+    for tz_name in common_timezones:
+        tz = timezone(tz_name)
+        localized = tz.localize(now)
+        fmt = {
+            'offset': localized.strftime('%z'),
+            'name': tz_name.split('/')[-1].replace('_', ' ')
+        }
+        choice = (tz_name, tmpl.format(**fmt))
+        choices.append(choice)
+    choices.sort(key=lambda k: k[1])
+    return choices
 
 
 class LoginForm(FlaskExtendableForm):
@@ -18,7 +35,7 @@ class LoginForm(FlaskExtendableForm):
 
 
 class UserProfileForm(FlaskExtendableForm):
-    timezone = SelectField('Timezone', validators=[DataRequired()], choices=[(x, x) for x in pytz.common_timezones])
+    timezone = SelectField('Timezone', validators=[DataRequired()], choices=get_datetime_choices())
 
 
 class ChangePasswordForm(FlaskExtendableForm):
