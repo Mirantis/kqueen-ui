@@ -1,4 +1,4 @@
-from .config import current_config
+from .config.utils import kqueen_ui_config
 
 from flask import Flask, redirect, request, url_for
 from kqueen_ui.blueprints.manager.views import manager
@@ -10,10 +10,7 @@ from kqueen_ui.utils.loggers import setup_logging
 
 import logging
 
-# Logging configuration
-config = current_config(config_file=None)
-
-setup_logging(config.get('LOG_CONFIG'), config.get('DEBUG'))
+setup_logging(kqueen_ui_config.get('LOG_CONFIG'), kqueen_ui_config.get('DEBUG'))
 logger = logging.getLogger('kqueen_ui')
 
 
@@ -25,7 +22,7 @@ def create_app(config_file=None):
     app.register_blueprint(ui, url_prefix='/ui')
 
     # load configuration
-    config = current_config(config_file)
+    config = config_file or kqueen_ui_config
     app.config.from_mapping(config.to_dict())
 
     app.jinja_env.filters.update(filters)

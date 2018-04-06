@@ -1,8 +1,9 @@
-from kqueen_ui.config import current_config
+from kqueen_ui.config.utils import kqueen_ui_config
+
 
 import multiprocessing
 
-app_config = current_config()
+app_config = kqueen_ui_config
 
 bind = "{host}:{port}".format(
     host=app_config.get('HOST'),

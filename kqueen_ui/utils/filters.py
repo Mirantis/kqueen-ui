@@ -1,9 +1,9 @@
 from flask import request
 from kqueen_ui.auth import is_authorized
-from kqueen_ui.config import current_config
+from kqueen_ui.config.utils import kqueen_ui_config
 from urllib.parse import urlsplit
 
-config = current_config().to_dict()
+config = kqueen_ui_config.to_dict()
 
 CLUSTER_STATE_MAP = {
     config['CLUSTER_OK_STATE']: 'mdi-cloud-check',
