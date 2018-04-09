@@ -3,6 +3,7 @@ from flask import (current_app as app, Blueprint, flash, jsonify, redirect,
                    render_template, request, session, url_for)
 from flask_babel import format_datetime
 from kqueen_ui.api import get_kqueen_client
+from kqueen_ui.auth import AUTH_MODULES
 from kqueen_ui.auth import authenticate, confirm_token, generate_confirmation_token
 from kqueen_ui.generic_views import KQueenView
 from kqueen_ui.utils.email import EmailMessage
@@ -199,23 +200,23 @@ class UserInvite(KQueenView):
 
     def handle(self):
         form_cls = UserInviteForm
-        auth_options = app.config.get('AUTH_OPTIONS', {})
-        if auth_options:
-            auth_choices = []
-            for name, options in auth_options.items():
-                choice = (name, options.get('label', name))
-                auth_choices.append(choice)
-            field_kw = {
-                'auth_method': {
-                    'type': 'select',
-                    'label': 'Authentication Method',
-                    'choices': auth_choices,
-                    'validators': {
-                        'required': True
-                    }
+
+        auth_choices = []
+        for name, options in AUTH_MODULES.items():
+            choice = (name, options.get('label', name))
+            auth_choices.append(choice)
+        field_kw = {
+            'auth_method': {
+                'type': 'select',
+                'label': 'Authentication Method',
+                'choices': auth_choices,
+                'validators': {
+                    'required': True
                 }
             }
-            form_cls.append_fields(field_kw)
+        }
+
+        form_cls.append_fields(field_kw)
         form = form_cls()
         if form.validate_on_submit():
             organization = 'Organization:{}'.format(session['user']['organization']['id'])
@@ -223,7 +224,7 @@ class UserInvite(KQueenView):
             notify = True
             if hasattr(form, 'auth_method'):
                 auth_method = form.auth_method.data
-                notify = auth_options.get(auth_method, {}).get('notify', True)
+                notify = AUTH_MODULES.get(auth_method, {}).get('notify', True)
             password = ''
             active = True
             if auth_method == 'local':
@@ -244,6 +245,7 @@ class UserInvite(KQueenView):
 
             # send mail
             if notify:
+                logger.debug('User {} from {} with id {} will be notified through email.'.format(user_kw['username'], user_kw['organization'], user['id']))
                 token = generate_confirmation_token(user['email'])
                 html = render_template(
                     'ui/email/user_invitation.html',

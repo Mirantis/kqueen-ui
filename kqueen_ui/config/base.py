@@ -1,3 +1,4 @@
+
 class BaseConfig:
     DEBUG = False
     LOG_LEVEL = 'WARNING'
@@ -56,7 +57,8 @@ class BaseConfig:
     PROVISIONER_UNKNOWN_STATE = 'Not Reachable'
 
     # Authentication choices
-    AUTH_OPTIONS = {}
+    LDAP_AUTH_NOTIFY = False
+    LOCAL_AUTH_NOTIFY = True
 
     @classmethod
     def get(cls, name, default=None):

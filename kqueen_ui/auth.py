@@ -1,10 +1,23 @@
 from itsdangerous import URLSafeTimedSerializer
 from flask import current_app as app
 from kqueen_ui.api import get_kqueen_client
+from kqueen_ui.config import current_config
 
 import logging
 
 logger = logging.getLogger('kqueen_ui')
+config = current_config()
+
+AUTH_MODULES = {
+    "local": {
+        "label": "Local",
+        "notify": config.get("LOCAL_AUTH_NOTIFY")
+    },
+    "ldap": {
+        "label": "LDAP",
+        "notify": config.get("LDAP_AUTH_NOTIFY")
+    }
+}
 
 
 def authenticate(username, password):

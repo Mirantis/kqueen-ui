@@ -1,9 +1,11 @@
+from distutils import util
 import importlib
 import logging
 import os
+import re
 
-CONFIG_FILE_DEFAULT = 'config/dev.py'
 logger = logging.getLogger('kqueen_ui')
+CONFIG_FILE_DEFAULT = 'config/dev.py'
 
 
 def select_file(config_file=None):
@@ -42,6 +44,8 @@ def apply_env_changes(config, prefix='KQUEENUI_'):
     for name, value in os.environ.items():
         if name.startswith(prefix):
             config_key_name = name[len(prefix):]
+            if re.search('(?i)true|(?i)false', value):
+                value = util.strtobool(value)
             setattr(config, config_key_name, value)
 
 
