@@ -811,20 +811,21 @@ footer {
   @include mirantis-button-variant($btn-danger-color, $btn-danger-bg, $btn-danger-border);
 }
 
-// *****************************************************************************
-// SweetAlert
-// *****************************************************************************
+//*****************************************************************************
+//SweetAlert
+//*****************************************************************************
 
 .swal-modal {
   width: 578px;
 }
-
-.swal-button--danger {
-  background-color: $brand-danger;
+.swal-title {
+  margin: 0px;
+  font-size: 18px;
+  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.21);
+  margin-bottom: 28px;
 }
-
-.swal-icon--warning {
-  border-color: $brand-warning;
+.swal-button:focus{
+  box-shadow:none;
 }
 
 // *****************************************************************************
