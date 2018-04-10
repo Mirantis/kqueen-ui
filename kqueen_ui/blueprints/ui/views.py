@@ -220,16 +220,23 @@ class UserInvite(KQueenView):
         form = form_cls()
         if form.validate_on_submit():
             organization = 'Organization:{}'.format(session['user']['organization']['id'])
-            auth_method = 'local'
-            notify = True
+
+            # If notification method is not set, use 'local'
             if hasattr(form, 'auth_method'):
                 auth_method = form.auth_method.data
-                notify = AUTH_MODULES.get(auth_method, {}).get('notify', True)
-            password = ''
-            active = True
+            else:
+                auth_method = 'local'
+
             if auth_method == 'local':
                 password = generate_password()
                 active = False
+                notify = True
+            elif auth_method == 'ldap':
+                password = ''
+                active = True
+                notify = False
+            else:
+                ValueError('Authentication type is not known')
             user_kw = {
                 'username': form.email.data,
                 'password': password,

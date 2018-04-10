@@ -15,9 +15,3 @@ class Config(BaseConfig):
 
     # Addons
     ENABLE_ADDONS = False
-
-    # Auth configuration
-
-    # Enable email notifications to user
-    LDAP_AUTH_NOTIFY = False
-    LOCAL_AUTH_NOTIFY = True

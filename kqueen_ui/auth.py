@@ -10,12 +10,10 @@ config = current_config()
 
 AUTH_MODULES = {
     "local": {
-        "label": "Local",
-        "notify": config.get("LOCAL_AUTH_NOTIFY")
+        "label": "Local"
     },
     "ldap": {
-        "label": "LDAP",
-        "notify": config.get("LDAP_AUTH_NOTIFY")
+        "label": "LDAP"
     }
 }
 
