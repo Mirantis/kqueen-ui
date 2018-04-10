@@ -56,27 +56,9 @@ class ChangePasswordForm(FlaskExtendableForm):
 
 
 class UserInviteForm(FlaskExtendableForm):
-    email = EmailField('Email', validators=[Email()])
+    auth_method = SelectField('Authentication Method', choices=[], switch=True)
 
-    def validate(self):
-        if not FlaskExtendableForm.validate(self):
-            return False
-
-        # TODO: remove these uniqueness checks after introduction of unique constraint
-        # in ETCD storage class on backend
-        client = get_service_client()
-        # Check if e-mail and username exists on backend
-        response = client.user.list()
-        if response.status > 200:
-            self.email.errors.append('Can not contact backend at this time.')
-            return False
-        users = response.data
-        user_emails = [u['email'] for u in users if 'email' in u]
-        if self.email.data in user_emails:
-            self.email.errors.append('This e-mail is already registered.')
-            return False
-
-        return True
+    # TODO: add email uniqueness checker to the whole EmailField
 
 
 class PasswordResetForm(FlaskExtendableForm):

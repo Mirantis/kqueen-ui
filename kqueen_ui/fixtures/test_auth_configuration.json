@@ -1,0 +1,40 @@
+{
+  "ldap": {
+      "engine": "LDAPAuth",
+      "name": "LDAP",
+      "parameters": {
+          "_password": "*****",
+          "admin_dn": "cn=admin,dc=example,dc=org",
+          "uri": "ldap://127.0.0.1"
+      },
+      "ui_parameters": {
+          "username": {
+              "description": "Enter user common name, resisted in the configured LDAP",
+              "generate_password": false,
+              "label": "User CN",
+              "notify": false,
+              "type": "text",
+              "validators": {
+                  "required": true
+              }
+          }
+      }
+  },
+  "local": {
+      "engine": "LocalAuth",
+      "name": "Local",
+      "parameters": {},
+      "ui_parameters": {
+          "username": {
+              "active": false,
+              "description": "Provide valid email of the user you want to invite to the organization",
+              "label": "User Email",
+              "notify": true,
+              "type": "email",
+              "validators": {
+                  "required": true
+              }
+          }
+      }
+  }
+}

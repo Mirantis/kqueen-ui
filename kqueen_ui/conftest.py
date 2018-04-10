@@ -296,7 +296,7 @@ def no_kqueen_requests(monkeypatch):
             obj.update(fnkwargs.get('payload', {}))
             return obj
         elif action == 'auth':
-            return obj
+            return auth_configuration()
         else:
             raise NotImplementedError('Action {} is not supported by mock_kqueen_request'.format(action))
     monkeypatch.setattr('kqueen_ui.generic_views.KQueenView.kqueen_request', mock_kqueen_request)

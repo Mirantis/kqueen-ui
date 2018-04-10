@@ -87,11 +87,10 @@ def test_member_create(client_login_superadmin, user, monkeypatch):
         return response
     monkeypatch.setattr('kqueen_ui.api.UserManager.list', mock_user_list)
 
-    form_data = {
-        'email': 'newuser@pytest.org',
-        'role': 'admin',
-        'auth_method': 'local'
-    }
+    form_data = {'role': 'member',
+                 'username__local': 'test@test.ru',
+                 'auth_method': 'local',
+                 'username__ldap': ''}
     organization_id = user['organization']['id']
     response = client_login_superadmin.post(url_for('manager.member_create', organization_id=organization_id), data=form_data)
     assert response.status_code == 302

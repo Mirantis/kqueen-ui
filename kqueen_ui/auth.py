@@ -8,15 +8,6 @@ import logging
 logger = logging.getLogger('kqueen_ui')
 config = current_config()
 
-AUTH_MODULES = {
-    "local": {
-        "label": "Local"
-    },
-    "ldap": {
-        "label": "LDAP"
-    }
-}
-
 
 def authenticate(username, password):
     user = {}
