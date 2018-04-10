@@ -56,7 +56,8 @@ class ChangePasswordForm(FlaskExtendableForm):
 
 
 class UserInviteForm(FlaskExtendableForm):
-    email = EmailField('Email', validators=[Email()])
+
+    auth_type = SelectField('Authentication Method', choices=[], switch=True)
 
     def validate(self):
         if not FlaskExtendableForm.validate(self):

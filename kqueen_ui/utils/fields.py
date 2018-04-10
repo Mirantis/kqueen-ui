@@ -10,6 +10,7 @@ from wtforms.fields.html5 import (
     EmailField as WTEmailField,
     IntegerField as WTIntegerField
 )
+from wtforms.validators import regexp, data_required
 
 import json
 import logging
@@ -96,3 +97,7 @@ class YamlFileField(FileField):
                 msg = 'Provided file is not a YAML'
                 logger.exception(msg)
                 raise ValueError(msg)
+
+
+class NameField(TextAreaField):
+    pass

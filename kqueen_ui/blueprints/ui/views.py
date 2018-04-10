@@ -201,24 +201,20 @@ class UserInvite(KQueenView):
     def handle(self):
         form_cls = UserInviteForm
 
-        auth_choices = []
         for name, options in AUTH_MODULES.items():
-            choice = (name, options.get('label', name))
-            auth_choices.append(choice)
-        field_kw = {
-            'auth_method': {
-                'type': 'select',
-                'label': 'Authentication Method',
-                'choices': auth_choices,
-                'validators': {
-                    'required': True
-                }
-            }
-        }
+            field_params = {'username'+'__'+name: {'label': options['username'],
+                                                   'type': options['type'],
+                                                   'validators': {'required': True}}
+                            }
 
-        form_cls.append_fields(field_kw)
+            form_cls.append_fields(field_params, switchtag=name)
+
+        # TODO: add login uniqueness check, restrict allowed symbols and add corresponding validator
+
         form = form_cls()
+        form.auth_type.choices = [(k, v['name']) for k, v in AUTH_MODULES.items()]
         if form.validate_on_submit():
+            test = form._fields.items()
             organization = 'Organization:{}'.format(session['user']['organization']['id'])
             auth_method = 'local'
             notify = True
@@ -245,7 +241,10 @@ class UserInvite(KQueenView):
 
             # send mail
             if notify:
-                logger.debug('User {} from {} with id {} will be notified through email.'.format(user_kw['username'], user_kw['organization'], user['id']))
+                logger.debug('User {} from {} with id {} will be notified through email.'.format(user_kw['username'],
+                                                                                                 user_kw[
+                                                                                                     'organization'],
+                                                                                                 user['id']))
                 token = generate_confirmation_token(user['email'])
                 html = render_template(
                     'ui/email/user_invitation.html',
