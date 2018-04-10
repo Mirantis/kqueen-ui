@@ -1,5 +1,5 @@
 {% extends "ui/base.html" %}
-{% from "ui/partial/form.html" import render_form %}
+{% from "ui/partial/selectform.html" import render_selectform %}
 
 {% block page_header %}Invite Member{% endblock %}
 
@@ -12,7 +12,7 @@
 
 {% block content %}
 <div class="box">
-  {{ render_form(form) }}
+  {{ render_selectform(form) }}
 </div>
 {% endblock %}
 

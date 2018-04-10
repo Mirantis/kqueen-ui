@@ -9,7 +9,8 @@ from kqueen_ui.utils.fields import (
     SelectField,
     StringField,
     TextAreaField,
-    YamlFileField
+    YamlFileField,
+    NameField
 )
 
 
@@ -22,7 +23,8 @@ TYPE_MAP = {
     'select': SelectField,
     'text': StringField,
     'text_area': TextAreaField,
-    'yaml_file': YamlFileField
+    'yaml_file': YamlFileField,
+    'name': NameField
 }
 
 
