@@ -16,7 +16,8 @@
         {% endif %}
       {% endif %}
     {% endfor %}
-    <input type="submit" value="Submit" class="btn btn-primary btn-sm">
+    <input type="button" name='cancel' value="Cancel" class="btn btn-default btn-sm"  onclick="window.location.href='{{ url_for('ui.index') }}';">
+    <input type="submit" name='submit' value="Submit" class="btn btn-primary btn-sm">
 </form>
 {% if switch_fields|length > 0 %}
 <script>
@@ -109,6 +110,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 });
+
 </script>
 {% endif %}
 {% endmacro %}
