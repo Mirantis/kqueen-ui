@@ -239,6 +239,13 @@ class UserManager(BaseManager):
         return self.request('whoami')
 
 
+class ConfigurationManager(BaseManager):
+    resource_url = 'configurations/'
+
+    def auth(self):
+        return self.request('auth')
+
+
 class KQueenAPIClient:
 
     def __init__(
@@ -261,6 +268,7 @@ class KQueenAPIClient:
         self.provisioner = ProvisionerManager(self)
         self.organization = OrganizationManager(self)
         self.user = UserManager(self)
+        self.configuration = ConfigurationManager(self)
 
 
 def get_kqueen_client(username=None, password=None, token=None):

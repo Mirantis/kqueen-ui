@@ -191,6 +191,13 @@ def cluster_status():
 
 
 @pytest.fixture
+def auth_configuration():
+    with open('kqueen_ui/fixtures/test_auth_configuration.json', 'r') as stream:
+        data_loaded = json.load(stream)
+    return data_loaded
+
+
+@pytest.fixture
 def provisioner_engines():
     with open('kqueen_ui/fixtures/test_provisioner_engines.json', 'r') as stream:
         data_loaded = json.load(stream)
@@ -246,6 +253,8 @@ def no_kqueen_requests(monkeypatch):
             obj = organization()
         elif resource == 'user':
             obj = user()
+        elif resource == 'configuration':
+            obj = auth_configuration()
         else:
             raise NotImplementedError('Resource {} is not supported by mock_kqueen_request'.format(resource))
 
@@ -285,6 +294,8 @@ def no_kqueen_requests(monkeypatch):
             return obj
         elif action == 'update':
             obj.update(fnkwargs.get('payload', {}))
+            return obj
+        elif action == 'auth':
             return obj
         else:
             raise NotImplementedError('Action {} is not supported by mock_kqueen_request'.format(action))
