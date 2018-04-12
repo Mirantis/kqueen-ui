@@ -1,4 +1,5 @@
-{% if session.get('user', None) %}
+{% set user = session.get('user', None) %}
+{% if user %}
   {% set index_url = url_for('ui.index') %}
   {% set manager_url = url_for('manager.overview') %}
   {% set user_profile_url = url_for('ui.user_profile') %}
@@ -26,9 +27,12 @@
         <li>
           <a href="{{ user_profile_url }}">User Profile</a>
         </li>
+        {% if user.auth != 'ldap' %}
         <li>
           <a href="{{ change_pw_url }}">Change Password</a>
         </li>
+        {% endif %}
+
         <li>
           <a href="{{ logout_url }}">Logout</a>
         </li>
