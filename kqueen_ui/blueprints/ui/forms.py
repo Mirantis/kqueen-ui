@@ -35,7 +35,8 @@ class LoginForm(FlaskExtendableForm):
 
 
 class UserProfileForm(FlaskExtendableForm):
-    timezone = SelectField('Timezone', validators=[DataRequired()], choices=get_datetime_choices())
+    timezone = SelectField('Timezone', validators=[DataRequired()],
+                           choices=get_datetime_choices())
 
 
 class ChangePasswordForm(FlaskExtendableForm):
@@ -62,8 +63,8 @@ class UserInviteForm(FlaskExtendableForm):
         if not FlaskExtendableForm.validate(self):
             return False
 
-        # TODO: remove these uniqueness checks after introduction of unique constraint
-        # in ETCD storage class on backend
+        # TODO: remove these uniqueness checks after introduction of unique
+        # constraint in ETCD storage class on backend
         client = get_service_client()
         # Check if e-mail and username exists on backend
         response = client.user.list()
@@ -103,8 +104,8 @@ class RequestPasswordResetForm(FlaskExtendableForm):
         if not FlaskExtendableForm.validate(self):
             return False
 
-        # TODO: remove these uniqueness checks after introduction of unique constraint
-        # in ETCD storage class on backend
+        # TODO: remove these uniqueness checks after introduction of unique
+        # constraint in ETCD storage class on backend
         client = get_service_client()
         # Check if e-mail exists on backend
         response = client.user.list()
@@ -127,7 +128,8 @@ class ProvisionerCreateForm(FlaskExtendableForm):
 
 class ClusterCreateForm(FlaskExtendableForm):
     name = StringField('Name', validators=[DataRequired()])
-    provisioner = SelectField('Provisioner', validators=[DataRequired()], choices=[], switch=True)
+    provisioner = SelectField('Provisioner', validators=[DataRequired()],
+                              choices=[], switch=True)
 
 
 class ClusterApplyForm(FlaskExtendableForm):

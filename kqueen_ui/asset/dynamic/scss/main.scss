@@ -15,6 +15,10 @@ body {
   background-color: #f5f5f5;
 }
 
+a {
+  cursor: pointer;
+}
+
 #content {
   margin-bottom: 50px;
 }
@@ -561,9 +565,8 @@ footer {
 }
 
 // Radial progress bar
-
 .pie_progress {
-  width: 120px;
+  width: 110px;
   margin: 10px auto;
 }
 
@@ -575,8 +578,17 @@ footer {
 }
 
 .pie_progress__number {
-  font-size: 38px;
+  font-size: 35px;
   font-family: 'Exo 2';
+}
+
+.pie-percents {
+  margin-top: 28px;
+  color: #988b8b;
+}
+
+.pie-label {
+  font-size: 14px;
 }
 
 // *****************************************************************************
@@ -880,7 +892,7 @@ footer {
     @include prefix(transform, rotate(-45deg), webkit);
   }
   // Colors
-  &.white { 
+  &.white {
     background: #f0f0f0;
     color: #555;
   }
@@ -938,9 +950,9 @@ footer {
   border-top-color: #004d99;
   display: inline-block;
   margin: 0 3px;
-  @include prefix(animation-name, spin, webkit moz o);  
-  @include prefix(animation-duration, 1s, webkit moz o);  
-  @include prefix(animation-iteration-count, infinite, webkit moz o);  
+  @include prefix(animation-name, spin, webkit moz o);
+  @include prefix(animation-duration, 1s, webkit moz o);
+  @include prefix(animation-iteration-count, infinite, webkit moz o);
   @include prefix(animation-timing-function, cubic-bezier(0.5, -0.35, 0.5, 1.35), webkit moz o);
 }
 

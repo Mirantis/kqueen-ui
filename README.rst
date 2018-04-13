@@ -19,7 +19,6 @@ UI project for Mirantis KQueen, more information's in `KQueen repository <https:
 Requirements
 ------------
 
-
  -  Python v3.6 and higher.
  -  Pip v3 and higher.
  -  NodeJS and npm
@@ -31,18 +30,18 @@ Development
 -----------
 
 - Bootstrap kqueen-ui environment. You need running KQueen backend app to connect to.
-   To run it, please refer to `KQueen project documentation <https://github.com/Mirantis/kqueen/blob/master/README.rst>`_
+  To run it, please refer to `KQueen project documentation <https://github.com/Mirantis/kqueen/blob/master/README.rst>`_
 
   ::
 
-    virtualenv -p /usr/bin/python3 kqueen-ui
-    source ./kqueen-ui/bin/activate
+    virtualenv -p /usr/bin/python3 venv
+    source ./venv/bin/activate
 
     or if you have *virtualenvwrapper* installed
 
   ::
 
-    mkvirtualenv -p /usr/bin/python3 kqueen-ui
+    mkvirtualenv -p /usr/bin/python3 venv
 
 - Install Python dependencies
 

@@ -200,7 +200,10 @@ def provisioner_engines():
 
 @pytest.fixture
 def token():
-    return 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MDg4NTkwNzksIm5iZiI6MTUwODg1NTQ3OSwiaWRlbnRpdHkiOiIzNmIzMDBmMS0yZDNmLTQ2NzAtOTI4NS0wNTEyOGYzYjM5NmIiLCJpYXQiOjE1MDg4NTU0Nzl9.wGx5bXq5Xmf3lZSXt38BGf4wTg115qxM5Blze4ZYAj0'
+    return 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MDg4NTkwNz' \
+           'ksIm5iZiI6MTUwODg1NTQ3OSwiaWRlbnRpdHkiOiIzNmIzMDBmMS0yZDNmL' \
+           'TQ2NzAtOTI4NS0wNTEyOGYzYjM5NmIiLCJpYXQiOjE1MDg4NTU0Nzl9.wGx' \
+           '5bXq5Xmf3lZSXt38BGf4wTg115qxM5Blze4ZYAj0'
 
 
 @pytest.fixture
@@ -237,7 +240,8 @@ def client_login_superadmin(client, monkeypatch):
 
 @pytest.fixture(autouse=True)
 def no_kqueen_requests(monkeypatch):
-    def mock_kqueen_request(self, resource, action, fnargs=(), fnkwargs={}, service=False):
+    def mock_kqueen_request(self, resource, action, fnargs=(), fnkwargs=None, service=False):
+        fnkwargs = fnkwargs or {}
         if resource == 'cluster':
             obj = cluster()
         elif resource == 'provisioner':
@@ -247,7 +251,8 @@ def no_kqueen_requests(monkeypatch):
         elif resource == 'user':
             obj = user()
         else:
-            raise NotImplementedError('Resource {} is not supported by mock_kqueen_request'.format(resource))
+            raise NotImplementedError('Resource {} is not supported by '
+                                      'mock_kqueen_request'.format(resource))
 
         if fnkwargs.get('all_namespaces', True):
             obj['_namespace'] = 'pytestorg'
@@ -287,10 +292,13 @@ def no_kqueen_requests(monkeypatch):
             obj.update(fnkwargs.get('payload', {}))
             return obj
         else:
-            raise NotImplementedError('Action {} is not supported by mock_kqueen_request'.format(action))
-    monkeypatch.setattr('kqueen_ui.generic_views.KQueenView.kqueen_request', mock_kqueen_request)
+            raise NotImplementedError('Action {} is not supported by '
+                                      'mock_kqueen_request'.format(action))
+    monkeypatch.setattr('kqueen_ui.generic_views.KQueenView.'
+                        'kqueen_request', mock_kqueen_request)
 
-    # TODO: should always use wrapper, so I don't need to patch single manager method directly on client
+    # TODO: should always use wrapper, so I don't need to
+    #  patch single manager method directly on client
     def mock_policy(self, uuid):
         response = KQueenResponse()
         response.data = default_policy()

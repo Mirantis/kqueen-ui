@@ -87,7 +87,8 @@ class BaseManager(ParserMixin):
             'password': self.client.password
         })
 
-        r = self._request('', override_url=self.client.auth_url, method='POST', payload=payload, auth=False)
+        r = self._request('', override_url=self.client.auth_url,
+                          method='POST', payload=payload, auth=False)
         token = r.data.get('access_token', None)
         error = None
         self.client.token = token
@@ -104,7 +105,8 @@ class BaseManager(ParserMixin):
             logger.warning('KQueen Client:: Could not get access token: {}'.format(r.error))
         return token, error
 
-    def _request(self, url_suffix, method='GET', payload=None, override_url=None, encode_kw=None, auth=True):
+    def _request(self, url_suffix, method='GET', payload=None,
+                 override_url=None, encode_kw=None, auth=True):
         headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json'

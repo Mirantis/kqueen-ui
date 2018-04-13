@@ -34,7 +34,9 @@ def test_login_required(client, view, values):
     ('ui.user_profile', {}, ['<h2>User Profile</h2>']),
     ('ui.provisioner_create', {}, ['<h2>Create Provisioner</h2>']),
     ('ui.cluster_create', {}, ['<h2>Deploy Kubernetes Cluster</h2>']),
-    ('ui.cluster_detail', {'cluster_id': '1868f6f4-1dbb-4555-ba46-1d2924e81f5e'}, ['<h2>Cluster pytest-cluster detail</h2>', '<td>ip-10-0-10-95.us-west-2.compute.internal</td>']),
+    ('ui.cluster_detail', {'cluster_id': '1868f6f4-1dbb-4555-ba46-1d2924e81f5e'},
+     ['<h2>Cluster pytest-cluster detail</h2>',
+      '<td>ip-10-0-10-95.us-west-2.compute.internal</td>']),
 ])
 def test_render_view(client_login, view, values, lookup_html):
     response = client_login.get(url_for(view, **values))
@@ -122,7 +124,8 @@ def test_provisioner_create(client_login):
 
 
 def test_provisioner_delete(client_login, provisioner):
-    response = client_login.get(url_for('ui.provisioner_delete', provisioner_id=provisioner['id']))
+    response = client_login.get(url_for('ui.provisioner_delete',
+                                        provisioner_id=provisioner['id']))
     assert response.status_code == 302
     assert response.headers['Location'].endswith(url_for('ui.index'))
 
@@ -139,7 +142,8 @@ def test_cluster_create(client_login, provisioner):
 
 
 def test_cluster_delete(client_login, cluster):
-    response = client_login.get(url_for('ui.cluster_delete', cluster_id=cluster['id']))
+    response = client_login.get(url_for('ui.cluster_delete',
+                                        cluster_id=cluster['id']))
     assert response.status_code == 302
     assert response.headers['Location'].endswith(url_for('ui.index'))
 
@@ -148,25 +152,30 @@ def test_cluster_resize(client_login, cluster):
     form_data = {
         'node_count': '3'
     }
-    response = client_login.post(url_for('ui.cluster_resize', cluster_id=cluster['id']), data=form_data)
+    response = client_login.post(url_for('ui.cluster_resize',
+                                         cluster_id=cluster['id']),
+                                 data=form_data)
     assert response.status_code == 302
     assert response.headers['Location'].endswith(url_for('ui.index'))
 
 
 def test_cluster_deployment_status(client_login, cluster):
-    response = client_login.get(url_for('ui.cluster_deployment_status', cluster_id=cluster['id']))
+    response = client_login.get(url_for('ui.cluster_deployment_status',
+                                        cluster_id=cluster['id']))
     expected_keys = ['progress', 'response', 'result']
     assert response.status_code == 200
     assert set(expected_keys) == set(response.json.keys())
 
 
 def test_cluster_kubeconfig(client_login, cluster):
-    response = client_login.get(url_for('ui.cluster_kubeconfig', cluster_id=cluster['id']))
+    response = client_login.get(url_for('ui.cluster_kubeconfig',
+                                        cluster_id=cluster['id']))
     assert response.status_code == 200
     assert response.json == cluster['kubeconfig']
 
 
 def test_cluster_topology_data(client_login, cluster):
-    response = client_login.get(url_for('ui.cluster_topology_data', cluster_id=cluster['id']))
+    response = client_login.get(url_for('ui.cluster_topology_data',
+                                        cluster_id=cluster['id']))
     assert response.status_code == 200
     assert response.json == {}
