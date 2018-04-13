@@ -2,43 +2,72 @@
 
 {% from "ui/partial/form.html" import render_form %}
 
-{% block page_header %}Cluster {{ cluster.name }} detail{% endblock %}
+{% block page_header %}
+Cluster {{ cluster.name }} detail
+{% endblock %}
 
-{% block breadcrumb %}<li class="breadcrumb-item active">Cluster {{ cluster.name }} detail</li>{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Cluster {{ cluster.name }} detail</li>
+{% endblock %}
 
 {% block content %}
 <div class="overview">
   <div class="col-sm-2 col-sm-offset-1 clearfix">
-    <div class="pie_progress" role="progressbar" data-goal="{{ status.overview.namespaces }}" aria-valuemax="{{ status.overview.namespaces_max }}">
+    <div
+      class="pie_progress"
+      role="progressbar"
+      data-goal="{{ status.overview.namespaces }}"
+      aria-valuemax="{{ status.overview.namespaces_max }}"
+    >
       <div class="pie_progress__number">0</div>
-      <div class="pie_progress__label">Namespaces</div>
     </div>
+    <div class="pie-label">Namespaces</div>
   </div>
   <div class="col-sm-2 clearfix">
-    <div class="pie_progress" role="progressbar" data-goal="{{ status.overview.nodes }}" aria-valuemax="{{ status.overview.nodes_max }}">
+    <div
+      class="pie_progress_static pie_progress"
+      role="progressbar"
+      data-goal="{{ status.overview.nodes }}"
+      aria-valuemax="{{ status.overview.nodes_max }}"
+    >
       <div class="pie_progress__number">0</div>
-      <div class="pie_progress__label">Nodes</div>
     </div>
+    <div class="pie-label">Nodes</div>
   </div>
   <div class="col-sm-2 clearfix">
-    <div class="pie_progress" role="progressbar" data-goal="{{ status.overview.deployments }}" aria-valuemax="{{ status.overview.deployments_max }}">
+    <div
+      class="pie_progress"
+      role="progressbar"
+      data-goal="{{ status.overview.deployments }}"
+      aria-valuemax="{{ status.overview.deployments_max }}"
+    >
       <div class="pie_progress__number">0</div>
-      <div class="pie_progress__label">Deployments</div>
     </div>
+    <div class="pie-label">Deployments</div>
   </div>
   {% set podcount = status.pods|length %}
   <div class="col-sm-2 clearfix">
-    <div class="pie_progress" role="progressbar" data-goal="{{ status.overview.pods }}" aria-valuemax="{{ status.overview.pods_max }}">
+    <div
+      class="pie_progress"
+      role="progressbar"
+      data-goal="{{ status.overview.pods }}"
+      aria-valuemax="{{ status.overview.pods_max }}"
+    >
       <div class="pie_progress__number">0</div>
-      <div class="pie_progress__label">Pods</div>
     </div>
+    <div class="pie-label">Pods</div>
   </div>
   {% set servicecount = status.services|length %}
   <div class="col-sm-2 clearfix">
-    <div class="pie_progress" role="progressbar" data-goal="{{ status.overview.services }}" aria-valuemax="{{ status.overview.services_max }}">
+    <div
+      class="pie_progress"
+      role="progressbar"
+      data-goal="{{ status.overview.services }}"
+      aria-valuemax="{{ status.overview.services_max }}"
+    >
       <div class="pie_progress__number">0</div>
-      <div class="pie_progress__label">Services</div>
     </div>
+    <div class="pie-label">Services</div>
   </div>
 </div>
 
@@ -47,18 +76,37 @@
     {% if cluster.state != config.CLUSTER_OK_STATE %}
       <a href="#" class="btn btn-primary btn-xs disabled">Kubeconfig N/A</a>
     {% else %}
-      <a target="_blank" href="{{ url_for('ui.cluster_kubeconfig', cluster_id=cluster.id) }}" class="btn btn-primary btn-xs">Download Kubeconfig</a>
+      <a
+        target="_blank"
+        href="{{ url_for('ui.cluster_kubeconfig', cluster_id=cluster.id) }}"
+        class="btn btn-primary btn-xs"
+      >
+        Download Kubeconfig
+      </a>
     {% endif %}
   </div>
   <div class="col-sm-3">
-    <form id="scaleform" action="{{ url_for('ui.cluster_resize', cluster_id=cluster.id) }}" method="post" enctype="multipart/form-data">  
+    <form
+      id="scaleform"
+      action="{{ url_for('ui.cluster_resize', cluster_id=cluster.id) }}"
+      method="post"
+      enctype="multipart/form-data"
+    >
       <div class="scaleformbox">
         {% if cluster.state != config.CLUSTER_OK_STATE %}
         <a class="btn btn-primary btn-xs disabled" id="scalebtn">Scale Nodes N/A</a>
         {% else %}
         <div class="btn btn-primary btn-xs" id="scalebtn">Scale Nodes</div>
         <div class="input-group" id="scaleinput">
-          <input type="number" id="node_count" step="1" min="1" value="{{ status.overview.nodes }}" name="node_count" class="form-control">
+          <input
+            type="number"
+            id="node_count"
+            step="1"
+            min="1"
+            value="{{ status.overview.nodes }}"
+            name="node_count"
+            class="form-control"
+          >
           <span class="input-group-btn">
             <input class="btn btn-primary" type="submit" value="&#10004;">
           </span>
@@ -68,7 +116,9 @@
     </form>
   </div>
   <div class="col-sm-3" id="state">
-    <a class="btn btn-{{ state_class }} btn-xs" style="pointer-events: none;">State: {{ cluster.state }}</a>
+    <a class="btn btn-{{ state_class }} btn-xs" style="pointer-events: none;">
+      State: {{ cluster.state }}
+    </a>
   </div>
   <div class="col-sm-3" id="progress">
     {% if cluster.state in config.CLUSTER_TRANSIENT_STATES %}
@@ -77,17 +127,29 @@
       {% set initial_progress = 100 %}
     {% endif %}
     <div class="progress progress-{{ state_class }} bs-override">
-      <div class="progress-title">{% if not cluster.state in config.CLUSTER_TRANSIENT_STATES %}100%{% endif %}</div>
-      <div class="progress-bar progress-bar-{{ state_class }} progress-bar-striped" role="progressbar" style="width: {{ initial_progress }}%;"></div>
+      <div class="progress-title">
+        {% if not cluster.state in config.CLUSTER_TRANSIENT_STATES %}100%{% endif %}
+      </div>
+      <div
+        class="progress-bar progress-bar-{{ state_class }} progress-bar-striped"
+        role="progressbar"
+        style="width: {{ initial_progress }}%;"
+      ></div>
     </div>
   </div>
 </div>
 
 <ul class="nav nav-tabs{% if cluster.state != config.CLUSTER_OK_STATE %} hidden{% endif %}">
-  <li role="presentation" class="active"><a data-toggle="tab" href="#status" data-tabcode="#statusTab">Status</a></li>
-  <li role="presentation"><a data-toggle="tab" href="#topology" data-tabcode="#topologyTab">Topology</a></li>
+  <li role="presentation" class="active">
+    <a data-toggle="tab" href="#status" data-tabcode="#statusTab">Status</a>
+  </li>
+  <li role="presentation">
+    <a data-toggle="tab" href="#topology" data-tabcode="#topologyTab">Topology</a>
+  </li>
   {% if config.ENABLE_ADDONS %}
-  <li role="presentation"><a data-toggle="tab" href="#addons" data-tabcode="#addonsTab">Addons</a></li>
+  <li role="presentation">
+    <a data-toggle="tab" href="#addons" data-tabcode="#addonsTab">Addons</a>
+  </li>
   {% endif %}
 </ul>
 
@@ -96,7 +158,7 @@
   <div class="tab-pane active" id="status">
     <h3>Nodes</h3>
     <div class="table-container">
-      <table class="table table-hover no-actions" id="table-nodes">
+      <table class="table table-hover no-actions" id="nodes-table-nodes">
         <thead>
           <tr>
             <th>Name</th>
@@ -124,7 +186,9 @@
             </td>
             <td class="status_column">
               {% for status in node.status %}
-              <abbr title="{{ status.type }}"><i class="mdi {{ status.icon }}" style="font-size: 18px;" aria-hidden="true"></i></abbr>
+              <abbr title="{{ status.type }}">
+                <i class="mdi {{ status.icon }}" style="font-size: 18px;" aria-hidden="true"></i>
+              </abbr>
               {% endfor %}
             </td>
             <td class="action_column">
@@ -143,7 +207,7 @@
     
     <h3>Deployments</h3>
     <div class="table-container">
-      <table class="table table-hover no-actions" id="table-nodes">
+      <table class="table table-hover no-actions" id="deployments-table-nodes">
         <thead>
           <tr>
             <th>Name</th>
@@ -180,7 +244,7 @@
 
     <h3>Services</h3>
     <div class="table-container">
-      <table class="table table-hover no-actions" id="table-nodes">
+      <table class="table table-hover no-actions" id="services-table-nodes">
         <thead>
           <tr>
             <th>Name</th>
@@ -208,8 +272,15 @@
                 {% for external_ip in service.external_ip %}
                 <li style="position: relative;">
                   <a href="{{ external_ip }}">{{ external_ip|truncate(24, True) }}</a>
-                  <a title="Copy to clipboard" class="clipboard pull-right" style="cursor: pointer;" data-clipboard-text="{{ external_ip }}">
-                    <i class="mdi mdi-clipboard-outline" style="font-size: 18px; position: absolute; top: -3px; right: 0px;"></i>
+                  <a
+                    title="Copy to clipboard"
+                    class="clipboard pull-right"
+                    data-clipboard-text="{{ external_ip }}"
+                  >
+                    <i
+                      class="mdi mdi-clipboard-outline"
+                      style="font-size: 18px; position: absolute; top: -3px; right: 0px;"
+                    ></i>
                   </a>
                 </li>
                 {% endfor %}
@@ -242,7 +313,14 @@
           {% for image in status.images %}
           <tr>
             <td>
-              <span data-toggle="popover" data-trigger="hover" data-content="{{ image.names[0] }}" class="pop-help">{{ image.names[-1] }}</span>
+              <span
+                data-toggle="popover"
+                data-trigger="hover"
+                data-content="{{ image.names[0] }}"
+                class="pop-help"
+              >
+                {{ image.names[-1] }}
+              </span>
             </td>
             <td>{{ image.size_bytes }}</td>
           </tr>
@@ -267,7 +345,9 @@
         </thead>
         <tbody>
           {% for pvc in status.persistent_volume_claims %}
-          <tr{% if pvc.volume %} data-toggle="collapse" data-target="#pvc-{{ loop.index }}" class="clickable"{% endif %}>
+          <tr{% if pvc.volume %}
+            data-toggle="collapse" data-target="#pvc-{{ loop.index }}" class="clickable"
+          {% endif %}>
             <td>{{ pvc.name }}</td>
             <td>{{ pvc.namespace }}</td>
             <td>{{ pvc.requested_capacity }}</td>
@@ -297,12 +377,14 @@
                     <tr>
                       <th>Driver</th>
                       <td>
-                        <span title="Driver Metadata"
-                              style="cursor: help; color: #4bbfaf;"
-                              data-html="true"
-                              data-toggle="popover"
-                              data-trigger="hover"
-                              data-content="<ul>{% for key, value in pvc.volume.driver.metadata.items() %}<li>{{ key }}: {{value}}</li>{% endfor %}</ul>">
+                        <span
+                          title="Driver Metadata"
+                          style="cursor: help; color: #4bbfaf;"
+                          data-html="true"
+                          data-toggle="popover"
+                          data-trigger="hover"
+                          data-content="<ul>{% for key, value in pvc.volume.driver.metadata.items()%}<li>{{ key }}: {{value}}</li>{% endfor %}</ul>"
+                        >
                           {{ pvc.volume.driver.name }}
                         </span>
                       </td>
@@ -394,8 +476,12 @@
     <div class="col-xs-3 topology-tooltip">
       <h3>Topology Layout</h3>
       <div class="btn-group btn-group-sm">
-        <button id="ForcedLayoutGraphBtn" type="button" class="btn btn-primary active" disabled>Force-directed</button>
-        <button id="HiveGraphBtn" type="button" class="btn btn-primary" disabled>Hive Plot</button>
+        <button id="ForcedLayoutGraphBtn" type="button" class="btn btn-primary active" disabled>
+          Force-directed
+        </button>
+        <button id="HiveGraphBtn" type="button" class="btn btn-primary" disabled>
+          Hive Plot
+        </button>
       </div>
       <h3>Topology Resources</h3>
       <div class="topology-legend">
@@ -403,32 +489,47 @@
           <svg class="kindInfo" data-kind="Pod">
             <use xlink:href="#vertex-Pod" x="15" y="15"></use>
           </svg>
-          <div>Pods <br/><input class="topology-filter-checkbox" type="checkbox" name="pods" checked></div>
+          <div>
+            Pods <br/>
+            <input class="topology-filter-checkbox" type="checkbox" name="pods" checked>
+          </div>
         </div>
         <div>
           <svg class="kindInfo" data-kind="Service">
             <use xlink:href="#vertex-Service" x="15" y="15"></use>
           </svg>
-          <div>Services <br/><input class="topology-filter-checkbox" type="checkbox" name="services" checked></div>
+          <div>
+            Services <br/>
+            <input class="topology-filter-checkbox" type="checkbox" name="services" checked>
+          </div>
         </div>
         <div>
           <svg class="kindInfo" data-kind="Node">
             <use xlink:href="#vertex-Node" x="15" y="15"></use>
           </svg>
-          <div>Nodes <br/><input class="topology-filter-checkbox" type="checkbox" name="nodes" checked></div>
+          <div>
+            Nodes <br/>
+            <input class="topology-filter-checkbox" type="checkbox" name="nodes" checked>
+          </div>
         </div>
         <br>
         <div>
           <svg class="kindInfo" data-kind="Deployment">
             <use xlink:href="#vertex-Deployment" x="15" y="15"></use>
           </svg>
-          <div>Deploys <br/><input class="topology-filter-checkbox" type="checkbox" name="deploys" checked></div>
+          <div>
+            Deploys <br/>
+            <input class="topology-filter-checkbox" type="checkbox" name="deploys" checked>
+          </div>
         </div>
         <div>
           <svg class="kindInfo" data-kind="Namespace">
             <use xlink:href="#vertex-Namespace" x="15" y="15"></use>
           </svg>
-          <div>Namespaces <br/><input class="topology-filter-checkbox" type="checkbox" name="namespaces" checked></div>
+          <div>
+            Namespaces <br/>
+            <input class="topology-filter-checkbox" type="checkbox" name="namespaces" checked>
+          </div>
         </div>
 
       </div>
@@ -505,11 +606,12 @@
 <script>
   // init Clipboard
   new Clipboard('.clipboard');
+
   // init asPieProgress
   $('.pie_progress').asPieProgress({
     namespace: 'pieProgress',
-    barsize: '2',
-    size: '120',
+    barsize: '5',
+    size: '110',
     min: 0,
     trackcolor: '#ececea',
     barcolor: '#4bbfaf',
@@ -518,20 +620,21 @@
     }
   });
   $('.pie_progress').asPieProgress('start');
+
   // init Popover
   $('[data-toggle="popover"]').popover();
+
   // handle scaleform
-  var scalebutton = $('.scaleformbox #scalebtn')
-  , scaleinput = $('.scaleformbox #scaleinput')
-  , nodecount = $('.scaleformbox #node_count')
-  ;
-  scalebutton.click(function(){
+  var scalebutton = $('.scaleformbox #scalebtn'),
+      scaleinput = $('.scaleformbox #scaleinput'),
+      nodecount = $('.scaleformbox #node_count');
+  scalebutton.click(() => {
     scalebutton.hide();
     scaleinput.css('display', 'table');
     nodecount.focus();
   });
-  nodecount.blur(function(){
-    setTimeout(function(){
+  nodecount.blur(() => {
+    setTimeout(() => {
       scaleinput.hide();
       scalebutton.show();
     }, 200);
@@ -541,18 +644,19 @@
 </script>
 {% if cluster.state in config.CLUSTER_TRANSIENT_STATES %}
 <script>
-(function(){
-  var progressRefreshFn = function(){
-    $.get("{{ url_for('ui.cluster_deployment_status', cluster_id=cluster.id) }}", function(res){
+(() => {
+  var progressRefreshFn = () => {
+    $.get("{{ url_for('ui.cluster_deployment_status', cluster_id=cluster.id) }}", (res) => {
       $('.bs-override.progress .progress-bar').addClass('active');
-      if(res.response == 200){
+      if (res.response === 200) {
         $('.bs-override.progress .progress-bar').css('width', res.progress + '%')
         $('.bs-override.progress .progress-title').html(res.progress + '%');
-      }else{
+      } else {
         $('.bs-override.progress .progress-bar').css('width', '100%')
         $('.bs-override.progress .progress-title').html('Please wait');
       }
-      if(! (res.result == '{{ config.CLUSTER_PROVISIONING_STATE }}' || res.result == '{{ config.CLUSTER_RESIZING_STATE }}')){
+      if (!(res.result == '{{ config.CLUSTER_PROVISIONING_STATE }}' ||
+            res.result == '{{ config.CLUSTER_RESIZING_STATE }}')) {
         window.location.reload(1);
       }
     });

@@ -16,12 +16,18 @@
         {% endif %}
       {% endif %}
     {% endfor %}
-    <input type="button" name='cancel' value="Cancel" class="btn btn-default btn-sm"  onclick="window.location.href='{{ url_for('ui.index') }}';">
+    <input
+      type="button"
+      name="cancel"
+      value="Cancel"
+      class="btn btn-default btn-sm"
+      onclick="window.location.href='{{ url_for('ui.index') }}';"
+    >
     <input type="submit" name='submit' value="Submit" class="btn btn-primary btn-sm">
 </form>
 {% if switch_fields|length > 0 %}
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", () => {
 {% for field in switch_fields %}
   selectSwitch('select#{{ field.id }}');
 {% endfor %}
@@ -31,76 +37,74 @@ document.addEventListener("DOMContentLoaded", function() {
 {% if tagged_fields|length > 0 %}
 <script>
 function validateJsonFileField(value, element, requiredKeys) {
-  var file = element.files[0]
-  , reader = new FileReader()
-  , valid = false
-  ;
+  var file = element.files[0],
+      reader = new FileReader(),
+      valid = false;
 
-  reader.onload = function(evt) {
+  reader.onload = (evt) => {
     var data = evt.target.result;
     var json = 'error';
     var message = 'Validation pending'
     try {
       json = JSON.parse(data);
     } catch(err) {
-      message = 'Not a valid JSON'
+      message = 'Not a valid JSON';
       console.log(err);
     }
-    if (json != 'error') {
+    if (json !== 'error') {
       var missingKeys = [];
       var countKeys = 0;
-      requiredKeys.forEach(function(key) {
+      requiredKeys.forEach((key) => {
         contains = Object.keys(json).indexOf(key) != -1;
-        if ( contains ) {
+        if (contains) {
           countKeys++;
         } else {
           missingKeys.push(key);
         }
       });
-      if ( countKeys != requiredKeys.length ) {
+      if (countKeys !== requiredKeys.length) {
         message = 'Missing mandatory keys: ' + missingKeys.toString();
       }
       valid = true;
     } else {
       valid = false;
     }
-    var validator = $("#switchableForm").data().validator
-    if ( valid ) {
-        var submitted = validator.formSubmitted;
-        validator.resetInternals();
-        validator.toHide = validator.errorsFor( element );
-        validator.formSubmitted = submitted;
-        validator.successList.push( element );
-        validator.invalid[ element.name ] = false;
-        validator.showErrors();
+    var validator = $('#switchableForm').data().validator;
+    if (valid) {
+      var submitted = validator.formSubmitted;
+      validator.resetInternals();
+      validator.toHide = validator.errorsFor(element);
+      validator.formSubmitted = submitted;
+      validator.successList.push(element);
+      validator.invalid[element.name] = false;
+      validator.showErrors();
     } else {
-        errors = {};
-        errors[ element.name ] =  message;
-        validator.invalid[ element.name ] = true;
-        validator.showErrors( errors );
+      errors = {};
+      errors[element.name] =  message;
+      validator.invalid[element.name] = true;
+      validator.showErrors(errors);
     }
-    validator.stopRequest( element, valid );
+    validator.stopRequest(element, valid);
   };
   reader.readAsText(file)
 
-  return "pending";
+  return 'pending';
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-  $.validator.addMethod("jsonfile", validateJsonFileField, $.validator.format("Test validation"));
+document.addEventListener('DOMContentLoaded', () => {
+  $.validator.addMethod('jsonfile', validateJsonFileField, $.validator.format('Test validation'));
 
-  $("#switchableForm").validate({
+  $('#switchableForm').validate({
     rules: {
       {%- for field in tagged_fields %}
-      "{{ field.id }}": {{ field.jsvalidators|tojson|safe }},
+      '{{ field.id }}': {{ field.jsvalidators|tojson|safe }},
       {%- endfor %}
     },
-    invalidHandler: function(event, validator) {
-      var $submits = $(this).find('input[type=submit]')
-       ,  errors = validator.numberOfInvalids()
-       ;
-      setTimeout(function() {
-        $submits.each(function() {
+    invalidHandler: (event, validator) => {
+      var $submits = $(this).find('input[type=submit]'),
+          errors = validator.numberOfInvalids();
+      setTimeout(() => {
+        $submits.each(() => {
           if (errors) {
             $(this).prop('disabled', false);
             $(this).removeClass('disabled');
@@ -130,7 +134,10 @@ document.addEventListener("DOMContentLoaded", function() {
 {% endmacro %}
 
 {% macro render_switchable_field(field) %}
-  <div class="form-group{% if field.errors %} has-error{% endif %} hidden" data-switchtag="{{ field.switchtag }}">
+  <div
+    class="form-group{% if field.errors %} has-error{% endif %} hidden"
+    data-switchtag="{{ field.switchtag }}"
+  >
     <label for="{{ field.id }}" class="control-label">{{ field.label }}</label>
     {{ field(class_="form-control")|safe }}
   {% if field.errors %}

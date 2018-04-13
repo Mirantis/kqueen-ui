@@ -57,7 +57,8 @@ def status_for_cluster_detail(_status):
     persistent_volume_claims = []
     if 'persistent_volume_claims' in _status:
         for pvc in _status['persistent_volume_claims']:
-            pvc_requested_capacity = pvc['spec'].get('resources', {}).get('requests', {}).get('storage', '-')
+            pvc_requested_capacity = pvc['spec'].get('resources', {})\
+                .get('requests', {}).get('storage', '-')
             pvc_storage_class = pvc['spec']['storage_class_name']
             pvc_access_modes = ', '.join(pvc['spec'].get('access_modes', []))
             pvc_name = pvc['metadata']['name']
@@ -93,7 +94,8 @@ def status_for_cluster_detail(_status):
     if 'nodes' in _status:
         for node in _status['nodes']:
             node_name = node['metadata']['name']
-            excluded_addr_types = ['LegacyHostIP', 'InternalDNS', 'ExternalDNS', 'Hostname']
+            excluded_addr_types = ['LegacyHostIP', 'InternalDNS',
+                                   'ExternalDNS', 'Hostname']
             node_ip = [
                 a['type'] + ': ' + a['address']
                 for a in node['status']['addresses']
@@ -145,7 +147,8 @@ def status_for_cluster_detail(_status):
     status['nodes'] = nodes
     # filter out duplicate images and sort them by verbose name
     images_set = set([tuple(d.items()) for d in images])
-    images_sorted = sorted(list(images_set), key=lambda k: [i for i in k if 'names' in i][0][1][-1])
+    images_sorted = sorted(list(images_set),
+                           key=lambda k: [i for i in k if 'names' in i][0][1][-1])
     status['images'] = [OrderedDict(t) for t in images_sorted]
 
     deployments = []
@@ -165,7 +168,8 @@ def status_for_cluster_detail(_status):
                 'desired': desired,
                 'percentage': percentage
             }
-            containers = deployment.get('spec', {}).get('template', {}).get('spec', {}).get('containers', [])
+            containers = deployment.get('spec', {}).get('template', {})\
+                .get('spec', {}).get('containers', [])
             deployment_containers = [
                 {
                     'name': c['name'],
@@ -294,7 +298,8 @@ def sanitize_resource_metadata(session, clusters, provisioners):
         if 'state' in cluster:
             if config.get('CLUSTER_PROVISIONING_STATE') != cluster['state']:
                 deployed_clusters = deployed_clusters + 1
-            if cluster['state'] in [config.get('CLUSTER_RESIZING_STATE'), config.get('CLUSTER_OK_STATE')]:
+            if cluster['state'] in [config.get('CLUSTER_RESIZING_STATE'),
+                                    config.get('CLUSTER_OK_STATE')]:
                 healthy_clusters = healthy_clusters + 1
         if 'created_at' in cluster:
             cluster['created_at'] = format_datetime(cluster['created_at'])
@@ -325,7 +330,8 @@ def sanitize_resource_metadata(session, clusters, provisioners):
             provisioner['created_at'] = format_datetime(provisioner['created_at'])
 
         provisioner_engine = provisioner.get('engine')
-        _engine_params = [e['parameters'] for e in engines if e['name'] == provisioner_engine]
+        _engine_params = [e['parameters'] for e in engines
+                          if e['name'] == provisioner_engine]
         if not len(_engine_params) == 1:
             del provisioner['parameters']
             continue
@@ -336,7 +342,9 @@ def sanitize_resource_metadata(session, clusters, provisioners):
                     provisioner['parameters'][param_name] = '*****************'
                 except KeyError:
                     pass
-        provisioner['parameters'] = OrderedDict(sorted(provisioner['parameters'].items(), key=lambda t: t[0]))
+        provisioner['parameters'] = OrderedDict(sorted(
+            provisioner['parameters'].items(), key=lambda t: t[0]
+        ))
 
     cluster_health = 0
     if healthy_clusters and deployed_clusters:

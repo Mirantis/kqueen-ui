@@ -3,7 +3,9 @@
 
 {% block page_header %}Manage {{ organization.name }}{% endblock %}
 
-{% block breadcrumb %}<li class="breadcrumb-item active">Manage {{ organization.name }}</li>{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Manage {{ organization.name }}</li>
+{% endblock %}
 
 {% block content %}
 <h3>Members</h3>
@@ -28,7 +30,9 @@
           <td>{{ member.email }}</td>
           <td>{{ member.role }}</td>
           <td>{{ member.created_at }}</td>
-          <td class="status_column"><i class="mdi {{ member.state|user_status_icon_class }}" title="{{ member.state }}"></i></td>
+          <td class="status_column">
+            <i class="mdi {{ member.state|user_status_icon_class }}" title="{{ member.state }}"></i>
+          </td>
           <td class="action_column">
             {{ render_member_row_actions(member) }}
           </td>

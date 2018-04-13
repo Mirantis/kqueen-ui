@@ -72,7 +72,8 @@ class KQueenView(View):
         """
         raise NotImplementedError
 
-    def kqueen_request(self, resource, action, fnargs=(), fnkwargs={}, service=False):
+    def kqueen_request(self, resource, action, fnargs=(), fnkwargs=None, service=False):
+        fnkwargs = fnkwargs or {}
         client = self._get_kqueen_service_client() if service else self._get_kqueen_client()
         if not client:
             return None
@@ -99,7 +100,6 @@ class KQueenView(View):
         return self._handle_response(response, resource, action)
 
     def validate(self, **kwargs):
-        if self.validation_hint:
-            if self.validation_hint == 'uuid':
-                for kwarg in kwargs.values():
-                    self._validate_uuid(kwarg)
+        if self.validation_hint and self.validation_hint == 'uuid':
+            for kwarg in kwargs.values():
+                self._validate_uuid(kwarg)

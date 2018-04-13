@@ -29,7 +29,14 @@
     <nav class="navbar navbar-inverse navbar-static-top">
       <div class="container">
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <button
+            type="button"
+            class="navbar-toggle collapsed"
+            data-toggle="collapse"
+            data-target="#navbar"
+            aria-expanded="false"
+            aria-controls="navbar"
+          >
             <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -40,7 +47,14 @@
           {% else %}
             {% set home_url = url_for('ui.index') %}
           {% endif %}
-          <a class="navbar-brand" href="{{ home_url }}" target="_self"><img class="mirantis-logo" src="{{ url_for('static', filename='img/mirantis-logo-vertical.png') }}" alt="Mirantis"><span>KQueen</span></a>
+          <a class="navbar-brand" href="{{ home_url }}" target="_self">
+            <img
+              class="mirantis-logo"
+              src="{{ url_for('static', filename='img/mirantis-logo-vertical.png') }}"
+              alt="Mirantis"
+            />
+            <span>KQueen</span>
+          </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           {% include "ui/partial/menu.html" %}
@@ -67,8 +81,14 @@
     <input id="BaseURI" type="hidden" value="/">
     <div id="flash-container">
     {% for category, message in get_flashed_messages(with_categories=true) %}
-      <div id="flash-message" class="alert alert-box-fixed0 alert-box-fixed alert-{{ category }} fade in" role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div
+        id="flash-message"
+        class="alert alert-box-fixed0 alert-box-fixed alert-{{ category }} fade in"
+        role="alert"
+      >
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
         <i class="mdi"></i>
         <span>{{ message }}</span>
       </div>
@@ -91,24 +111,23 @@
     
     {% block extrajs %}{% endblock %}
     <script>
-    $(document).ready(function(){
-      $('.confirm-delete').click(function(ev){
+    $(document).ready(() => {
+      $('.confirm-delete').click((ev) => {
         ev.preventDefault();
-        var $this = $( this )
-         ,  questionText = 'Do you wish to permanently delete ' + $this.data('name') + '?'
-         ,  href = $this.data('target')
-         ;
+        var $this = $(this),
+            questionText = 'Do you wish to permanently delete ' + $this.data('name') + '?',
+            href = $this.data('target');
         swal({
           title: 'Are you sure?',
           text: questionText,
           buttons: {
             cancel: {
-                text: "Cancel",
-                visible: true,
-                className: 'btn btn-default btn-sm'
+              text: "Cancel",
+              visible: true,
+              className: 'btn btn-default btn-sm'
             },
             confirm: {
-                className: 'btn btn-primary btn-sm'
+              className: 'btn btn-primary btn-sm'
             },
           },
           dangerMode: true,
@@ -123,10 +142,10 @@
     </script>
 
     <script>
-    $(document).ready(function(){
-      $('form').submit(function(event) {
+    $(document).ready(() => {
+      $('form').submit((event) => {
         var $submits = $(this).find('input[type=submit]');
-        $submits.each(function() {
+        $submits.each(() => {
           $(this).prop('disabled', true);
           $(this).addClass('disabled');
         });
@@ -145,8 +164,8 @@
     </div>
 
     <script>
-      $(window).bind('beforeunload', function(){
-        setTimeout(function(){
+      $(window).bind('beforeunload', () => {
+        setTimeout(() => {
           $('body').css('overflow', 'hidden');
           $('.loading-backdrop').css('display', 'initial');
           {% if config.PRELOADER == 'hexagon' %}
@@ -163,12 +182,11 @@
 
     {# Prevent caching in Safary #}
     <script>
-      $(window).bind("pageshow", function(event) {
-          if (event.originalEvent.persisted) {
-              window.location.reload()
-          }
+      $(window).bind("pageshow", (event) => {
+        if (event.originalEvent.persisted) {
+          window.location.reload()
+        }
       });
     </script>
-
   </body>
 </html>

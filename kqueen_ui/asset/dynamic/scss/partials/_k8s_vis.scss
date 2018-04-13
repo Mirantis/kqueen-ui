@@ -125,33 +125,33 @@
   height: 35px;
 }
 
- .axis {
-    stroke: #666;
-  }
+.axis {
+  stroke: #666;
+}
 
-  .axis, .node circle {
-    fill: #fff;
-    stroke-width: 1.5px;
-  }
+.axis, .node circle {
+  fill: #fff;
+  stroke-width: 1.5px;
+}
 
-  .tooltip {
-    position: absolute;
-    padding: 5px 10px;
-    font: 12px sans-serif;
-    background: #fff;
-    border: 1px solid #000;
-    pointer-events: none;
-  }
+.tooltip {
+  position: absolute;
+  padding: 5px 10px;
+  font: 12px sans-serif;
+  background: #fff;
+  border: 1px solid #000;
+  pointer-events: none;
+}
 
-  .link {
-    fill: none;
-    stroke: #999;
-    stroke-width: 1px;
-    stroke-opacity: .3;
-  }
+.link {
+  fill: none;
+  stroke: #999;
+  stroke-width: 1px;
+  stroke-opacity: .3;
+}
 
-  .link.active, line.active {
-    stroke: red;
-    stroke-width: 2px;
-    stroke-opacity: 1;
-  }
+.link.active, line.active {
+  stroke: red;
+  stroke-width: 2px;
+  stroke-opacity: 1;
+}

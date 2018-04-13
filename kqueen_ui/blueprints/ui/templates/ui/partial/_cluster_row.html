@@ -1,10 +1,18 @@
 {% from "ui/partial/tableaction.html" import render_cluster_row_actions with context %}
 
 {% macro render_cluster_row(cluster, index) %}
-        <tr {% if cluster.state in config.CLUSTER_TRANSIENT_STATES %} class="in-transition" data-href="{{ url_for('ui.cluster_row', cluster_id=cluster.id, index=index)  }}"{% endif %} data-index="{{ index }}" data-status="{{ cluster.state }}">
+        <tr
+          {% if cluster.state in config.CLUSTER_TRANSIENT_STATES %}
+          class="in-transition" data-href="{{ url_for('ui.cluster_row', cluster_id=cluster.id, index=index) }}"
+          {% endif %}
+          data-index="{{ index }}"
+          data-status="{{ cluster.state }}"
+        >
           <td class="table-col-4">
             {% if is_authorized(session, 'cluster:get', cluster) %}
-            <a href="{{ url_for('ui.cluster_detail', cluster_id=cluster.id) }}">{{ cluster.name }}</a>
+            <a href="{{ url_for('ui.cluster_detail', cluster_id=cluster.id) }}">
+              {{ cluster.name }}
+            </a>
             {% else %}
             {{ cluster.name }}
             {% endif %}
@@ -16,7 +24,12 @@
           </td>
           <td class="action_column">
             {% if cluster.metadata %}
-            <a data-toggle="collapse" data-target="#cluster-{{ index }}" class="clickable" title="More information">
+            <a
+              data-toggle="collapse"
+              data-target="#cluster-{{ index }}"
+              class="clickable"
+              title="More information"
+            >
               <i class="mdi mdi-information-outline"></i>
             </a>
             {% endif %}

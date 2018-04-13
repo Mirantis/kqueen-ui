@@ -11,9 +11,10 @@ from kqueen_ui.utils.loggers import user_prefix
 from kqueen_ui.utils.wrappers import login_required
 
 from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
-                    ChangePasswordForm, UserInviteForm, UserProfileForm, RequestPasswordResetForm,
-                    PasswordResetForm)
-from .utils import generate_password, prettify_engine_name, status_for_cluster_detail, sanitize_resource_metadata
+                    ChangePasswordForm, UserInviteForm, UserProfileForm,
+                    RequestPasswordResetForm, PasswordResetForm)
+from .utils import (generate_password, prettify_engine_name,
+                    status_for_cluster_detail, sanitize_resource_metadata)
 
 import copy
 import logging
@@ -40,7 +41,8 @@ def test_token():
             if 'policy' in session:
                 del session['policy']
         elif response.status == -1:
-            flash('Backend is unavailable at this time, please try again later.', 'danger')
+            flash('Backend is unavailable at this time, please try again later.',
+                  'danger')
             del session['user']
             if 'policy' in session:
                 del session['policy']
@@ -62,7 +64,9 @@ class Index(KQueenView):
     def handle(self):
         clusters = self.kqueen_request('cluster', 'list')
         provisioners = self.kqueen_request('provisioner', 'list')
-        clusters, provisioners, overview = sanitize_resource_metadata(session, clusters, provisioners)
+        clusters, provisioners, overview = sanitize_resource_metadata(
+            session, clusters, provisioners
+        )
         return render_template('ui/index.html',
                                overview=overview,
                                clusters=clusters,
@@ -97,20 +101,23 @@ ui.add_url_rule('/overviewpies', view_func=OverviewPies.as_view('overview_pies')
 def login():
     error = None
     if request.method == 'POST':
-        user, _error = authenticate(request.form['username'], request.form['password'])
+        user, _error = authenticate(request.form['username'],
+                                    request.form['password'])
         if user:
             session['user'] = user
             client = get_kqueen_client(token=user['token'])
             organization_id = user['organization']['id']
             response = client.organization.policy(organization_id)
             if response.status == -1:
-                flash('Backend is unavailable at this time, please try again later.', 'danger')
+                flash('Backend is unavailable at this time, please '
+                      'try again later.', 'danger')
                 del session['user']
                 if 'policy' in session:
                     del session['policy']
                 return render_template('ui/login.html', error=error)
             elif response.status > 200:
-                flash('Could not contact authentication backend, please try again later.', 'danger')
+                flash('Could not contact authentication backend, please '
+                      'try again later.', 'danger')
                 del session['user']
                 if 'policy' in session:
                     del session['policy']
@@ -133,7 +140,8 @@ def login():
             if _error['status'] == 401:
                 error = 'Invalid credentials.'
             else:
-                error = 'Could not contact authentication backend, please try again later.'
+                error = 'Could not contact authentication backend, ' \
+                        'please try again later.'
     return render_template('ui/login.html', error=error)
 
 
@@ -151,9 +159,7 @@ def logout():
 # Resource Views
 ################
 
-#
 # Organization
-#
 
 class OrganizationManage(KQueenView):
     decorators = [login_required]
@@ -164,12 +170,11 @@ class OrganizationManage(KQueenView):
         organization_id = session['user']['organization']['id']
         user_id = session['user']['id']
         # backend resources
-        organization = self.kqueen_request('organization', 'get', fnargs=(organization_id,))
+        organization = self.kqueen_request('organization', 'get',
+                                           fnargs=(organization_id,))
         users = self.kqueen_request('user', 'list')
         members = [
-            u
-            for u
-            in users
+            u for u in users
             if u['organization']['id'] == organization_id and u['id'] != user_id
         ]
         # sort members by date
@@ -189,7 +194,8 @@ class OrganizationManage(KQueenView):
                                members=members)
 
 
-ui.add_url_rule('/organizations/manage', view_func=OrganizationManage.as_view('organization_manage'))
+ui.add_url_rule('/organizations/manage',
+                view_func=OrganizationManage.as_view('organization_manage'))
 
 
 # User
@@ -240,12 +246,18 @@ class UserInvite(KQueenView):
                 'auth': auth_method,
                 'active': active
             }
-            logger.debug('User {} from {} invited.'.format(user_kw['username'], user_kw['organization']))
+            logger.debug('User {} from {} invited.'.format(
+                user_kw['username'], user_kw['organization']
+            ))
             user = self.kqueen_request('user', 'create', fnargs=(user_kw,))
 
             # send mail
             if notify:
-                logger.debug('User {} from {} with id {} will be notified through email.'.format(user_kw['username'], user_kw['organization'], user['id']))
+                logger.debug(
+                    'User {} from {} with id {} will be notified through email.'.format(
+                        user_kw['username'], user_kw['organization'], user['id']
+                    )
+                )
                 token = generate_confirmation_token(user['email'])
                 html = render_template(
                     'ui/email/user_invitation.html',
@@ -262,12 +274,16 @@ class UserInvite(KQueenView):
                 try:
                     email.send()
                 except Exception as e:
-                    logger.exception('User {} from {} with id {} will be removed.'.format(user_kw['username'], user_kw['organization'], user['id']))
+                    logger.exception('User {} from {} with id {} will be removed.'.format(
+                        user_kw['username'], user_kw['organization'], user['id']
+                    ))
                     self.kqueen_request('user', 'delete', fnargs=(user['id'],))
                     flash('Could not send invitation e-mail, please try again later.', 'danger')
                     return render_template('ui/user_invite.html', form=form)
 
-            logger.debug('User {} from {} created with id {}.'.format(user_kw['username'], user_kw['organization'], user['id']))
+            logger.debug('User {} from {} created with id {}.'.format(
+                user_kw['username'], user_kw['organization'], user['id']
+            ))
             flash('User {} successfully created.'.format(user['username']), 'success')
             return redirect(url_for('ui.organization_manage'))
         return render_template('ui/user_invite.html', form=form)
@@ -280,11 +296,16 @@ class UserReinvite(KQueenView):
 
     def handle(self, user_id):
         user = self.kqueen_request('user', 'get', fnargs=(user_id,))
-        logger.debug('User {} from {} with id {} re-invited.'.format(user['username'], user['organization'], user['id']))
+        logger.debug('User {} from {} with id {} re-invited.'.format(
+            user['username'], user['organization'], user['id']
+        ))
         if user['active']:
-            logger.debug('User {} from {} with id {} is already active.'.format(user['username'], user['organization'], user['id']))
+            logger.debug('User {} from {} with id {} is already active.'.format(
+                user['username'], user['organization'], user['id']
+            ))
             flash('User {} is already active.'.format(user['username']), 'warning')
-            return redirect(request.environ.get('HTTP_REFERER', url_for('ui.organization_manage')))
+            return redirect(request.environ.get('HTTP_REFERER',
+                                                url_for('ui.organization_manage')))
 
         # send mail
         token = generate_confirmation_token(user['email'])
@@ -303,12 +324,19 @@ class UserReinvite(KQueenView):
         try:
             email.send()
         except Exception as e:
-            logger.exception('User {} from {} with id {} will be removed.'.format(user['username'], user['organization'], user['id']))
+            logger.exception('User {} from {} with id {} will be removed.'.format(
+                user['username'], user['organization'], user['id']
+            ))
             self.kqueen_request('user', 'delete', fnargs=(user['id'],))
             flash('Could not send activation e-mail, please try again later.', 'danger')
-            return redirect(request.environ.get('HTTP_REFERER', url_for('ui.organization_manage')))
+            return redirect(request.environ.get('HTTP_REFERER',
+                                                url_for('ui.organization_manage')))
 
-        logger.debug('Activation e-mail sent to user {} from {} with id {} will be removed.'.format(user['username'], user['organization'], user['id']))
+        logger.debug(
+            'Activation e-mail sent to user {} from {} with id {} will be removed.'.format(
+                user['username'], user['organization'], user['id']
+            )
+        )
         flash('Activation e-mail sent to user {}.'.format(user['username']), 'success')
         return redirect(request.environ.get('HTTP_REFERER', url_for('ui.organization_manage')))
 
@@ -321,7 +349,9 @@ class UserDelete(KQueenView):
     def handle(self, user_id):
         user = self.kqueen_request('user', 'get', fnargs=(user_id,))
         self.kqueen_request('user', 'delete', fnargs=(user_id,))
-        logger.debug('User {} from {} with id {} removed.'.format(user['username'], user['organization'], user['id']))
+        logger.debug('User {} from {} with id {} removed.'.format(
+            user['username'], user['organization'], user['id']
+        ))
         flash('User {} successfully deleted.'.format(user['username']), 'success')
         return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
 
@@ -353,7 +383,9 @@ class UserProfile(KQueenView):
                 session['user']['metadata'] = {}
             session['user']['metadata']['timezone'] = form.timezone.data
 
-            user_logger.debug('User profile updated for user {}'.format(session['user']['username']))
+            user_logger.debug('User profile updated for user {}'.format(
+                session['user']['username']
+            ))
             flash('User profile successfully updated.', 'success')
             return redirect(url_for('ui.index'))
         return render_template('ui/user_profile.html', form=form)
@@ -383,21 +415,27 @@ class UserResetPassword(KQueenView):
     def handle(self, token):
         email = confirm_token(token)
         if not email:
-            user_logger.debug('Password reset link expired for user {}'.format(session['user']['username']))
+            user_logger.debug('Password reset link expired for user {}'.format(
+                session['user']['username']
+            ))
             flash('Password reset link is invalid or has expired.', 'danger')
             return redirect(url_for('ui.index'))
 
         users = self.kqueen_request('user', 'list', service=True)
-        # TODO: this logic realies heavily on unique emails, this is not the case on backend right now
-        # change this logic after unique contraint is introduced to backend
+        # TODO: this logic realies heavily on unique emails, this is not
+        # the case on backend right now change this logic after unique
+        # contraint is introduced to backend
         filtered = [u for u in users if u.get('email', None) == email]
         if len(filtered) == 1:
             user = filtered[0]
             form = PasswordResetForm()
             if form.validate_on_submit():
                 password = {'password': form.password_1.data}
-                self.kqueen_request('user', 'updatepw', fnargs=(user['id'], password), service=True)
-                user_logger.debug('Password reseted for user {}'.format(session['user']['username']))
+                self.kqueen_request('user', 'updatepw',
+                                    fnargs=(user['id'], password), service=True)
+                user_logger.debug('Password reseted for user {}'.format(
+                    session['user']['username']
+                ))
                 flash('Password successfully updated.', 'success')
                 return redirect(url_for('ui.login'))
             return render_template('ui/user_reset_password.html', form=form)
@@ -412,20 +450,25 @@ class UserSetPassword(KQueenView):
     def handle(self, token):
         email = confirm_token(token)
         if not email:
-            user_logger.debug('Password reset link expired for user {}'.format(session['user']['username']))
+            user_logger.debug('Password reset link expired for user {}'.format(
+                session['user']['username']
+            ))
             flash('Password reset link is invalid or has expired.', 'danger')
             return redirect(url_for('ui.index'))
 
         users = self.kqueen_request('user', 'list', service=True)
-        # TODO: this logic realies heavily on unique emails, this is not the case on backend right now
-        # change this logic after unique contraint is introduced to backend
+        # TODO: this logic realies heavily on unique emails, this is not
+        # the case on backend right now change this logic after unique
+        # contraint is introduced to backend
         filtered = [u for u in users if u.get('email', None) == email]
         if len(filtered) == 1:
             user = filtered[0]
             form = PasswordResetForm()
             if form.validate_on_submit():
                 password = {'password': form.password_1.data}
-                self.kqueen_request('user', 'updatepw', fnargs=(user['id'], password), service=True)
+                self.kqueen_request('user', 'updatepw',
+                                    fnargs=(user['id'], password),
+                                    service=True)
                 user['active'] = True
                 self.kqueen_request('user', 'update', fnargs=(user['id'], user), service=True)
                 user_logger.debug('Password setted for user {}'.format(user['username']))
@@ -463,14 +506,22 @@ class UserRequestResetPassword(KQueenView):
         return render_template('ui/user_request_password_reset.html', form=form)
 
 
-ui.add_url_rule('/users/invite', view_func=UserInvite.as_view('user_invite'))
-ui.add_url_rule('/users/profile', view_func=UserProfile.as_view('user_profile'))
-ui.add_url_rule('/users/<user_id>/reinvite', view_func=UserReinvite.as_view('user_reinvite'))
-ui.add_url_rule('/users/<user_id>/delete', view_func=UserDelete.as_view('user_delete'))
-ui.add_url_rule('/users/changepw', view_func=UserChangePassword.as_view('user_change_password'))
-ui.add_url_rule('/users/resetpw/<token>', view_func=UserResetPassword.as_view('user_reset_password'))
-ui.add_url_rule('/users/setpw/<token>', view_func=UserSetPassword.as_view('user_set_password'))
-ui.add_url_rule('/users/requestresetpw', view_func=UserRequestResetPassword.as_view('user_request_reset_password'))
+ui.add_url_rule('/users/invite',
+                view_func=UserInvite.as_view('user_invite'))
+ui.add_url_rule('/users/profile',
+                view_func=UserProfile.as_view('user_profile'))
+ui.add_url_rule('/users/<user_id>/reinvite',
+                view_func=UserReinvite.as_view('user_reinvite'))
+ui.add_url_rule('/users/<user_id>/delete',
+                view_func=UserDelete.as_view('user_delete'))
+ui.add_url_rule('/users/changepw',
+                view_func=UserChangePassword.as_view('user_change_password'))
+ui.add_url_rule('/users/resetpw/<token>',
+                view_func=UserResetPassword.as_view('user_reset_password'))
+ui.add_url_rule('/users/setpw/<token>',
+                view_func=UserSetPassword.as_view('user_set_password'))
+ui.add_url_rule('/users/requestresetpw',
+                view_func=UserRequestResetPassword.as_view('user_request_reset_password'))
 
 
 # Provisioner
@@ -502,11 +553,12 @@ class ProvisionerCreate(KQueenView):
                 # Filter out populated tagged fields and get their data
                 parameters = {
                     k.split('__')[0]: v.data
-                    for (k, v)
-                    in form._fields.items()
-                    if (hasattr(v, 'switchtag') and v.switchtag) and prettify_engine_name(form.engine.data) in k
+                    for (k, v) in form._fields.items()
+                    if (hasattr(v, 'switchtag') and v.switchtag) and
+                    prettify_engine_name(form.engine.data) in k
                 }
             except Exception as e:
+                parameters = {}
                 msg = 'Failed to create Provisioner: Invalid parameters.'
                 user_logger.exception('{}:{}'.format(user_prefix(session), msg))
                 flash(msg, 'danger')
@@ -521,7 +573,8 @@ class ProvisionerCreate(KQueenView):
                 'created_at': datetime.utcnow(),
                 'owner': owner_ref
             }
-            provisioner = self.kqueen_request('provisioner', 'create', fnargs=(provisioner_kw,))
+            provisioner = self.kqueen_request('provisioner', 'create',
+                                              fnargs=(provisioner_kw,))
             msg = 'Provisioner {} created.'.format(provisioner['name'])
             user_logger.debug('{}:{}'.format(user_prefix(session), msg))
             flash(msg, 'success')
@@ -553,8 +606,10 @@ class ProvisionerDelete(KQueenView):
         return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
 
 
-ui.add_url_rule('/provisioners/create', view_func=ProvisionerCreate.as_view('provisioner_create'))
-ui.add_url_rule('/provisioners/<provisioner_id>/delete', view_func=ProvisionerDelete.as_view('provisioner_delete'))
+ui.add_url_rule('/provisioners/create',
+                view_func=ProvisionerCreate.as_view('provisioner_create'))
+ui.add_url_rule('/provisioners/<provisioner_id>/delete',
+                view_func=ProvisionerDelete.as_view('provisioner_delete'))
 
 
 # Cluster
@@ -566,11 +621,11 @@ class ClusterCreate(KQueenView):
     def handle(self):
         # Get all necessary objects from backend
         _provisioners = self.kqueen_request('provisioner', 'list')
+        unknown_state = app.config['PROVISIONER_UNKNOWN_STATE']
+        ok_state = app.config['PROVISIONER_OK_STATE']
         provisioners = [
-            p
-            for p
-            in _provisioners
-            if p.get('state', app.config['PROVISIONER_UNKNOWN_STATE']) == app.config['PROVISIONER_OK_STATE']
+            p for p in _provisioners
+            if p.get('state', unknown_state) == ok_state
         ]
         engines = self.kqueen_request('provisioner', 'engines')
         engine_dict = dict([(e.pop('name'), e) for e in engines])
@@ -583,8 +638,7 @@ class ClusterCreate(KQueenView):
             # Append provisioner ID to parameter name to make it unique
             parameters = {
                 k + '__' + provisioner['id']: v
-                for [k, v]
-                in _parameters.items()
+                for [k, v] in _parameters.items()
             }
             form_cls.append_fields(parameters, switchtag=provisioner['id'])
 
@@ -597,11 +651,12 @@ class ClusterCreate(KQueenView):
                 # Filter out populated tagged fields and get their data
                 metadata = {
                     k.split('__')[0]: v.data
-                    for (k, v)
-                    in form._fields.items()
-                    if (hasattr(v, 'switchtag') and v.switchtag) and form.provisioner.data in k
+                    for (k, v) in form._fields.items()
+                    if (hasattr(v, 'switchtag') and v.switchtag) and
+                    form.provisioner.data in k
                 }
             except Exception as e:
+                metadata = {}
                 user_logger.exception('{}:{}'.format(user_prefix(session), e))
                 flash('Invalid cluster metadata.', 'danger')
                 render_template('ui/cluster_create.html', form=form)
@@ -633,7 +688,8 @@ class ClusterDelete(KQueenView):
         msg = 'Cluster {} successfully deleted.'.format(cluster['name'])
 
         if cluster['provisioner']['engine'] == 'kqueen.engines.ManualEngine':
-            flash('Manual Engine does not support cluster deleting, cluster will be detached.', 'warning')
+            flash('Manual Engine does not support cluster deleting, '
+                  'cluster will be detached.', 'warning')
             msg = 'Cluster {} successfully detached.'.format(cluster['name'])
 
         if cluster['state'] == app.config['CLUSTER_PROVISIONING_STATE']:
@@ -700,7 +756,8 @@ class ClusterResize(KQueenView):
         cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
         if 'node_count' not in cluster.get('metadata', {}):
             engine = cluster.get('provisioner', {}).get('engine', '<unknown>')
-            flash("{} engine doesn't support scaling.".format(prettify_engine_name(engine)), 'warning')
+            flash("{} engine doesn't support scaling.".format(prettify_engine_name(engine)),
+                  'warning')
             return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
         current_node_count = cluster['metadata']['node_count']
         node_count = request.form['node_count']
@@ -753,11 +810,19 @@ class ClusterRow(KQueenView):
         return jsonify(data)
 
 
-ui.add_url_rule('/clusters/create', view_func=ClusterCreate.as_view('cluster_create'))
-ui.add_url_rule('/clusters/<cluster_id>/delete', view_func=ClusterDelete.as_view('cluster_delete'))
-ui.add_url_rule('/clusters/<cluster_id>/deployment-status', view_func=ClusterDeploymentStatus.as_view('cluster_deployment_status'))
-ui.add_url_rule('/clusters/<cluster_id>/detail', view_func=ClusterDetail.as_view('cluster_detail'))
-ui.add_url_rule('/clusters/<cluster_id>/resize', view_func=ClusterResize.as_view('cluster_resize'))
-ui.add_url_rule('/clusters/<cluster_id>/kubeconfig', view_func=ClusterKubeconfig.as_view('cluster_kubeconfig'))
-ui.add_url_rule('/clusters/<cluster_id>/topology-data', view_func=ClusterTopologyData.as_view('cluster_topology_data'))
-ui.add_url_rule('/clusters/<cluster_id>/row/<index>', view_func=ClusterRow.as_view('cluster_row'))
+ui.add_url_rule('/clusters/create',
+                view_func=ClusterCreate.as_view('cluster_create'))
+ui.add_url_rule('/clusters/<cluster_id>/delete',
+                view_func=ClusterDelete.as_view('cluster_delete'))
+ui.add_url_rule('/clusters/<cluster_id>/deployment-status',
+                view_func=ClusterDeploymentStatus.as_view('cluster_deployment_status'))
+ui.add_url_rule('/clusters/<cluster_id>/detail',
+                view_func=ClusterDetail.as_view('cluster_detail'))
+ui.add_url_rule('/clusters/<cluster_id>/resize',
+                view_func=ClusterResize.as_view('cluster_resize'))
+ui.add_url_rule('/clusters/<cluster_id>/kubeconfig',
+                view_func=ClusterKubeconfig.as_view('cluster_kubeconfig'))
+ui.add_url_rule('/clusters/<cluster_id>/topology-data',
+                view_func=ClusterTopologyData.as_view('cluster_topology_data'))
+ui.add_url_rule('/clusters/<cluster_id>/row/<index>',
+                view_func=ClusterRow.as_view('cluster_row'))
