@@ -205,6 +205,15 @@ class ClusterManager(BaseManager):
         }
         return self.request('%s/resize' % uuid, method='PATCH', payload=payload)
 
+    def set_network_policy(self, uuid, network_provider, enabled):
+        payload = {
+            'network_policy': {
+                'provider': network_provider,
+                'enabled': enabled
+            }
+        }
+        return self.request('%s/set_network_policy' % uuid, method='PATCH', payload=payload)
+
 
 class ProvisionerManager(BaseManager):
     resource_url = 'provisioners/'

@@ -700,17 +700,83 @@ class ClusterResize(KQueenView):
         cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
         if 'node_count' not in cluster.get('metadata', {}):
             engine = cluster.get('provisioner', {}).get('engine', '<unknown>')
-            flash("{} engine doesn't support scaling.".format(prettify_engine_name(engine)), 'warning')
-            return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
+            flash("{} engine doesn't support scaling."
+                  .format(prettify_engine_name(engine)), 'warning')
+            return redirect(request.environ.get('HTTP_REFERER',
+                                                url_for('ui.index')))
         current_node_count = cluster['metadata']['node_count']
         node_count = request.form['node_count']
+
+        if int(node_count) < 2 and cluster['networkPolicy']['enabled'] is True:
+            msg = 'Resizing cluster {} denied. The minimum size cluster to run \
+                   network policy enforcement is 2 n1-standard-1 instances.\
+                   Otherwise, turn off network policy before resizing.'\
+                   .format(self.cluster_id)
+            logger.error(msg)
+            flash(msg, 'error')
+            return redirect(request.environ.get('HTTP_REFERER',
+                                                url_for('ui.index')))
+
         if current_node_count == node_count:
-            return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
-        self.kqueen_request('cluster', 'resize', fnargs=(cluster_id, node_count))
+            return redirect(request.environ.get('HTTP_REFERER',
+                                                url_for('ui.index')))
+        self.kqueen_request('cluster', 'resize', fnargs=(cluster_id,
+                                                         node_count))
         msg = 'Cluster {} successfully resized.'.format(cluster['name'])
         user_logger.debug('{}:{}'.format(user_prefix(session), msg))
         flash(msg, 'success')
-        return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
+        return redirect(request.environ.get('HTTP_REFERER',
+                                            url_for('ui.index')))
+
+
+class ClusterSetNetworkPolicy(KQueenView):
+    decorators = [login_required]
+    methods = ['POST']
+    validation_hint = 'uuid'
+
+    def handle(self, cluster_id):
+        cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
+
+        network_provider = request.form['network_provider']
+        policy_enabled = request.form['enabled']
+
+        if 'networkPolicy' not in cluster.get('metadata', {}):
+            flash('Failed to set network policy. Recreate stack with enabled Network Policy option',
+                  'warning')
+            return redirect(request.environ.get('HTTP_REFERER',
+                                                url_for('ui.index')))
+        else:
+            current_policy_status = cluster['metadata']['networkPolicy'].get('enabled', False)
+            if bool(policy_enabled) == bool(current_policy_status):
+                return redirect(request.environ.get('HTTP_REFERER',
+                                                    url_for('ui.index')))
+
+        if 'node_count' not in cluster.get('metadata', {}):
+            engine = cluster.get('provisioner', {}).get('engine', '<unknown>')
+            flash("{} engine doesn't support network policy management."
+                  .format(prettify_engine_name(engine)), 'warning')
+            return redirect(request.environ.get('HTTP_REFERER',
+                                                url_for('ui.index')))
+
+        if int(cluster.metadata['node_count']) < 2:
+            msg = 'Setting {} Network Policy for cluster {} denied due \
+                   unsupported configuration. The recommended minimum size \
+                   cluster to run network policy enforcement is 3 \
+                   n1-standard-1 instances'.format(network_provider,
+                                                   self.cluster_id)
+            logger.error(msg)
+            flash(msg, 'error')
+            return redirect(request.environ.get('HTTP_REFERER',
+                                                url_for('ui.index')))
+
+        self.kqueen_request('cluster', 'set_network_policy',
+                            fnargs=(cluster_id, network_provider,
+                                    policy_enabled))
+        msg = '{} network policy successfully сhanged.'.format(cluster['name'])
+        user_logger.debug('{}:{}'.format(user_prefix(session), msg))
+        flash(msg, 'success')
+        return redirect(request.environ.get('HTTP_REFERER',
+                                            url_for('ui.index')))
 
 
 class ClusterKubeconfig(KQueenView):
@@ -758,6 +824,7 @@ ui.add_url_rule('/clusters/<cluster_id>/delete', view_func=ClusterDelete.as_view
 ui.add_url_rule('/clusters/<cluster_id>/deployment-status', view_func=ClusterDeploymentStatus.as_view('cluster_deployment_status'))
 ui.add_url_rule('/clusters/<cluster_id>/detail', view_func=ClusterDetail.as_view('cluster_detail'))
 ui.add_url_rule('/clusters/<cluster_id>/resize', view_func=ClusterResize.as_view('cluster_resize'))
+ui.add_url_rule('/clusters/<cluster_id>/set_network_policy', view_func=ClusterSetNetworkPolicy.as_view('cluster_set_network_policy'))
 ui.add_url_rule('/clusters/<cluster_id>/kubeconfig', view_func=ClusterKubeconfig.as_view('cluster_kubeconfig'))
 ui.add_url_rule('/clusters/<cluster_id>/topology-data', view_func=ClusterTopologyData.as_view('cluster_topology_data'))
 ui.add_url_rule('/clusters/<cluster_id>/row/<index>', view_func=ClusterRow.as_view('cluster_row'))
