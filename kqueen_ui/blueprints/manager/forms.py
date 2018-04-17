@@ -3,9 +3,8 @@ from flask_wtf import FlaskForm
 from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.utils.forms import FlaskExtendableForm
 from slugify import slugify
-from wtforms import SelectField, StringField
-from wtforms.validators import DataRequired, Email
-from wtforms.fields.html5 import EmailField
+from kqueen_ui.utils.fields import SelectField, StringField
+from wtforms.validators import DataRequired
 
 ROLE_CHOICES = (
     ('member', 'Member'),
@@ -44,28 +43,10 @@ class OrganizationCreateForm(FlaskForm):
 
 
 class MemberCreateForm(FlaskExtendableForm):
-    email = EmailField('Email', validators=[Email()])
+    auth_method = SelectField('Authentication Method', choices=[], switch=True)
     role = SelectField('Role', choices=ROLE_CHOICES)
 
-    def validate(self):
-        if not FlaskForm.validate(self):
-            return False
-
-        # TODO: remove these uniqueness checks after introduction of unique constraint
-        # in ETCD storage class on backend
-        client = get_kqueen_client(token=session['user']['token'])
-        # Check if e-mail and username exists on backend
-        response = client.user.list()
-        if response.status > 200:
-            self.email.errors.append('Can not contact backend at this time.')
-            return False
-        users = response.data
-        user_emails = [u['email'] for u in users if 'email' in u]
-        if self.email.data in user_emails:
-            self.email.errors.append('This e-mail is already registered.')
-            return False
-
-        return True
+    # TODO: Add general email field validator
 
 
 class MemberChangeRoleForm(FlaskForm):

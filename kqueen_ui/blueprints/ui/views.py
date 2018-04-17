@@ -3,7 +3,6 @@ from flask import (current_app as app, Blueprint, flash, jsonify, redirect,
                    render_template, request, session, url_for)
 from flask_babel import format_datetime
 from kqueen_ui.api import get_kqueen_client
-from kqueen_ui.auth import AUTH_MODULES
 from kqueen_ui.auth import authenticate, confirm_token, generate_confirmation_token
 from kqueen_ui.generic_views import KQueenView
 from kqueen_ui.utils.email import EmailMessage
@@ -199,53 +198,61 @@ class UserInvite(KQueenView):
     methods = ['GET', 'POST']
 
     def handle(self):
+        # TODO: Add CN name validator (for LDAp username)
+
         form_cls = UserInviteForm
 
-        auth_choices = []
-        for name, options in AUTH_MODULES.items():
-            choice = (name, options.get('label', name))
-            auth_choices.append(choice)
-        field_kw = {
-            'auth_method': {
-                'type': 'select',
-                'label': 'Authentication Method',
-                'choices': auth_choices,
-                'validators': {
-                    'required': True
-                }
-            }
-        }
+        auth_config = self.kqueen_request('configuration', 'auth')
 
-        form_cls.append_fields(field_kw)
+        for auth_type, options in auth_config.items():
+            ui_parameters = options['ui_parameters']
+            # Add tag to field names to enable dynamic field switching
+            ui_parameters = {k + '__' + auth_type: v for k, v in ui_parameters.items()}
+            form_cls.append_fields(ui_parameters, switchtag=auth_type)
+
         form = form_cls()
+        form.auth_method.choices = [(k, v['name']) for k, v in auth_config.items()]
         if form.validate_on_submit():
+
             organization = 'Organization:{}'.format(session['user']['organization']['id'])
-            auth_method = 'local'
-            notify = True
-            if hasattr(form, 'auth_method'):
-                auth_method = form.auth_method.data
-                notify = AUTH_MODULES.get(auth_method, {}).get('notify', True)
-            password = ''
-            active = True
-            if auth_method == 'local':
-                password = generate_password()
-                active = False
+
+            # Filter out populated tagged fields and get their data
+            try:
+                ui_filled_parameters = {
+                    k.split('__')[0]: v.data
+                    for (k, v)
+                    in form._fields.items()
+                    if (hasattr(v, 'switchtag') and v.switchtag) and form.auth_method.data in k
+                }
+            except Exception as e:
+                msg = 'Failed to invite user: Invalid parameters.'
+                user_logger.exception('{}:{}'.format(user_prefix(session), msg))
+                flash(msg, 'danger')
+                render_template('ui/user_invite.html', form=form)
+
+            chosen_auth_type = form.auth_method.data
+            username_field_descr = auth_config[chosen_auth_type]['ui_parameters']['username']
+            username = ui_filled_parameters['username']
+
             user_kw = {
-                'username': form.email.data,
-                'password': password,
-                'email': form.email.data,
+                'username': username,
+                'password': generate_password() if username_field_descr.get('generate_password', True) else '',
+                'email': username if username_field_descr['type'] == 'email' else '',
                 'organization': organization,
                 'role': 'member',
                 'created_at': datetime.utcnow(),
-                'auth': auth_method,
-                'active': active
+                'auth': chosen_auth_type,
+                'active': username_field_descr.get('active', True),
+                'metadata': {}
             }
             logger.debug('User {} from {} invited.'.format(user_kw['username'], user_kw['organization']))
             user = self.kqueen_request('user', 'create', fnargs=(user_kw,))
 
             # send mail
+            notify = username_field_descr.get('notify')
             if notify:
-                logger.debug('User {} from {} with id {} will be notified through email.'.format(user_kw['username'], user_kw['organization'], user['id']))
+                logger.debug('User {} from {} with id {} will be notified '
+                             'through email.'.format(user_kw['username'], user_kw['organization'], user['id']))
                 token = generate_confirmation_token(user['email'])
                 html = render_template(
                     'ui/email/user_invitation.html',
@@ -261,13 +268,17 @@ class UserInvite(KQueenView):
                 )
                 try:
                     email.send()
-                except Exception as e:
-                    logger.exception('User {} from {} with id {} will be removed.'.format(user_kw['username'], user_kw['organization'], user['id']))
+                except Exception:
+                    logger.exception('User {} from {} with id {} will be removed.'.format(user_kw['username'],
+                                                                                          user_kw['organization'],
+                                                                                          user['id']))
                     self.kqueen_request('user', 'delete', fnargs=(user['id'],))
                     flash('Could not send invitation e-mail, please try again later.', 'danger')
                     return render_template('ui/user_invite.html', form=form)
 
-            logger.debug('User {} from {} created with id {}.'.format(user_kw['username'], user_kw['organization'], user['id']))
+            logger.debug('User {} from {} created with id {}.'.format(user_kw['username'],
+                                                                      user_kw['organization'],
+                                                                      user['id']))
             flash('User {} successfully created.'.format(user['username']), 'success')
             return redirect(url_for('ui.organization_manage'))
         return render_template('ui/user_invite.html', form=form)
