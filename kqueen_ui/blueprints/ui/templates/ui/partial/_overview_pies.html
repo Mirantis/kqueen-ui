@@ -1,27 +1,53 @@
 {% macro render_overview_pies(overview) %}
 <div class="overview">
   <div class="col-sm-3 clearfix">
-    <div class="pie_progress_static" id="pie_clusters" role="progressbar" data-goal="{{ overview.cluster_count }}" aria-valuemax="{{ overview.cluster_max }}">
+    <div
+      class="pie_progress_static"
+      id="pie_clusters"
+      role="progressbar"
+      data-goal="{{ overview.cluster_count }}"
+      aria-valuemax="{{ overview.cluster_max }}"
+    >
       <div class="pie_progress__number"></div>
-      <div class="pie_progress__label">Clusters</div>
     </div>
+    <div class="pie-label">Clusters</div>
   </div>
   <div class="col-sm-3 clearfix">
-    <div class="pie_progress_percentage pie_progress" id="pie_cluster_health" role="progressbar" data-goal="{{ overview.cluster_health }}"{% if overview.cluster_health < 100 %} data-barcolor="#e02d3a"{% endif %}>
+    <div
+      class="pie_progress_static pie_progress"
+      id="pie_cluster_health"
+      role="progressbar"
+      data-goal="{{ overview.cluster_health }}"
+      {% if overview.cluster_health < 100 %} data-barcolor="#e02d3a" {% endif %}
+    >
       <div class="pie_progress__number"></div>
-      <div class="pie_progress__label">Cluster Health</div>
+      <div class="pie_progress__label pie-percents">%</div>
     </div>
+    <div class="pie-label">Cluster Health</div>
   </div>
   <div class="col-sm-3 clearfix">
-    <div class="pie_progress_static" role="progressbar" data-goal="{{ overview.provisioner_count }}" aria-valuemax="{{ overview.provisioner_max }}">
+    <div
+      class="pie_progress_static"
+      role="progressbar"
+      data-goal="{{ overview.provisioner_count }}"
+      aria-valuemax="{{ overview.provisioner_max }}"
+    >
       <div class="pie_progress__number"></div>
-      <div class="pie_progress__label">Provisioners</div>
     </div>
+    <div class="pie-label">Provisioners</div>
   </div>
   <div class="col-sm-3 clearfix">
-    <div class="pie_progress_percentage pie_progress" role="progressbar" data-goal="{{ overview.provisioner_health }}"{% if overview.provisioner_health < 100 %} data-barcolor="#e02d3a"{% endif %}>
+    <div
+      class="pie_progress_static pie_progress"
+      role="progressbar"
+      data-goal="{{ overview.provisioner_health }}"
+      {% if overview.provisioner_health < 100 %} data-barcolor="#e02d3a" {% endif %}
+    >
       <div class="pie_progress__number"></div>
-      <div class="pie_progress__label" style="line-height: 1.1; margin-top: 36px;">Provisioner<br>Health</div>
+      <div class="pie_progress__label pie-percents">%</div>
+    </div>
+    <div class="pie-label" style="line-height: 1.1;">
+      Provisioner<br>Health
     </div>
   </div>
 </div>
