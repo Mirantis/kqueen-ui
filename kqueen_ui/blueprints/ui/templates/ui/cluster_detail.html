@@ -6,84 +6,135 @@
 
 {% block breadcrumb %}<li class="breadcrumb-item active">Cluster {{ cluster.name }} detail</li>{% endblock %}
 
+{% set cant_delete = (cluster.state == config.CLUSTER_PROVISIONING_STATE or
+                      not is_authorized(session, 'cluster:delete', cluster)) %}
+{% set not_ok_state = cluster.state != config.CLUSTER_OK_STATE %}
+
 {% block content %}
 <div class="overview">
-  <div class="col-sm-2 col-sm-offset-1 clearfix">
-    <div
-      class="pie_progress"
-      role="progressbar"
-      data-goal="{{ status.overview.namespaces }}"
-      aria-valuemax="{{ status.overview.namespaces_max }}"
-    >
-      <div class="pie_progress__number">0</div>
+  <div class="row">
+    <div class="col-sm-2 col-sm-offset-1 clearfix">
+      <div
+        class="pie_progress"
+        role="progressbar"
+        data-goal="{{ status.overview.namespaces }}"
+        aria-valuemax="{{ status.overview.namespaces_max }}"
+      >
+        <div class="pie_progress__number">0</div>
+      </div>
+      <div class="pie-label">Namespaces</div>
     </div>
-    <div class="pie-label">Namespaces</div>
+    <div class="col-sm-2 clearfix">
+      <div
+        class="pie_progress_static pie_progress"
+        role="progressbar"
+        data-goal="{{ status.overview.nodes }}"
+        aria-valuemax="{{ status.overview.nodes_max }}"
+      >
+        <div class="pie_progress__number">0</div>
+      </div>
+      <div class="pie-label">Nodes</div>
+    </div>
+    <div class="col-sm-2 clearfix">
+      <div
+        class="pie_progress"
+        role="progressbar"
+        data-goal="{{ status.overview.deployments }}"
+        aria-valuemax="{{ status.overview.deployments_max }}"
+      >
+        <div class="pie_progress__number">0</div>
+      </div>
+      <div class="pie-label">Deployments</div>
+    </div>
+    {% set podcount = status.pods|length %}
+    <div class="col-sm-2 clearfix">
+      <div
+        class="pie_progress"
+        role="progressbar"
+        data-goal="{{ status.overview.pods }}"
+        aria-valuemax="{{ status.overview.pods_max }}"
+      >
+        <div class="pie_progress__number">0</div>
+      </div>
+      <div class="pie-label">Pods</div>
+    </div>
+    {% set servicecount = status.services|length %}
+    <div class="col-sm-2 clearfix">
+      <div
+        class="pie_progress"
+        role="progressbar"
+        data-goal="{{ status.overview.services }}"
+        aria-valuemax="{{ status.overview.services_max }}"
+      >
+        <div class="pie_progress__number">0</div>
+      </div>
+      <div class="pie-label">Services</div>
+    </div>
   </div>
-  <div class="col-sm-2 clearfix">
-    <div
-      class="pie_progress_static pie_progress"
-      role="progressbar"
-      data-goal="{{ status.overview.nodes }}"
-      aria-valuemax="{{ status.overview.nodes_max }}"
-    >
-      <div class="pie_progress__number">0</div>
+
+  <div class="row cluster-status">
+    <div class="col-sm-6" id="state">
+      <a class="btn btn-{{ state_class }} btn-xs" style="pointer-events: none;">
+        State: {{ cluster.state }}
+      </a>
     </div>
-    <div class="pie-label">Nodes</div>
-  </div>
-  <div class="col-sm-2 clearfix">
-    <div
-      class="pie_progress"
-      role="progressbar"
-      data-goal="{{ status.overview.deployments }}"
-      aria-valuemax="{{ status.overview.deployments_max }}"
-    >
-      <div class="pie_progress__number">0</div>
+    <div class="col-sm-6" id="progress">
+      {% if cluster.state in config.CLUSTER_TRANSIENT_STATES %}
+        {% set initial_progress = 0 %}
+      {% else %}
+        {% set initial_progress = 100 %}
+      {% endif %}
+      <div class="progress progress-{{ state_class }} bs-override">
+        <div class="progress-title">
+          {% if not cluster.state in config.CLUSTER_TRANSIENT_STATES %}100%{% endif %}
+        </div>
+        <div
+          class="progress-bar progress-bar-{{ state_class }} progress-bar-striped"
+          role="progressbar"
+          style="width: {{ initial_progress }}%;"
+        ></div>
+      </div>
     </div>
-    <div class="pie-label">Deployments</div>
-  </div>
-  {% set podcount = status.pods|length %}
-  <div class="col-sm-2 clearfix">
-    <div
-      class="pie_progress"
-      role="progressbar"
-      data-goal="{{ status.overview.pods }}"
-      aria-valuemax="{{ status.overview.pods_max }}"
-    >
-      <div class="pie_progress__number">0</div>
-    </div>
-    <div class="pie-label">Pods</div>
-  </div>
-  {% set servicecount = status.services|length %}
-  <div class="col-sm-2 clearfix">
-    <div
-      class="pie_progress"
-      role="progressbar"
-      data-goal="{{ status.overview.services }}"
-      aria-valuemax="{{ status.overview.services_max }}"
-    >
-      <div class="pie_progress__number">0</div>
-    </div>
-    <div class="pie-label">Services</div>
   </div>
 </div>
 
 <div class="overview-actions">
+  {% set policy = cluster.get('metadata', {}).get('network_policy', {}) %}
   <div class="col-sm-3">
-    {% if cluster.state != config.CLUSTER_OK_STATE %}
+    {% if not_ok_state %}
       <a href="#" class="btn btn-primary btn-xs disabled">Kubeconfig N/A</a>
     {% else %}
-      <a target="_blank" href="{{ url_for('ui.cluster_kubeconfig', cluster_id=cluster.id) }}" class="btn btn-primary btn-xs">Download Kubeconfig</a>
+      <a
+        target="_blank"
+        href="{{ url_for('ui.cluster_kubeconfig', cluster_id=cluster.id) }}"
+        class="btn btn-primary btn-xs"
+      >
+        Download Kubeconfig
+      </a>
     {% endif %}
   </div>
   <div class="col-sm-3">
-    <form id="scaleform" action="{{ url_for('ui.cluster_resize', cluster_id=cluster.id) }}" method="post" enctype="multipart/form-data">  
+    <form
+      id="scaleform"
+      action="{{ url_for('ui.cluster_resize', cluster_id=cluster.id) }}"
+      method="post"
+      enctype="multipart/form-data"
+    >
       <div class="scaleformbox">
-        {% if cluster.state != config.CLUSTER_OK_STATE %}
+        {% if not_ok_state %}
         <a class="btn btn-primary btn-xs disabled" id="scalebtn">Scale Nodes N/A</a>
         {% else %}
         <div class="btn btn-primary btn-xs" id="scalebtn">Scale Nodes</div>
         <div class="input-group" id="scaleinput">
-          <input type="number" id="node_count" step="1" min="1" value="{{ status.overview.nodes }}" name="node_count" class="form-control">
+          <input
+            type="number"
+            id="node_count"
+            step="1"
+            min="{{ 2 if policy != 'none' and policy.get('enabled') else 1 }}"
+            value="{{ status.overview.nodes }}"
+            name="node_count"
+            class="form-control"
+          >
           <span class="input-group-btn">
             <input class="btn btn-primary" type="submit" value="&#10004;">
           </span>
@@ -92,23 +143,49 @@
       </div>
     </form>
   </div>
-  <div class="col-sm-3" id="state">
-    <a class="btn btn-{{ state_class }} btn-xs" style="pointer-events: none;">State: {{ cluster.state }}</a>
-  </div>
-  <div class="col-sm-3" id="progress">
-    {% if cluster.state in config.CLUSTER_TRANSIENT_STATES %}
-      {% set initial_progress = 0 %}
+  <div class="col-sm-3">
+    {% if policy == 'none' %}
+      <a class="btn btn-primary btn-xs disabled" id="policy-btn">
+        Network Policy Disabled
+      </a>
+    {% elif policy is not string and policy.get('provider') == 'CALICO' %}
+      {% set node_count = cluster.get('metadata', {}).get('node_count', '-1') | int %}
+      <form
+        id="calicoform"
+        action="{{ url_for('ui.set_network_policy', cluster_id=cluster.id, provider='calico') }}"
+        method="post"
+        enctype="multipart/form-data"
+      >
+        <button
+          class="btn btn-primary btn-xs"
+          {% if not_ok_state or not policy.get('enabled') and node_count < 2 %}disabled{% endif %}
+          type="submit"
+          id="policy-btn"
+        >
+          {{ "Disable" if policy.get('enabled') else "Enable" }} Calico
+          {% if not_ok_state %}N/A{% endif %}
+        </button>
+      </form>
     {% else %}
-      {% set initial_progress = 100 %}
+      <a class="btn btn-primary btn-xs disabled" id="policy-btn">
+        Network Policy N/A
+      </a>
     {% endif %}
-    <div class="progress progress-{{ state_class }} bs-override">
-      <div class="progress-title">{% if not cluster.state in config.CLUSTER_TRANSIENT_STATES %}100%{% endif %}</div>
-      <div class="progress-bar progress-bar-{{ state_class }} progress-bar-striped" role="progressbar" style="width: {{ initial_progress }}%;"></div>
-    </div>
+  </div>
+  <div class="col-sm-3">
+    <a
+      data-target="{{ url_for('ui.cluster_delete', cluster_id=cluster.id) }}"
+      data-name="cluster {{ cluster.name }}"
+      {% if cant_delete %}disabled{% endif %}
+      class="confirm-delete btn btn-primary btn-xs"
+      title="Delete cluster"
+    >
+      Delete cluster
+    </a>
   </div>
 </div>
 
-<ul class="nav nav-tabs{% if cluster.state != config.CLUSTER_OK_STATE %} hidden{% endif %}">
+<ul class="nav nav-tabs{% if not_ok_state %} hidden{% endif %}">
   <li role="presentation" class="active"><a data-toggle="tab" href="#status" data-tabcode="#statusTab">Status</a></li>
   <li role="presentation"><a data-toggle="tab" href="#topology" data-tabcode="#topologyTab">Topology</a></li>
   {% if config.ENABLE_ADDONS %}
@@ -116,7 +193,24 @@
   {% endif %}
 </ul>
 
-<div class="tab-content clearfix{% if cluster.state != config.CLUSTER_OK_STATE %} hidden{% endif %}">
+<div class="tab-content clearfix{% if not_ok_state %} hidden{% endif %}">
+  <div class="tab-pane active">
+  {% set range = cluster.get('metadata', {}).get('network_range') %}
+    {% if range %}
+      <h3>Cluster info</h3>
+      <div class="table-container">
+        <table class="table table-hover no-actions info-table" id="table-policy">
+          <tbody>
+            <tr>
+              <th>Network range</th>
+              <td>{{ range }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </div>
+
   {# STATUS TAB #}
   <div class="tab-pane active" id="status">
     <h3>Nodes</h3>
@@ -165,7 +259,7 @@
         </tbody>
       </table>
     </div>
-    
+
     <h3>Deployments</h3>
     <div class="table-container">
       <table class="table table-hover no-actions" id="table-nodes">

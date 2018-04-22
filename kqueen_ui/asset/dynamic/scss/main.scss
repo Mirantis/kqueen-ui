@@ -76,8 +76,17 @@ a.disabled {
   padding: 10px;
 }
 
+.cluster-status {
+  width: 50%;
+  margin: 17px auto 0 auto;
+}
+
 .pop-help {
   cursor: help; color: $brand-primary;
+}
+
+a, input[type="checkbox"] {
+  cursor: pointer;
 }
 
 // *****************************************************************************
@@ -298,6 +307,31 @@ label.error {
   }
 }
 
+.control-label {
+  display: block;
+}
+
+.field-group {
+  position: relative;
+
+  .field-description {
+    font-weight: normal;
+    position: absolute;
+    top: 21%;
+    margin-left: 7px;
+    color: #666;
+    cursor: pointer;
+  }
+}
+
+.form-checkbox {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  padding: 5px 0;
+  box-shadow: inset 0px 0px 0px 0px white;
+}
+
 // *****************************************************************************
 // Table
 // *****************************************************************************
@@ -370,6 +404,14 @@ label.error {
   }
   p {
     @extend .text-center;
+  }
+  .info-table {
+    th, td {
+      border: none;
+    }
+    th {
+      width: 180px;
+    }
   }
 }
 
