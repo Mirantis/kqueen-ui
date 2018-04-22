@@ -1,23 +1,23 @@
 {% macro render_selectform(form, action='') %}
 <form id="switchableForm" method="post" action="{{ action }}" enctype="multipart/form-data">
-    {{ form.hidden_tag() }}
-    {% set tagged_fields = [] %}
-    {% set switch_fields = [] %}
-    {% for field in form %}
-      {% if not field.flags.hidden %}
-        {% if field|attr('switchtag') %}
-          {% set _do = tagged_fields.append(field) %}
-          {{ render_switchable_field(field) }}
-        {% else %}
-          {{ render_field(field) }}
-        {% endif %}
-        {% if field|attr('switch') %}
-          {% set _do = switch_fields.append(field) %}
-        {% endif %}
+  {{ form.hidden_tag() }}
+  {% set tagged_fields = [] %}
+  {% set switch_fields = [] %}
+  {% for field in form %}
+    {% if not field.flags.hidden %}
+      {% if field|attr('switchtag') %}
+        {% set _do = tagged_fields.append(field) %}
+        {{ render_switchable_field(field) }}
+      {% else %}
+        {{ render_field(field) }}
       {% endif %}
-    {% endfor %}
-    <input type="button" name='cancel' value="Cancel" class="btn btn-default btn-sm"  onclick="window.location.href='{{ url_for('ui.index') }}';">
-    <input type="submit" name='submit' value="Submit" class="btn btn-primary btn-sm">
+      {% if field|attr('switch') %}
+        {% set _do = switch_fields.append(field) %}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+  <input type="button" name='cancel' value="Cancel" class="btn btn-default btn-sm"  onclick="window.location.href='{{ url_for('ui.index') }}';">
+  <input type="submit" name='submit' value="Submit" class="btn btn-primary btn-sm">
 </form>
 {% if switch_fields|length > 0 %}
 <script>
@@ -31,10 +31,9 @@ document.addEventListener("DOMContentLoaded", function() {
 {% if tagged_fields|length > 0 %}
 <script>
 function validateJsonFileField(value, element, requiredKeys) {
-  var file = element.files[0]
-  , reader = new FileReader()
-  , valid = false
-  ;
+  var file = element.files[0],
+      reader = new FileReader(),
+      valid = false;
 
   reader.onload = function(evt) {
     var data = evt.target.result;
@@ -86,8 +85,13 @@ function validateJsonFileField(value, element, requiredKeys) {
   return "pending";
 }
 
+function validateFieldByRegexp(value, element, regexp) {
+  return new RegExp(regexp).test(value);
+}
+
 document.addEventListener("DOMContentLoaded", function() {
   $.validator.addMethod("jsonfile", validateJsonFileField, $.validator.format("Test validation"));
+  $.validator.addMethod("regexp", validateFieldByRegexp, $.validator.format("Invalid value."));
 
   $("#switchableForm").validate({
     rules: {
@@ -96,9 +100,8 @@ document.addEventListener("DOMContentLoaded", function() {
       {%- endfor %}
     },
     invalidHandler: function(event, validator) {
-      var $submits = $(this).find('input[type=submit]')
-       ,  errors = validator.numberOfInvalids()
-       ;
+      var $submits = $(this).find('input[type=submit]'),
+          errors = validator.numberOfInvalids();
       setTimeout(function() {
         $submits.each(function() {
           if (errors) {
@@ -107,6 +110,25 @@ document.addEventListener("DOMContentLoaded", function() {
           }
         });
       }, 1);
+    }
+  });
+
+  // Verify if calico networking can be enabled
+  var policySelect = $('.network-policy'),
+      nodesCountInput = $('.gke_node_count');
+
+  function isNotEnoughNodes(value) {
+    var count = parseInt(value);
+    return isNaN(count) || count < 2;
+  }
+
+  policySelect.prop('disabled', isNotEnoughNodes(nodesCountInput.val()));
+  nodesCountInput.bind('keyup mouseup', function () {
+    if (isNotEnoughNodes($(this).val())) {
+      policySelect.prop('disabled', true);
+      policySelect.val('PROVISIONER_UNSPECIFIED');
+    } else {
+      policySelect.prop('disabled', false);
     }
   });
 });
@@ -130,9 +152,18 @@ document.addEventListener("DOMContentLoaded", function() {
 {% endmacro %}
 
 {% macro render_switchable_field(field) %}
-  <div class="form-group{% if field.errors %} has-error{% endif %} hidden" data-switchtag="{{ field.switchtag }}">
+  <div
+    class="form-group {% if field.errors %}has-error{% endif %} hidden"
+    data-switchtag="{{ field.switchtag }}"
+  >
     <label for="{{ field.id }}" class="control-label">{{ field.label }}</label>
-    {{ field(class_="form-control")|safe }}
+    <div class="field-group">
+      {{ field(class_="form-control " + (field.class_name if field.class_name else ""),
+               placeholder=field.placeholder)|safe }}
+      {% if field.checkbox_text %}
+        <label for="{{ field.id }}" class="field-description">{{ field.checkbox_text }}</label>
+      {% endif %}
+    </div>
   {% if field.errors %}
     <span class="help-block">
     {% for error in field.errors %}
