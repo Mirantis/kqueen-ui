@@ -35,21 +35,9 @@ Development
 
   ::
 
-    virtualenv -p /usr/bin/python3 kqueen-ui
-    source ./kqueen-ui/bin/activate
-
-    or if you have *virtualenvwrapper* installed
-
-  ::
-
-    mkvirtualenv -p /usr/bin/python3 kqueen-ui
-
-- Install Python dependencies
-
-  ::
-
-    pip3 install -e ".[dev]"
-    pip3 install --editable .
+    pip install --user pipenv
+    pipenv --python 3.6
+    pipenv install --dev
 
 - Install npm and gulp
 
@@ -66,6 +54,8 @@ Development
 
 - Optionally start mail server container. It is used to send confirmation emails during new user creation.
 
+  ::
+
     docker-compose -f docker-compose.mail.yml up -d
 
 - Start UI service by typing
@@ -73,6 +63,8 @@ Development
   ::
 
     kqueen_ui
+
+- Make sure Kqueen API is running and `bootstrapped <https://github.com/Mirantis/kqueen/blob/master/bootstrap_admin.py>`__.
 
 Configuration
 -------------
