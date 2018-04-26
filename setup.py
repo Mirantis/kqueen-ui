@@ -5,6 +5,16 @@ version = '0.9'
 with open('README.rst') as f:
     long_description = ''.join(f.readlines())
 
+test_require = [
+    'codacy-coverage',
+    'coveralls',
+    'flake8',
+    'pytest',
+    'pytest-cov',
+    'pytest-env',
+    'pytest-flask'
+]
+
 setup(
     name='kqueen-ui',
     version=version,
@@ -29,6 +39,19 @@ setup(
         'pytz',
         'urllib3'
     ],
+    setup_requires=[
+        'pytest-runner',
+    ],
+    tests_require=test_require,
+    extras_require={
+        'test': test_require,
+        'dev': test_require + [
+            'ipython',
+            'sphinx',
+            'sphinx-autobuild',
+            'sphinx_rtd_theme',
+        ]
+    },
     classifiers=[
         'Operating System :: POSIX :: Linux',
         'Programming Language :: Python',

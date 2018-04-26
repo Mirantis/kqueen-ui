@@ -13,14 +13,14 @@ jobs:
   include:
   - stage: test
     install:
-    - pip install -r requirements.txt
-    - pip install -r requirements-dev.txt
+    - pip install -e ".[test]"
+    - pip check
     script:
     - python3 -m flake8
   - stage: test
     install:
-    - pip install -r requirements.txt
-    - pip install -r requirements-dev.txt
+    - pip install -e ".[test]"
+    - pip check
     script:
     - python3 -m pytest --cov=. --cov-report=term-missing:skip-covered
     - coveralls
