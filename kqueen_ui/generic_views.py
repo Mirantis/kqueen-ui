@@ -4,6 +4,7 @@ from kqueen_ui.api import get_kqueen_client, get_service_client
 from kqueen_ui.exceptions import KQueenAPIException
 from uuid import UUID
 
+import json
 import logging
 
 logger = logging.getLogger('kqueen_ui')
@@ -27,6 +28,7 @@ class KQueenView(View):
     def _handle_response(self, response, resource, action):
         if response is not None:
             msg = 'Status Code: {}; Data: {}'.format(str(response.status), str(response.data))
+
             if response.status == -1:
                 user_msg = 'Backend is unavailable at this time, please try again later.'
                 self.graceful_exit(msg, user_msg)
@@ -37,10 +39,19 @@ class KQueenView(View):
                 self.graceful_exit(msg, user_msg)
             elif response.status == 404:
                 fmt_resource = str(resource).capitalize()
-                user_msg = '{} not found.'.format(fmt_resource)
+                user_msg = '{} is not found.'.format(fmt_resource)
                 self.graceful_exit(msg, user_msg)
             elif response.status >= 400:
-                user_msg = 'Error occurred while contacting backend, please try again later.'
+                if response.error:
+                    json_acceptable_string = response.error.replace("'", "\"")
+                    try:
+                        error_details = json.loads(json_acceptable_string)
+                    except json.JSONDecodeError:
+                        logger.debug('Could not load json from error details')
+                        error_details = {}
+                    user_msg = error_details['description'] if error_details else response.error
+                else:
+                    user_msg = 'Error occurred while contacting backend, please try again later.'
                 self.graceful_exit(msg, user_msg)
             return response.data
 
@@ -64,7 +75,7 @@ class KQueenView(View):
         logger.error('error: {}'.format(logger_message))
         if user_message:
             flash(user_message, 'danger')
-        raise KQueenAPIException()
+        raise KQueenAPIException(user_message)
 
     def handle(self):
         """

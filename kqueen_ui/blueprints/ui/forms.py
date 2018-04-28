@@ -1,5 +1,4 @@
 from datetime import datetime
-from kqueen_ui.api import get_service_client
 from kqueen_ui.utils.fields import (
     EmailField,
     PasswordField,
@@ -9,7 +8,7 @@ from kqueen_ui.utils.fields import (
 )
 from kqueen_ui.utils.forms import FlaskExtendableForm
 from pytz import common_timezones, timezone
-from wtforms.validators import DataRequired, Email, EqualTo, Length
+from wtforms.validators import DataRequired, EqualTo, Length
 
 
 def get_datetime_choices():
@@ -58,8 +57,6 @@ class ChangePasswordForm(FlaskExtendableForm):
 class UserInviteForm(FlaskExtendableForm):
     auth_method = SelectField('Authentication Method', choices=[], switch=True)
 
-    # TODO: add email uniqueness checker to the whole EmailField
-
 
 class PasswordResetForm(FlaskExtendableForm):
     password_1 = PasswordField(
@@ -79,27 +76,7 @@ class PasswordResetForm(FlaskExtendableForm):
 
 
 class RequestPasswordResetForm(FlaskExtendableForm):
-    email = EmailField('Email', validators=[Email()])
-
-    def validate(self):
-        if not FlaskExtendableForm.validate(self):
-            return False
-
-        # TODO: remove these uniqueness checks after introduction of unique constraint
-        # in ETCD storage class on backend
-        client = get_service_client()
-        # Check if e-mail exists on backend
-        response = client.user.list()
-        if response.status > 200:
-            self.email.errors.append('Can not contact backend at this time.')
-            return False
-        users = response.data
-        user_emails = [u['email'] for u in users if 'email' in u]
-        if self.email.data not in user_emails:
-            self.email.errors.append('This e-mail is not registered.')
-            return False
-
-        return True
+    email = EmailField('Email')
 
 
 class ProvisionerCreateForm(FlaskExtendableForm):

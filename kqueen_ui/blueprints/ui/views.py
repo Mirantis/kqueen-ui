@@ -4,6 +4,7 @@ from flask import (current_app as app, Blueprint, flash, jsonify, redirect,
 from flask_babel import format_datetime
 from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.auth import authenticate, confirm_token, generate_confirmation_token
+from kqueen_ui.exceptions import KQueenAPIException
 from kqueen_ui.generic_views import KQueenView
 from kqueen_ui.utils.email import EmailMessage
 from kqueen_ui.utils.loggers import user_prefix
@@ -198,8 +199,6 @@ class UserInvite(KQueenView):
     methods = ['GET', 'POST']
 
     def handle(self):
-        # TODO: Add CN name validator (for LDAp username)
-
         form_cls = UserInviteForm
 
         auth_config = self.kqueen_request('configuration', 'auth')
@@ -246,8 +245,10 @@ class UserInvite(KQueenView):
                 'metadata': {}
             }
             logger.debug('User {} from {} invited.'.format(user_kw['username'], user_kw['organization']))
-            user = self.kqueen_request('user', 'create', fnargs=(user_kw,))
-
+            try:
+                user = self.kqueen_request('user', 'create', fnargs=(user_kw,))
+            except KQueenAPIException:
+                return render_template('ui/user_invite.html', form=form)
             # send mail
             notify = username_field_descr.get('notify')
             if notify:
@@ -428,24 +429,23 @@ class UserSetPassword(KQueenView):
             return redirect(url_for('ui.index'))
 
         users = self.kqueen_request('user', 'list', service=True)
-        # TODO: this logic realies heavily on unique emails, this is not the case on backend right now
-        # change this logic after unique contraint is introduced to backend
         filtered = [u for u in users if u.get('email', None) == email]
-        if len(filtered) == 1:
-            user = filtered[0]
-            form = PasswordResetForm()
-            if form.validate_on_submit():
-                password = {'password': form.password_1.data}
-                self.kqueen_request('user', 'updatepw', fnargs=(user['id'], password), service=True)
-                user['active'] = True
-                self.kqueen_request('user', 'update', fnargs=(user['id'], user), service=True)
-                user_logger.debug('Password setted for user {}'.format(user['username']))
-                flash('Password successfully updated.', 'success')
-                return redirect(url_for('ui.login'))
-            return render_template('ui/user_reset_password.html', form=form)
-        else:
-            flash('Could not match user to given e-mail.', 'danger')
-        return redirect(url_for('ui.index'))
+        if not filtered:
+            flash('Could not match user to a given e-mail.'
+                  ' Maybe invitation is canceled and user is deleted', 'danger')
+            return redirect(url_for('ui.index'))
+
+        user = filtered[0]
+        form = PasswordResetForm()
+        if form.validate_on_submit():
+            password = {'password': form.password_1.data}
+            self.kqueen_request('user', 'updatepw', fnargs=(user['id'], password), service=True)
+            user['active'] = True
+            self.kqueen_request('user', 'update', fnargs=(user['id'], user), service=True)
+            user_logger.debug('Password is set for the {} user'.format(user['username']))
+            flash('Password successfully updated.', 'success')
+            return redirect(url_for('ui.login'))
+        return render_template('ui/user_reset_password.html', form=form)
 
 
 class UserRequestResetPassword(KQueenView):

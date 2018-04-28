@@ -34,7 +34,7 @@ $(document).ready(function() {
     // Hide flash message after 3 seconds
     setTimeout(function () {
         $(".alert.fade").alert('close');
-    }, 3000);
+    }, 5000);
 
     $.validator.addMethod(
         "uuid",
