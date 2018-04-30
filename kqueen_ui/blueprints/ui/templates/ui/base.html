@@ -11,12 +11,13 @@
 
     <title>KQueen</title>
 
-    <link href="https://fonts.googleapis.com/css?family=Exo+2:400,700" rel="stylesheet">
+    <!-- <link href="https://fonts.googleapis.com/css?family=Exo+2:400,700" rel="stylesheet"> -->
+    <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans+Condensed:100,200,300,400,500,600,700|IBM+Plex+Sans:100,200,300,400,500,600,700&amp;subset=cyrillic" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400" rel="stylesheet">
     {% include "ui/partial/favicon.html" %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/vendor.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/materialdesignicons.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/vendor.css') }}">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -40,7 +41,7 @@
           {% else %}
             {% set home_url = url_for('ui.index') %}
           {% endif %}
-          <a class="navbar-brand" href="{{ home_url }}" target="_self"><img class="mirantis-logo" src="{{ url_for('static', filename='img/mirantis-logo-vertical.png') }}" alt="Mirantis"><span>KQueen</span></a>
+          <a class="navbar-brand" href="{{ home_url }}" target="_self"><img class="mirantis-logo" src="{{ url_for('static', filename='img/kqueen-logo.svg') }}" alt="Mirantis"></a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           {% include "ui/partial/menu.html" %}

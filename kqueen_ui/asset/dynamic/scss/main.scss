@@ -10,9 +10,9 @@
 // *****************************************************************************
 
 body {
-  background-image: url('/static/img/iso-grid-floor.png');
   background-size: 150px, auto;
   background-color: #f5f5f5;
+  color: $base-text;
 }
 
 #content {
@@ -362,6 +362,7 @@ label.error {
         margin-top: -2px;
         display: inline-block;
         cursor: pointer;
+        color: $mira-gray-dark;
       }
     }
   }
@@ -576,7 +577,7 @@ footer {
 
 .pie_progress__number {
   font-size: 38px;
-  font-family: 'Exo 2';
+  font-family: 'IBM Plex Sans Condensed';
 }
 
 // *****************************************************************************
@@ -786,6 +787,8 @@ footer {
 
 .btn {
   text-transform: uppercase;
+  font-weight: 400;
+  border-radius: 4px;
 }
 
 .btn-default {
@@ -950,7 +953,7 @@ footer {
 
 .breadcrumb-container {
   margin-bottom: 30px;
-  background-color: $mira-purple;
+  background-color: $mira-gray-neutral;
   ol.breadcrumb {
     margin-bottom: 0px;
   }
@@ -965,16 +968,20 @@ footer {
       line-height: inherit;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      color: $base-text;
     }
   }
   .breadcrumb-item a {
-    color: #fff;
+    color: $base-text;
     text-decoration: none;
     &:hover,
     &:focus,
     &:active {
-      text-decoration: underline
+      text-decoration: underline;
     }
+  }
+  .active {
+    color: #636E72 !important;
   }
 }
 

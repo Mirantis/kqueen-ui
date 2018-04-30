@@ -49,8 +49,8 @@
   }
   &:hover {
     color: $color;
-    background-color: saturate($background, 10%);
-        border-color: saturate($border, 10%);
+    background-color: darken($background, 10%);
+        border-color: darken($border, 10%);
   }
   &:active,
   &.active,
