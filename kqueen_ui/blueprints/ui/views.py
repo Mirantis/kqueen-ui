@@ -577,11 +577,11 @@ class ClusterCreate(KQueenView):
     def handle(self):
         # Get all necessary objects from backend
         _provisioners = self.kqueen_request('provisioner', 'list')
+        unknown_state = app.config['PROVISIONER_UNKNOWN_STATE']
+        ok_state = app.config['PROVISIONER_OK_STATE']
         provisioners = [
-            p
-            for p
-            in _provisioners
-            if p.get('state', app.config['PROVISIONER_UNKNOWN_STATE']) == app.config['PROVISIONER_OK_STATE']
+            p for p in _provisioners
+            if p.get('state', unknown_state) == ok_state
         ]
         engines = self.kqueen_request('provisioner', 'engines')
         engine_dict = dict([(e.pop('name'), e) for e in engines])
@@ -594,8 +594,7 @@ class ClusterCreate(KQueenView):
             # Append provisioner ID to parameter name to make it unique
             parameters = {
                 k + '__' + provisioner['id']: v
-                for [k, v]
-                in _parameters.items()
+                for [k, v] in _parameters.items()
             }
             form_cls.append_fields(parameters, switchtag=provisioner['id'])
 
@@ -618,14 +617,16 @@ class ClusterCreate(KQueenView):
                 render_template('ui/cluster_create.html', form=form)
 
             owner_ref = 'User:{}'.format(session['user']['id'])
+            provisioner_id = form.provisioner.data
             cluster_kw = {
                 'name': form.name.data,
                 'state': app.config['CLUSTER_PROVISIONING_STATE'],
-                'provisioner': 'Provisioner:{}'.format(form.provisioner.data),
+                'provisioner': 'Provisioner:{}'.format(provisioner_id),
                 'created_at': datetime.utcnow(),
                 'metadata': metadata,
                 'owner': owner_ref
             }
+
             cluster = self.kqueen_request('cluster', 'create', fnargs=(cluster_kw,))
             msg = 'Provisioning of cluster {} is in progress.'.format(cluster['name'])
             user_logger.debug('{}:{}'.format(user_prefix(session), msg))
@@ -654,7 +655,7 @@ class ClusterDelete(KQueenView):
         self.kqueen_request('cluster', 'delete', fnargs=(cluster_id,))
         user_logger.debug('{}:{}'.format(user_prefix(session), msg))
         flash(msg, 'success')
-        return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
+        return redirect(url_for('ui.index'))
 
 
 class ClusterDeploymentStatus(KQueenView):
@@ -724,6 +725,42 @@ class ClusterResize(KQueenView):
         return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
 
 
+class ClusterSetPolicy(KQueenView):
+    decorators = [login_required]
+    methods = ['POST']
+    validation_hint = 'uuid'
+
+    def handle(self, cluster_id):
+        redirect_url = request.environ.get('HTTP_REFERER', url_for('ui.index'))
+
+        cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
+        policy = cluster['metadata'].get('network_policy', 'none')
+        if 'node_count' not in cluster.get('metadata', {}):
+            engine = cluster.get('provisioner', {}).get('engine', '<unknown>')
+            flash('{} engine doesn\'t support network policy.'.format(
+                prettify_engine_name(engine)), 'warning')
+            return redirect(redirect_url)
+
+        if policy.get('provider') == 'CALICO':
+            if policy.get('enabled'):
+                self.kqueen_request('cluster', 'set_network_policy', fnargs=(cluster_id, False))
+                flash('Network policy was successfully disabled', 'success')
+                return redirect(redirect_url)
+
+            if int(cluster['metadata']['node_count']) < 2:
+                flash('At least 2 nodes are required to enable network policy', 'error')
+                return redirect(redirect_url)
+
+            cluster = self.kqueen_request('cluster', 'set_network_policy',
+                                          fnargs=(cluster_id, True))
+            msg = 'Calico policy for cluster {} successfully enabled.'.format(cluster['name'])
+            user_logger.debug('{}:{}'.format(user_prefix(session), msg))
+            flash(msg, 'success')
+        else:
+            flash('Can not manage network policy for this cluster.', 'warning')
+        return redirect(redirect_url)
+
+
 class ClusterKubeconfig(KQueenView):
     decorators = [login_required]
     methods = ['GET']
@@ -764,11 +801,21 @@ class ClusterRow(KQueenView):
         return jsonify(data)
 
 
-ui.add_url_rule('/clusters/create', view_func=ClusterCreate.as_view('cluster_create'))
-ui.add_url_rule('/clusters/<cluster_id>/delete', view_func=ClusterDelete.as_view('cluster_delete'))
-ui.add_url_rule('/clusters/<cluster_id>/deployment-status', view_func=ClusterDeploymentStatus.as_view('cluster_deployment_status'))
-ui.add_url_rule('/clusters/<cluster_id>/detail', view_func=ClusterDetail.as_view('cluster_detail'))
-ui.add_url_rule('/clusters/<cluster_id>/resize', view_func=ClusterResize.as_view('cluster_resize'))
-ui.add_url_rule('/clusters/<cluster_id>/kubeconfig', view_func=ClusterKubeconfig.as_view('cluster_kubeconfig'))
-ui.add_url_rule('/clusters/<cluster_id>/topology-data', view_func=ClusterTopologyData.as_view('cluster_topology_data'))
-ui.add_url_rule('/clusters/<cluster_id>/row/<index>', view_func=ClusterRow.as_view('cluster_row'))
+ui.add_url_rule('/clusters/create',
+                view_func=ClusterCreate.as_view('cluster_create'))
+ui.add_url_rule('/clusters/<cluster_id>/delete',
+                view_func=ClusterDelete.as_view('cluster_delete'))
+ui.add_url_rule('/clusters/<cluster_id>/deployment-status',
+                view_func=ClusterDeploymentStatus.as_view('cluster_deployment_status'))
+ui.add_url_rule('/clusters/<cluster_id>/detail',
+                view_func=ClusterDetail.as_view('cluster_detail'))
+ui.add_url_rule('/clusters/<cluster_id>/set_network_policy',
+                view_func=ClusterSetPolicy.as_view('set_network_policy'))
+ui.add_url_rule('/clusters/<cluster_id>/resize',
+                view_func=ClusterResize.as_view('cluster_resize'))
+ui.add_url_rule('/clusters/<cluster_id>/kubeconfig',
+                view_func=ClusterKubeconfig.as_view('cluster_kubeconfig'))
+ui.add_url_rule('/clusters/<cluster_id>/topology-data',
+                view_func=ClusterTopologyData.as_view('cluster_topology_data'))
+ui.add_url_rule('/clusters/<cluster_id>/row/<index>',
+                view_func=ClusterRow.as_view('cluster_row'))

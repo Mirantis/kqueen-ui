@@ -86,8 +86,13 @@ function validateJsonFileField(value, element, requiredKeys) {
   return "pending";
 }
 
+function validateFieldByRegexp(value, element, regexp) {
+  return new RegExp(regexp).test(value);
+}
+
 document.addEventListener("DOMContentLoaded", function() {
   $.validator.addMethod("jsonfile", validateJsonFileField, $.validator.format("Test validation"));
+  $.validator.addMethod("regexp", validateFieldByRegexp, $.validator.format("Invalid value."));
 
   $("#switchableForm").validate({
     rules: {
@@ -107,6 +112,21 @@ document.addEventListener("DOMContentLoaded", function() {
           }
         });
       }, 1);
+    }
+  });
+
+  // Verify if calico networking can be enabled
+  var policySelect = $('.network-policy');
+  var nodesCountInput = $('.gke_node_count');
+  var nodeCount = parseInt(nodesCountInput.val());
+  policySelect.prop('disabled', isNaN(nodeCount) || nodeCount < 2);
+  nodesCountInput.bind('keyup mouseup', function () {
+    var nodeCount = parseInt($(this).val());
+    if (isNaN(nodeCount) || nodeCount < 2) {
+      policySelect.prop('disabled', true);
+      policySelect.val('none');
+    } else {
+      policySelect.prop('disabled', false);
     }
   });
 });
@@ -130,9 +150,18 @@ document.addEventListener("DOMContentLoaded", function() {
 {% endmacro %}
 
 {% macro render_switchable_field(field) %}
-  <div class="form-group{% if field.errors %} has-error{% endif %} hidden" data-switchtag="{{ field.switchtag }}">
+  <div
+    class="form-group {% if field.errors %}has-error{% endif %} hidden"
+    data-switchtag="{{ field.switchtag }}"
+  >
     <label for="{{ field.id }}" class="control-label">{{ field.label }}</label>
-    {{ field(class_="form-control")|safe }}
+    <div class="field-group">
+      {{ field(class_="form-control " + (field.class_name if field.class_name else ""),
+               placeholder=field.placeholder)|safe }}
+      {% if field.checkbox_text %}
+        <label for="{{ field.id }}" class="field-description">{{ field.checkbox_text }}</label>
+      {% endif %}
+    </div>
   {% if field.errors %}
     <span class="help-block">
     {% for error in field.errors %}

@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from flask_wtf import FlaskForm
 from kqueen_ui.utils.fields import (
+    CheckboxField,
     EmailField,
     FileField,
     IntegerField,
@@ -14,6 +15,7 @@ from kqueen_ui.utils.fields import (
 
 
 TYPE_MAP = {
+    'checkbox': CheckboxField,
     'email': EmailField,
     'file': FileField,
     'integer': IntegerField,
@@ -54,15 +56,18 @@ class FlaskExtendableForm(FlaskForm):
         for field_name, field_params in fields.items():
             field_class = TYPE_MAP.get(field_params['type'], None)
             if field_class:
-                label = field_params['label'] if 'label' in field_params else field_name
-                jsvalidators = field_params['validators'] if 'validators' in field_params else {}
+                label = field_params.get('label', field_name)
+                jsvalidators = field_params.get('validators', {})
                 field_kwargs = {
                     'switchtag': switchtag,
                     'jsvalidators': jsvalidators
                 }
                 if field_class == SelectField:
                     field_kwargs['choices'] = field_params.get('choices', [])
-                if 'default' in field_params:
-                    field_kwargs['default'] = field_params['default']
+                additional_fields = ['default', 'class_name', 'checkbox_text', 'placeholder']
+                for field in additional_fields:
+                    if field in field_params:
+                        field_kwargs[field] = field_params[field]
+
                 field = field_class(label, **field_kwargs)
                 setattr(cls, field_name, field)

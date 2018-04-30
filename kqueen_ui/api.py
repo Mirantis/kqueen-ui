@@ -205,6 +205,13 @@ class ClusterManager(BaseManager):
         }
         return self.request('%s/resize' % uuid, method='PATCH', payload=payload)
 
+    def set_network_policy(self, uuid, enabled, provider='CALICO'):
+        payload = {
+            'provider': provider,
+            'enabled': enabled
+        }
+        return self.request('%s/set_network_policy' % uuid, method='PATCH', payload=payload)
+
 
 class ProvisionerManager(BaseManager):
     resource_url = 'provisioners/'
