@@ -577,7 +577,7 @@
         $('.bs-override.progress .progress-bar').css('width', '100%')
         $('.bs-override.progress .progress-title').html('Please wait');
       }
-      if(! (res.result == '{{ config.CLUSTER_PROVISIONING_STATE }}' || res.result == '{{ config.CLUSTER_RESIZING_STATE }}')){
+      if(! (res.result == '{{ config.CLUSTER_PROVISIONING_STATE }}' || res.result == '{{ config.CLUSTER_UPDATING_STATE }}')){
         window.location.reload(1);
       }
     });

@@ -294,7 +294,7 @@ def sanitize_resource_metadata(session, clusters, provisioners):
         if 'state' in cluster:
             if config.get('CLUSTER_PROVISIONING_STATE') != cluster['state']:
                 deployed_clusters = deployed_clusters + 1
-            if cluster['state'] in [config.get('CLUSTER_RESIZING_STATE'), config.get('CLUSTER_OK_STATE')]:
+            if cluster['state'] in [config.get('CLUSTER_UPDATING_STATE'), config.get('CLUSTER_OK_STATE')]:
                 healthy_clusters = healthy_clusters + 1
         if 'created_at' in cluster:
             cluster['created_at'] = format_datetime(cluster['created_at'])
