@@ -93,6 +93,18 @@ a, input[type="checkbox"] {
   word-wrap: break-word;
 }
 
+.form-control {
+  &::-webkit-input-placeholder {
+    color: #ccc;
+  }
+  &:-moz-placeholder {
+    color: #ccc;
+  }
+  &::-moz-placeholder {
+    color: #ccc;
+  }
+}
+
 // *****************************************************************************
 // Tabs
 // *****************************************************************************
