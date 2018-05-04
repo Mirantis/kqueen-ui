@@ -7,25 +7,26 @@
 //
 //## Gray and brand colors for use across Bootstrap.
 
-$mira-red:               #E02D3A;
-$mira-red-dark:		 #861B22;
-$mira-teal:              #4BBFAF;
+$base-text:              #2D3436;
+$mira-red:               #D25565;
+$mira-red-dark:          #861B22;
+$mira-teal:              #00B894;
 $mira-blue:              #004d99;
-$mira-orange:            #cc9900;
-$mira-purple:		 #9B287B;
-$mira-purple-dark:	 #471B37;
-$mira-razzmatazz:	 #EF2369;
-$mira-burgundy:		 #8A1D42;
-$mira-dark-teal:	 #126666;
+$mira-orange:            #F0B775;
+$mira-purple:            #9B287B;
+$mira-purple-dark:       #6C567B;
+$mira-razzmatazz:        #EF2369;
+$mira-burgundy:          #8A1D42;
+$mira-dark-teal:         #126666;
 $mira-gray-dark:         #666;
-$mira-gray-neutral:	 #BCBEC0;
-$mira-gray-cool:	 #E6EFED;
+$mira-gray-neutral:      #B2BEC3;
+$mira-gray-cool:         #E6EFED;
 
 $gray:                   $mira-gray-dark;
 $gray-light:             $mira-gray-neutral;
 $gray-lighter:           $mira-gray-cool;
 
-$brand-primary:          $mira-red;
+$brand-primary:          $mira-purple-dark;
 $brand-success:          $mira-teal;
 $brand-info:             $mira-blue;
 $brand-warning:          $mira-orange;
@@ -44,14 +45,14 @@ $body-bg:                #eee;
 //
 //## Font, line-height, and color for body text, headings, and more.
 
-$font-family-sans-serif:  "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+$font-family-sans-serif:  "IBM Plex Sans", "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
 $font-size-base:	  16px;
 
 $font-size-h2: 		  40px;
 $font-size-h3: 		  28px;
 
-$headings-font-family:	  "Exo 2", $font-family-sans-serif;
+$headings-font-family:	  "IBM Plex Sans", $font-family-sans-serif;
 $headings-font-weight:    400;
 
 //== Components
