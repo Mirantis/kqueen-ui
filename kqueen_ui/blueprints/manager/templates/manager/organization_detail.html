@@ -10,7 +10,12 @@
 
 <div class="table-container">
   <div class="table-actions">
-    <a href="{{ url_for('manager.member_create', organization_id=organization.id) }}" role="button" class="btn btn-primary btn-sm">Add Member</a>
+    <a
+      href="{{ url_for('manager.member_create', organization_id=organization.id) }}"
+      class="btn btn-primary btn-sm"
+    >
+      Add Member
+    </a>
   </div>
   <table class="table table-hover">
     <thead>
@@ -41,13 +46,18 @@
             <a href="{{ change_role_url }}" title="Change member role">
               <i class="mdi mdi-account-edit"></i>
             </a>
-            <a data-target="{{ delete_url }}" data-name="member {{ member.username }}" class="confirm-delete" title="Delete member">
+            <a
+              data-target="{{ delete_url }}"
+              data-name="member {{ member.username }}"
+              class="confirm-delete"
+              title="Delete member"
+            >
               <i class="mdi mdi-delete-forever"></i>
             </a>
           </td>
         </tr>
       {% else %}
-        <tr style="pointer-events: none;"><td colspan="6" class="text-center">No Items</td></tr>
+        <tr class="not-event-pointer"><td colspan="6" class="text-center">No Items</td></tr>
       {% endfor %}
     </tbody>
   </table>

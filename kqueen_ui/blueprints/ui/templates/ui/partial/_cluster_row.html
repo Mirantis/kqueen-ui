@@ -26,7 +26,12 @@
           </td>
           <td class="action_column">
             {% if cluster.metadata %}
-            <a data-toggle="collapse" data-target="#cluster-{{ index }}" class="clickable" title="More information">
+            <a
+              data-toggle="collapse"
+              data-target="#cluster-{{ index }}"
+              class="clickable"
+              title="More information"
+            >
               <i class="mdi mdi-information-outline"></i>
             </a>
             {% endif %}
@@ -35,13 +40,13 @@
         </tr>
         {% if cluster.metadata %}
         <tr id="metadata-cluster-{{ index }}">
-          <td colspan="5" style="padding: 0px; border-top: 0px;">
-            <div style="margin: 8px;" id="cluster-{{ index }}" class="collapse">
+          <td colspan="5" class="meta-params">
+            <div id="cluster-{{ index }}" class="collapse">
               <table class="table table-hover no-actions" id="table-clustermeta">
                 <tbody>
                   {% for key, value in cluster.metadata.items() %}
                   <tr>
-                    <th style="width: 300px;">{{ key }}</th>
+                    <th>{{ key }}</th>
                     <td>{{ value|urlize(40, target="_blank") }}</td>
                   </tr>
                   {% endfor %}

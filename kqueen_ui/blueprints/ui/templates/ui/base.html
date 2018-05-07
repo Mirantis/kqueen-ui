@@ -41,7 +41,13 @@
           {% else %}
             {% set home_url = url_for('ui.index') %}
           {% endif %}
-          <a class="navbar-brand" href="{{ home_url }}" target="_self"><img class="mirantis-logo" src="{{ url_for('static', filename='img/kqueen-logo.svg') }}" alt="Mirantis"></a>
+          <a class="navbar-brand" href="{{ home_url }}" target="_self">
+            <img
+              class="mirantis-logo"
+              src="{{ url_for('static', filename='img/kqueen-logo.svg') }}"
+              alt="Mirantis"
+            />
+          </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           {% include "ui/partial/menu.html" %}
@@ -65,7 +71,7 @@
     {% endif %}
     </div>
 
-    <input id="BaseURI" type="hidden" value="/">
+    <input id="BaseURI" type="hidden" value="/" />
     <div id="flash-container">
     {% for category, message in get_flashed_messages(with_categories=true) %}
       <div id="flash-message" class="alert alert-box-fixed0 alert-box-fixed alert-{{ category }} fade in" role="alert">
@@ -136,7 +142,7 @@
     </script>
 
     {# START PRELOADER #}
-    <div class="loading-backdrop" style="display: none;">
+    <div class="loading-backdrop hidden">
     {% if config.PRELOADER == 'simple' %}
       {% include "ui/partial/simpleload.html" %}
     {% elif config.PRELOADER == 'hexagon' %}

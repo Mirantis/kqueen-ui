@@ -105,6 +105,37 @@ a, input[type="checkbox"] {
   }
 }
 
+.not-event-pointer {
+  pointer-events: none;
+}
+
+div.login {
+  margin-top: 20%;
+  h3 {
+    margin: 5px 0px;
+  }
+  ::-webkit-input-placeholder {
+    text-align: center;
+  }
+  :-moz-placeholder {
+    text-align: center;
+  }
+  ::-moz-placeholder {
+    text-align: center;
+  }
+  :-ms-input-placeholder {
+    text-align: center;
+  }
+}
+
+div.login-footer {
+  font-size: 0.9em;
+}
+
+.provisioner-pie {
+  line-height: 1.1;
+}
+
 // *****************************************************************************
 // Tabs
 // *****************************************************************************
@@ -150,6 +181,21 @@ a, input[type="checkbox"] {
   h3 {
     margin: 0;
     padding: 0;
+  }
+  .manage-resources {
+    padding: 10px 0px;
+  }
+  .mdi-large {
+    font-size: 18px;
+  }
+  .external-ip {
+    position: relative;
+  }
+  .pvc-volume {
+    padding: 0px;
+    .collapse {
+      margin: 8px;
+    }
   }
 }
 
@@ -234,6 +280,13 @@ a, input[type="checkbox"] {
   > span {
     padding-right: 10px;
   }
+}
+
+.mdi-clipboard-outline {
+  font-size: 18px;
+  position: absolute;
+  top: -3px;
+  right: 0px;
 }
 
 .close {
@@ -524,6 +577,28 @@ div:not(.tab-pane) {
   .table-container {
     margin: 0;
   }
+}
+
+.driver-meta {
+  cursor: help;
+  color: #4bbfaf;
+}
+
+td.meta-params {
+  padding: 0px;
+  border-top: 0px;
+  div.collapse {
+    margin: 8px;
+  }
+  th {
+    width: 300px;
+  }
+}
+
+td.mdi-account {
+  font-size: 22px;
+  float: left;
+  margin-right: 3px;
 }
 
 // *****************************************************************************
