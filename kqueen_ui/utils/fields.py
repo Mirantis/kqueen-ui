@@ -4,13 +4,15 @@ from wtforms import (
     PasswordField as WTPasswordField,
     SelectField as WTSelectField,
     StringField as WTStringField,
-    TextAreaField as WTTextAreaField
+    TextAreaField as WTTextAreaField,
+    FieldList as WTFieldList,
+    FormField as WTFormField,
+    Form as WTForm
 )
 from wtforms.fields.html5 import (
     EmailField as WTEmailField,
     IntegerField as WTIntegerField
 )
-
 import json
 import logging
 import yaml
@@ -115,3 +117,15 @@ class YamlFileField(EditableFileField):
                 msg = 'Provided file is not a YAML'
                 logger.exception(msg)
                 raise ValueError(msg)
+
+
+class ParamForm(WTForm):
+    param_key = StringField('Existent parameter name')
+    param_value = TextAreaField('New value')
+
+
+class ParametersField(SelectableMixin, WTFieldList):
+    def __init__(self, *args, **kwargs):
+        kwargs['unbound_field'] = WTFormField(ParamForm)
+        kwargs['min_entries'] = 1
+        super().__init__(*args, **kwargs)

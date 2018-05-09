@@ -1,5 +1,6 @@
 {% macro render_selectform(form, action='') %}
-<form id="switchableForm" method="post" action="{{ action }}" enctype="multipart/form-data">
+ <script src="{{ url_for('static', filename='js/fieldlist.js') }}"></script>
+ <form id="switchableForm" method="post" action="{{ action }}" enctype="multipart/form-data">
   {{ form.hidden_tag() }}
   {% set tagged_fields = [] %}
   {% set switch_fields = [] %}
@@ -118,27 +119,84 @@ document.addEventListener("DOMContentLoaded", function() {
 {% endmacro %}
 
 {% macro render_switchable_field(field) %}
+  {% if field.type == "ParametersField" %}
+    {{ render_multi_form_field(field) }}
+  {% else %}
+    <div
+      class="form-group {% if field.errors %}has-error{% endif %} hidden"
+      data-switchtag="{{ field.switchtag }}"
+    >
+      <label for="{{ field.id }}" class="control-label">{{ field.label }}</label>
+      <div class="field-group">
+        {{ field(class_="form-control " + (field.class_name if field.class_name else ""),
+                 placeholder=field.placeholder, accept=field.accept_files)|safe }}
+        {% if field.checkbox_text %}
+          <label for="{{ field.id }}" class="field-description">{{ field.checkbox_text }}</label>
+        {% endif %}
+        {% if field.read_from_file %}
+          <input type="file" class="form-control editable-data" id="input-{{ field.id }}" />
+        {% endif %}
+      </div>
+    {% if field.errors %}
+      <span class="help-block">
+      {% for error in field.errors %}
+        {{ error }}
+      {% endfor %}
+      </span>
+    {% endif %}
+  </div>
+  {% endif %}
+{% endmacro %}
+
+{% macro render_multi_form_field(field) %}
   <div
+    id="{{ field.name }}-fieldset"
     class="form-group {% if field.errors %}has-error{% endif %} hidden"
     data-switchtag="{{ field.switchtag }}"
   >
-    <label for="{{ field.id }}" class="control-label">{{ field.label }}</label>
-    <div class="field-group">
-      {{ field(class_="form-control " + (field.class_name if field.class_name else ""),
-               placeholder=field.placeholder, accept=field.accept_files)|safe }}
-      {% if field.checkbox_text %}
-        <label for="{{ field.id }}" class="field-description">{{ field.checkbox_text }}</label>
-      {% endif %}
-      {% if field.read_from_file %}
-        <input type="file" class="form-control editable-data" id="input-{{ field.id }}" />
-      {% endif %}
-    </div>
-  {% if field.errors %}
-    <span class="help-block">
-    {% for error in field.errors %}
-      {{ error }}
-    {% endfor %}
-    </span>
-  {% endif %}
+    {{ field.label }}
+    <button
+      type="button"
+      class="btn btn-xs btn-default add-field"
+      id="{{ field.name }}-fieldset-add-row"
+      data-toggle="tooltip"
+      title="Add new parameter"
+    >
+      <i class="mdi mdi-plus"></i>
+    </button>
+    <table class="fieldset-table">
+      {% for subform in field %}
+        <tr>
+          {% for subfield in subform %}
+            <th>{{ subfield.label }}</th>
+          {% endfor %}
+          <th></th>
+        </tr>
+      {% endfor %}
+      {% for subform in field %}
+        <tr data-toggle="fieldset-entry">
+          {% for subfield in subform %}
+            <td> {{ subfield(class="form-control")|safe }} </td>
+          {% endfor %}
+          <td>
+            <button
+              class="btn btn-xs btn-danger"
+              type="button"
+              data-toggle="tooltip"
+              title="Remove parameter"
+              id="{{ field.name }}-{{ loop.index0 }}-remove-row">
+              <i class="mdi mdi-minus"></i>
+            </button>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+    {% if field.errors %}
+      <span class="help-block">
+        {% for error in field.errors %}
+          {{ error }}
+        {% endfor %}
+      </span>
+    {% endif %}
   </div>
 {% endmacro %}

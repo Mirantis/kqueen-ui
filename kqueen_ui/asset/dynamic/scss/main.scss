@@ -423,6 +423,26 @@ label.error {
   box-shadow: inset 0px 0px 0px 0px white;
 }
 
+.fieldset-table {
+  margin: 15px;
+  td {
+    padding: 0 20px 10px 0;
+  }
+  th {
+    color: $gray;
+    label {
+      font-weight: 500;
+    }
+  }
+  textarea.form-control {
+    height: 38px;
+  }
+}
+
+button.add-field {
+  margin-left: 10px;
+}
+
 .editable-file {
   margin-bottom: 10px;
   max-width: 100%;
