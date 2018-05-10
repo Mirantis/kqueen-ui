@@ -357,6 +357,14 @@ label.error {
   font-size: 12px;
 }
 
+// Make the browse button fit an input in FF
+@-moz-document url-prefix() {
+  input[type="file"] {
+    padding: 2px 14px;
+    height: auto;
+  }
+}
+
 // *****************************************************************************
 // Table
 // *****************************************************************************
