@@ -65,7 +65,8 @@ gulp.task('vendor-js', function() {
                      'node_modules/jquery-asPieProgress/dist/jquery-asPieProgress.min.js',
                      'node_modules/jquery-validation/dist/jquery.validate.min.js',
                      'node_modules/pwstrength-bootstrap/dist/pwstrength-bootstrap.min.js',
-                     'node_modules/d3/d3.min.js', 
+                     'node_modules/d3/d3.min.js',
+                     'node_modules/js-yaml/dist/js-yaml.min.js',
                      bootstrapDir + '/assets/javascripts/bootstrap.min.js',
                      'node_modules/isotope-layout/dist/isotope.pkgd.min.js',
                      'node_modules/sweetalert/dist/sweetalert.min.js'])

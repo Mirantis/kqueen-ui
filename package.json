@@ -24,6 +24,7 @@
     "jquery": "1.9.1 - 2",
     "jquery-asPieProgress": "^0.4.7",
     "jquery-validation": "^1.17.0",
+    "js-yaml": "^3.11.0",
     "mdi": "^2.0.46",
     "os": "^0.1.1",
     "particles.js": "^2.0.0",

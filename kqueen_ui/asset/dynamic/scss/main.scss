@@ -348,6 +348,15 @@ label.error {
   box-shadow: inset 0px 0px 0px 0px white;
 }
 
+.editable-file {
+  margin-bottom: 10px;
+  max-width: 100%;
+  min-width: 100%;
+  min-height: 100px;
+  font-family: monospace;
+  font-size: 12px;
+}
+
 // *****************************************************************************
 // Table
 // *****************************************************************************

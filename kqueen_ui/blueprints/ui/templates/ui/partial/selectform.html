@@ -30,59 +30,61 @@ document.addEventListener("DOMContentLoaded", function() {
 {% endif %}
 {% if tagged_fields|length > 0 %}
 <script>
-function validateJsonFileField(value, element, requiredKeys) {
-  var file = element.files[0],
-      reader = new FileReader(),
-      valid = false;
-
-  reader.onload = function(evt) {
-    var data = evt.target.result;
-    var json = 'error';
-    var message = 'Validation pending'
-    try {
-      json = JSON.parse(data);
-    } catch(err) {
-      message = 'Not a valid JSON'
-      console.log(err);
-    }
-    if (json != 'error') {
-      var missingKeys = [];
-      var countKeys = 0;
-      requiredKeys.forEach(function(key) {
-        contains = Object.keys(json).indexOf(key) != -1;
-        if ( contains ) {
-          countKeys++;
-        } else {
-          missingKeys.push(key);
-        }
-      });
-      if ( countKeys != requiredKeys.length ) {
-        message = 'Missing mandatory keys: ' + missingKeys.toString();
+function validateFileField(element, requiredKeys, parser, validationFailedMessage) {
+  var data = 'error',
+      message = 'Validation failed',
+      isValid = false;
+  try {
+    data = parser(element.value);
+  } catch(err) {
+    var message = err.reason || err.message;
+    message = validationFailedMessage + (message ? (' (' + message + ')') : '');
+    console.log(err);
+  }
+  if (!(data instanceof Object) && message === 'Validation failed') {
+    message = validationFailedMessage;
+  } else if (data !== 'error' && data instanceof Object) {
+    var missingKeys = [],
+        countKeys = 0;
+    requiredKeys.forEach(function(key) {
+      if (key in data) {
+        countKeys++;
+      } else {
+        missingKeys.push(key);
       }
-      valid = true;
+    });
+    if (countKeys !== requiredKeys.length) {
+      message = 'Missing mandatory keys: ' + missingKeys.join(', ');
     } else {
-      valid = false;
+      isValid = true;
     }
-    var validator = $("#switchableForm").data().validator
-    if ( valid ) {
-        var submitted = validator.formSubmitted;
-        validator.resetInternals();
-        validator.toHide = validator.errorsFor( element );
-        validator.formSubmitted = submitted;
-        validator.successList.push( element );
-        validator.invalid[ element.name ] = false;
-        validator.showErrors();
-    } else {
-        errors = {};
-        errors[ element.name ] =  message;
-        validator.invalid[ element.name ] = true;
-        validator.showErrors( errors );
-    }
-    validator.stopRequest( element, valid );
-  };
-  reader.readAsText(file)
+  }
+  var validator = $("#switchableForm").data().validator;
+  if (isValid) {
+      $(element).parent().parent('.form-group').removeClass('has-error');
+      var submitted = validator.formSubmitted;
+      validator.resetInternals();
+      validator.toHide = validator.errorsFor(element);
+      validator.formSubmitted = submitted;
+      validator.successList.push(element);
+      validator.invalid[element.name] = false;
+      validator.showErrors();
+  } else {
+      $(element).parent().parent('.form-group').addClass('has-error');
+      var errors = {[element.name]: message};
+      validator.invalid[element.name] = true;
+      validator.showErrors(errors);
+  }
+  validator.stopRequest(element, isValid);
+  return 'pending';
+}
 
-  return "pending";
+function validateYamlFileField(value, element, requiredKeys) {
+  return validateFileField(element, requiredKeys, (d) => jsyaml.safeLoad(d), 'Not a valid YAML');
+}
+
+function validateJsonFileField(value, element, requiredKeys) {
+  return validateFileField(element, requiredKeys, (d) => JSON.parse(d), 'Not a valid JSON');
 }
 
 function validateFieldByRegexp(value, element, regexp) {
@@ -91,6 +93,7 @@ function validateFieldByRegexp(value, element, regexp) {
 
 document.addEventListener("DOMContentLoaded", function() {
   $.validator.addMethod("jsonfile", validateJsonFileField, $.validator.format("Test validation"));
+  $.validator.addMethod("yamlfile", validateYamlFileField, $.validator.format("Test validation"));
   $.validator.addMethod("regexp", validateFieldByRegexp, $.validator.format("Invalid value."));
 
   $("#switchableForm").validate({
@@ -131,6 +134,23 @@ document.addEventListener("DOMContentLoaded", function() {
       policySelect.prop('disabled', false);
     }
   });
+
+  // Put selected file contents into the corresponding textarea
+  $('input[type="file"].editable-data').bind('change', function () {
+    var textarea = $('#' + $(this).attr('id').slice('input-'.length)),
+        files = $(this).prop('files');
+
+    if (files.length) {
+      var reader = new FileReader();
+      reader.onload = function(evt) {
+        var data = evt.target.result;
+        if (data) {
+          textarea.val(data);
+        }
+      };
+      reader.readAsText(files[0]);
+    }
+  });
 });
 
 </script>
@@ -162,6 +182,9 @@ document.addEventListener("DOMContentLoaded", function() {
                placeholder=field.placeholder)|safe }}
       {% if field.checkbox_text %}
         <label for="{{ field.id }}" class="field-description">{{ field.checkbox_text }}</label>
+      {% endif %}
+      {% if field.read_from_file %}
+        <input type="file" class="form-control editable-data" id="input-{{ field.id }}" />
       {% endif %}
     </div>
   {% if field.errors %}
