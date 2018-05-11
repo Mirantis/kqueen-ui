@@ -5,13 +5,9 @@
 {% endmacro %}
 
 {% macro render_cluster_row_actions(cluster) %}
-  {% set detail_url = url_for('ui.cluster_detail', cluster_id=cluster.id) %}
   {% set cant_get = not is_authorized(session, 'cluster:get', cluster) %}
   {% set delete_url = url_for('ui.cluster_delete', cluster_id=cluster.id) %}
   {% set cant_delete = ( cluster.state == config.CLUSTER_PROVISIONING_STATE or not is_authorized(session, 'cluster:delete', cluster) ) %}
-  <a href="{{ detail_url }}"{% if cant_get %} class="disabled"{% endif %} title="Cluster detail">
-    <i class="mdi mdi-file-document-box"></i>
-  </a>
   <a data-target="{{ delete_url }}" data-name="cluster {{ cluster.name }}" class="confirm-delete{% if cant_delete %} disabled{% endif %}" title="Delete cluster">
     <i class="mdi mdi-delete-forever"></i>
   </a>

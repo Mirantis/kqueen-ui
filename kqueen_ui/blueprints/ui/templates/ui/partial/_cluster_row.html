@@ -1,10 +1,20 @@
 {% from "ui/partial/tableaction.html" import render_cluster_row_actions with context %}
 
 {% macro render_cluster_row(cluster, index) %}
-        <tr {% if cluster.state in config.CLUSTER_TRANSIENT_STATES %} class="in-transition" data-href="{{ url_for('ui.cluster_row', cluster_id=cluster.id, index=index)  }}"{% endif %} data-index="{{ index }}" data-status="{{ cluster.state }}">
+        {% set is_in_progress = cluster.state in config.CLUSTER_TRANSIENT_STATES %}
+        <tr
+          class="clickable{% if is_in_progress %} in-transition{% endif %}"
+          data-index="{{ index }}"
+          data-status="{{ cluster.state }}"
+          data-href="{{ url_for('ui.cluster_detail', cluster_id=cluster.id) }}"
+        >
           <td class="table-col-4">
             {% if is_authorized(session, 'cluster:get', cluster) %}
-            <a href="{{ url_for('ui.cluster_detail', cluster_id=cluster.id) }}">{{ cluster.name }}</a>
+            <div class="cluster-name">
+              <a href="{{ url_for('ui.cluster_detail', cluster_id=cluster.id) }}">
+                {{ cluster.name }}
+              </a>
+            </div>
             {% else %}
             {{ cluster.name }}
             {% endif %}
