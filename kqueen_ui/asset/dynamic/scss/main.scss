@@ -468,6 +468,12 @@ label.error {
       width: 180px;
     }
   }
+  .containers {
+    word-wrap: break-word;
+    li {
+      margin-bottom: 3px;
+    }
+  }
 }
 
 div:not(.tab-pane) {
