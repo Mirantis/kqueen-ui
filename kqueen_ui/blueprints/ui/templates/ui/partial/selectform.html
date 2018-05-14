@@ -30,71 +30,11 @@ document.addEventListener("DOMContentLoaded", function() {
 {% endif %}
 {% if tagged_fields|length > 0 %}
 <script>
-function validateFileField(element, requiredKeys, parser, validationFailedMessage) {
-  var data = 'error',
-      message = 'Validation failed',
-      isValid = false;
-  try {
-    data = parser(element.value);
-  } catch(err) {
-    var message = err.reason || err.message;
-    message = validationFailedMessage + (message ? (' (' + message + ')') : '');
-    console.log(err);
-  }
-  if (!(data instanceof Object) && message === 'Validation failed') {
-    message = validationFailedMessage;
-  } else if (data !== 'error' && data instanceof Object) {
-    var missingKeys = [],
-        countKeys = 0;
-    requiredKeys.forEach(function(key) {
-      if (key in data) {
-        countKeys++;
-      } else {
-        missingKeys.push(key);
-      }
-    });
-    if (countKeys !== requiredKeys.length) {
-      message = 'Missing mandatory keys: ' + missingKeys.join(', ');
-    } else {
-      isValid = true;
-    }
-  }
-  var validator = $("#switchableForm").data().validator;
-  if (isValid) {
-      $(element).parent().parent('.form-group').removeClass('has-error');
-      var submitted = validator.formSubmitted;
-      validator.resetInternals();
-      validator.toHide = validator.errorsFor(element);
-      validator.formSubmitted = submitted;
-      validator.successList.push(element);
-      validator.invalid[element.name] = false;
-      validator.showErrors();
-  } else {
-      $(element).parent().parent('.form-group').addClass('has-error');
-      var errors = {[element.name]: message};
-      validator.invalid[element.name] = true;
-      validator.showErrors(errors);
-  }
-  validator.stopRequest(element, isValid);
-  return 'pending';
-}
-
-function validateYamlFileField(value, element, requiredKeys) {
-  return validateFileField(element, requiredKeys, (d) => jsyaml.safeLoad(d), 'Not a valid YAML');
-}
-
-function validateJsonFileField(value, element, requiredKeys) {
-  return validateFileField(element, requiredKeys, (d) => JSON.parse(d), 'Not a valid JSON');
-}
-
-function validateFieldByRegexp(value, element, regexp) {
-  return new RegExp(regexp).test(value);
-}
-
 document.addEventListener("DOMContentLoaded", function() {
   $.validator.addMethod("jsonfile", validateJsonFileField, $.validator.format("Test validation"));
   $.validator.addMethod("yamlfile", validateYamlFileField, $.validator.format("Test validation"));
-  $.validator.addMethod("regexp", validateFieldByRegexp, $.validator.format("Invalid value."));
+  $.validator.addMethod(
+    "cidr", validateFieldIsIpCidr, $.validator.format("Value doesn't match CIDR format."));
 
   $("#switchableForm").validate({
     rules: {
@@ -152,7 +92,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 });
-
 </script>
 {% endif %}
 {% endmacro %}
@@ -179,7 +118,7 @@ document.addEventListener("DOMContentLoaded", function() {
     <label for="{{ field.id }}" class="control-label">{{ field.label }}</label>
     <div class="field-group">
       {{ field(class_="form-control " + (field.class_name if field.class_name else ""),
-               placeholder=field.placeholder)|safe }}
+               placeholder=field.placeholder, accept=field.accept_files)|safe }}
       {% if field.checkbox_text %}
         <label for="{{ field.id }}" class="field-description">{{ field.checkbox_text }}</label>
       {% endif %}

@@ -31,21 +31,14 @@ $(document).ready(function() {
         location.hash = this.getAttribute("data-tabcode");
     });
 
-    // Hide flash message after 3 seconds
+    // Hide flash message after 7 seconds
     setTimeout(function () {
-        $(".alert.fade").alert('close');
-    }, 5000);
+      $(".alert.fade").alert('close');
+    }, 7000);
 
-    $.validator.addMethod(
-        "uuid",
-	function(value, element, condition) {
-	    var result  = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
-	    return this.optional(element) || result == condition
-	},
-	"Entered value is not a valid UUID."
-    );
-
+    $.validator.addMethod('uuid', validateFieldIsUuid, 'Entered value is not a valid UUID.');
 });
+
 $(window).on("popstate", function() {
     var anchor = location.hash;
     if (location.hash) {

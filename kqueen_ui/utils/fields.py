@@ -62,6 +62,7 @@ class JsonFileField(EditableFileField):
     def __init__(self, *args, **kwargs):
         super(JsonFileField, self).__init__(*args, **kwargs)
         self._data = ''  # string representation of loaded json
+        self.accept_files = '.json'
 
     def _value(self):
         return self._data
