@@ -267,24 +267,24 @@ def sanitize_resource_metadata(session, clusters, provisioners):
     healthy_provisioners = 0
 
     if not engines:
-        abort = False
+        error = False
         if token:
             client = get_kqueen_client(token=token)
         else:
-            abort = True
+            error = True
         if client:
             engines_res = client.provisioner.engines()
             if engines_res.status > 200:
-                abort = True
+                error = True
             else:
                 engines = engines_res.data
                 cache.set('provisioner-engines', engines, timeout=5 * 60)
-        if abort:
+        if error:
             for cluster in clusters:
                 cluster['metadata'] = {}
             for provisioner in provisioners:
                 provisioner['parameters'] = {}
-            return clusters, provisioners
+            engines = []
 
     # sort clusters by date
     if isinstance(clusters, list):
