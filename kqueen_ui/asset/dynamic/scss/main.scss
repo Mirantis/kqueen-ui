@@ -109,25 +109,47 @@ a, input[type="checkbox"] {
 // Tabs
 // *****************************************************************************
 
+.nav-tabs {
+  border-bottom: 0;
+  li {
+    margin-bottom: -2px;
+    a {
+      border: none;
+      &:hover {
+      padding: 10px 15px 8px 15px;
+    }
+    }
+  }
+  li.active {
+    border: none;
+  }
+}
+
 .nav-tabs > li.active > a {
   background-color: #fff;
+  border: none;
   @include prefix(box-shadow, -1px -1px 4px -2px rgba(187,187,187,1), webkit moz);
   &:hover,
   &:focus,
   &:active {
     background-color: #fff;
-    border-bottom-color: transparent;
+    border: none;
+  }
+  &:hover {
+    @include prefix(box-shadow, -1px -1px 4px -2px rgba(187,187,187,1), webkit moz);
   }
 }
 
 .tab-content {
   padding: 12px 24px;
   background-color: #fff;
-  border: 1px solid #ddd;
-  border-top-color: transparent;
-  @include prefix(box-shadow, 1px 1px 4px -1px rgba(187,187,187,1), webkit moz);
+  @include prefix(box-shadow, 0px 1px 4px -1px rgba(187,187,187,1), webkit moz);
   .tab-pane h3 {
     margin-top: 10px;
+  }
+  h3 {
+    margin: 0;
+    padding: 0;
   }
 }
 
@@ -370,7 +392,6 @@ label.error {
 // *****************************************************************************
 
 .table-container {
-  margin: 20px 0px 50px 0px;
   .table-actions {
     padding-bottom: 24px;
     text-align: right;
@@ -490,6 +511,12 @@ div:not(.tab-pane) {
 #table-provisionerparams {
   > tbody > tr td {
     word-break: break-word;
+  }
+}
+
+.dashboard-tab {
+  .table-container {
+    margin: 0;
   }
 }
 
