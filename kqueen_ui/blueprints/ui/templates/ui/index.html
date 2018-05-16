@@ -154,9 +154,7 @@ jQuery(document).ready(function($){
   initPieProgress();
   $('.pie_progress').asPieProgress('start');
 });
-</script>
 
-<script>
 setInterval(function(){
   $('table > tbody > tr.in-transition').each(function(){
     var row = $(this),
@@ -184,5 +182,14 @@ setInterval(function(){
     });
   });
 }, 15000);
+
+$(document).ready(function() {
+  $('tr.clickable').click(function(e) {
+    if (e.target.tagName === 'TD') {
+      var link = $(this).data('href');
+      if (link) window.location = link;
+    }
+  });
+});
 </script>
 {% endblock %}
