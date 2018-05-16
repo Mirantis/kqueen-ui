@@ -219,11 +219,11 @@
           <tr>
             <td>{{ node.name }}</td>
             <td>
-              <ul>
+              <div>
                 {% for ip in node.ip %}
-                  <li>{{ ip }}</li>
+                  <div>{{ ip }}</div>
                 {% endfor %}
-              </ul>
+              </div>
             </td>
             <td>{{ node.os.os }}<br>{{ node.os.kernel }}</td>
             <td>
@@ -231,9 +231,9 @@
             </td>
             <td class="status_column">
               {% for status in node.status %}
-              <abbr title="{{ status.type }}">
-                <i class="mdi {{ status.icon }} mdi-large" aria-hidden="true"></i>
-              </abbr>
+              <div title="{{ 'OK' if status.health == 'success' else 'Error' }}">
+                <span class="label label-{{ status.health }}">{{ status.type }}</span>
+              </div>
               {% endfor %}
             </td>
             <td class="action_column">
@@ -273,11 +273,9 @@
               </div>
             </td>
             <td class="containers">
-              <ul>
-                {% for container in deployment.containers %}
-                <li><b>{{ container.name }}</b> {{ container.image }}</li>
-                {% endfor %}
-              </ul>
+              {% for container in deployment.containers %}
+              <div><b>{{ container.name }}</b> {{ container.image }}</div>
+              {% endfor %}
             </td>
           </tr>
           {% else %}
@@ -306,11 +304,9 @@
             <td>{{ service.namespace }}</td>
             <td><a href="http://{{ service.cluster_ip }}">{{ service.cluster_ip }}</a></td>
             <td>
-              <ul>
-                {% for port in service.ports %}
-                <li>{{ port }}</li>
-                {% endfor %}
-              </ul>
+              {% for port in service.ports %}
+              <div>{{ port }}</div>
+              {% endfor %}
             </td>
             <td>
               <ul>
