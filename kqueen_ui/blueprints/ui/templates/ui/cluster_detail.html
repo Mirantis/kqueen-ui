@@ -206,7 +206,7 @@
             <th>OS</th>
             <th>Size</th>
             <th class="status_column">Status</th>
-            <th colspan=2 class="action_column">Pods</th>
+            <th class="action_column">Pods</th>
           </tr>
         </thead>
         <tbody>
@@ -265,7 +265,7 @@
                 <div class="ui-progress-bar" style="width: {{ deployment.replicas.percentage }}%;"></div>
               </div>
             </td>
-            <td>
+            <td class="containers">
               <ul>
                 {% for container in deployment.containers %}
                 <li><b>{{ container.name }}</b> {{ container.image }}</li>
