@@ -18,7 +18,12 @@
           <td class="status_column"><i class="mdi {{ provisioner.state|provisioner_status_icon_class }}" title="{{ provisioner.state }}"></i></td>
           <td class="action_column">
             {% if provisioner.parameters %}
-            <a data-toggle="collapse" data-target="#provisioner-{{ loop.index }}" class="clickable" title="More information">
+            <a
+              data-toggle="collapse"
+              data-target="#provisioner-{{ loop.index }}"
+              class="clickable"
+              title="More information"
+            >
               <i class="mdi mdi-information-outline"></i>
             </a>
             {% endif %}
@@ -26,13 +31,13 @@
         </tr>
         {% if provisioner.parameters %}
         <tr>
-          <td colspan="5" style="padding: 0px; border-top: 0px;">
-            <div style="margin: 8px;" id="provisioner-{{ loop.index }}" class="collapse">
+          <td colspan="5" class="meta-params">
+            <div id="provisioner-{{ loop.index }}" class="collapse">
               <table class="table table-hover no-actions" id="table-provisionerparams">
                 <tbody>
                   {% for key, value in provisioner.parameters.items() %}
                   <tr>
-                    <th style="width: 300px;">{{ key }}</th>
+                    <th>{{ key }}</th>
                     <td>{{ value }}</td>
                   </tr>
                   {% endfor %}
@@ -43,7 +48,7 @@
         </tr>
         {% endif %}
       {% else %}
-        <tr style="pointer-events: none;"><td colspan="6" class="text-center">No Items</td></tr>
+        <tr class="not-event-pointer"><td colspan="6" class="text-center">No Items</td></tr>
       {% endfor %}
     </tbody>
   </table>

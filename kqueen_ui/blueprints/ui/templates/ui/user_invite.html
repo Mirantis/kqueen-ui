@@ -5,7 +5,9 @@
 
 {% block breadcrumb %}
 <li class="breadcrumb-item">
-  <a href="{{ url_for('ui.organization_manage', organization_id=session.user.organization.id) }}">Manage {{ session.user.organization.name }}</a>
+  <a href="{{ url_for('ui.organization_manage', organization_id=session.user.organization.id) }}">
+    Manage {{ session.user.organization.name }}
+  </a>
 </li>
 <li class="breadcrumb-item active">Invite Member</li>
 {% endblock %}

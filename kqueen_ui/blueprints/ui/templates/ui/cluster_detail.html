@@ -74,9 +74,9 @@
 
   <div class="row cluster-status">
     <div class="col-sm-6" id="state">
-      <a class="btn btn-{{ state_class }} btn-xs" style="pointer-events: none;">
+      <button class="btn btn-{{ state_class }} btn-xs not-event-pointer">
         State: {{ cluster.state }}
-      </a>
+      </button>
     </div>
     <div class="col-sm-6" id="progress">
       {% if cluster.state in config.CLUSTER_TRANSIENT_STATES %}
@@ -102,10 +102,9 @@
   {% set policy = cluster.get('metadata', {}).get('network_policy', {}) %}
   <div class="col-sm-3">
     {% if not_ok_state %}
-      <a href="#" class="btn btn-primary btn-xs disabled">Kubeconfig N/A</a>
+      <button class="btn btn-primary btn-xs disabled">Kubeconfig N/A</button>
     {% else %}
       <a
-        target="_blank"
         href="{{ url_for('ui.cluster_kubeconfig', cluster_id=cluster.id) }}"
         class="btn btn-primary btn-xs"
       >
@@ -122,7 +121,7 @@
     >
       <div class="scaleformbox">
         {% if not_ok_state %}
-        <a class="btn btn-primary btn-xs disabled" id="scalebtn">Scale Nodes N/A</a>
+        <button class="btn btn-primary btn-xs disabled" id="scalebtn">Scale Nodes N/A</button>
         {% else %}
         <div class="btn btn-primary btn-xs" id="scalebtn">Scale Nodes</div>
         <div class="input-group" id="scaleinput">
@@ -136,7 +135,7 @@
             class="form-control"
           >
           <span class="input-group-btn">
-            <input class="btn btn-primary" type="submit" value="&#10004;">
+            <button class="btn btn-primary" type="submit">&#10004;</button>
           </span>
         </div>
         {% endif %}
@@ -186,10 +185,16 @@
 </div>
 
 <ul class="nav nav-tabs{% if not_ok_state %} hidden{% endif %}">
-  <li role="presentation" class="active"><a data-toggle="tab" href="#status" data-tabcode="#statusTab">Status</a></li>
-  <li role="presentation"><a data-toggle="tab" href="#topology" data-tabcode="#topologyTab">Topology</a></li>
+  <li role="presentation" class="active">
+    <a data-toggle="tab" href="#status" data-tabcode="#statusTab">Status</a>
+  </li>
+  <li role="presentation">
+    <a data-toggle="tab" href="#topology" data-tabcode="#topologyTab">Topology</a>
+  </li>
   {% if config.ENABLE_ADDONS %}
-  <li role="presentation"><a data-toggle="tab" href="#addons" data-tabcode="#addonsTab">Addons</a></li>
+  <li role="presentation">
+    <a data-toggle="tab" href="#addons" data-tabcode="#addonsTab">Addons</a>
+  </li>
   {% endif %}
 </ul>
 
@@ -226,7 +231,9 @@
             </td>
             <td class="status_column">
               {% for status in node.status %}
-              <abbr title="{{ status.type }}"><i class="mdi {{ status.icon }}" style="font-size: 18px;" aria-hidden="true"></i></abbr>
+              <abbr title="{{ status.type }}">
+                <i class="mdi {{ status.icon }} mdi-large" aria-hidden="true"></i>
+              </abbr>
               {% endfor %}
             </td>
             <td class="action_column">
@@ -237,7 +244,7 @@
             </td>
           </tr>
           {% else %}
-          <tr style="pointer-events: none;"><td colspan="6" class="text-center">No Items</td></tr>
+          <tr class="not-event-pointer"><td colspan="6" class="text-center">No Items</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -274,7 +281,7 @@
             </td>
           </tr>
           {% else %}
-          <tr style="pointer-events: none;"><td colspan="4" class="text-center">No Items</td></tr>
+          <tr class="not-event-pointer"><td colspan="4" class="text-center">No Items</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -308,10 +315,14 @@
             <td>
               <ul>
                 {% for external_ip in service.external_ip %}
-                <li style="position: relative;">
+                <li class="external-ip">
                   <a href="{{ external_ip }}">{{ external_ip|truncate(24, True) }}</a>
-                  <a title="Copy to clipboard" class="clipboard pull-right" style="cursor: pointer;" data-clipboard-text="{{ external_ip }}">
-                    <i class="mdi mdi-clipboard-outline" style="font-size: 18px; position: absolute; top: -3px; right: 0px;"></i>
+                  <a
+                    title="Copy to clipboard"
+                    class="clipboard pull-right"
+                    data-clipboard-text="{{ external_ip }}"
+                  >
+                    <i class="mdi mdi-clipboard-outline"></i>
                   </a>
                 </li>
                 {% endfor %}
@@ -319,7 +330,7 @@
             </td>
           </tr>
           {% else %}
-          <tr style="pointer-events: none;"><td colspan="6" class="text-center">No Items</td></tr>
+          <tr class="not-event-pointer"><td colspan="6" class="text-center">No Items</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -343,7 +354,7 @@
             <td>{{ image.size_bytes }}</td>
           </tr>
           {% else %}
-          <tr style="pointer-events: none;"><td colspan="6" class="text-center">No Items</td></tr>
+          <tr class="not-event-pointer"><td colspan="6" class="text-center">No Items</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -374,8 +385,8 @@
           </tr>
           {% if pvc.volume %}
           <tr>
-            <td colspan="7" style="padding: 0px;">
-              <div style="margin: 8px;"id="pvc-{{ loop.index }}" class="collapse">
+            <td colspan="7" class="pvc-volume">
+              <div id="pvc-{{ loop.index }}" class="collapse">
                 <table class="table table-hover no-actions" id="table-pv">
                   <tbody>
                     <tr>
@@ -393,12 +404,14 @@
                     <tr>
                       <th>Driver</th>
                       <td>
-                        <span title="Driver Metadata"
-                              style="cursor: help; color: #4bbfaf;"
-                              data-html="true"
-                              data-toggle="popover"
-                              data-trigger="hover"
-                              data-content="<ul>{% for key, value in pvc.volume.driver.metadata.items() %}<li>{{ key }}: {{value}}</li>{% endfor %}</ul>">
+                        <span
+                          title="Driver Metadata"
+                          class="driver-meta"
+                          data-html="true"
+                          data-toggle="popover"
+                          data-trigger="hover"
+                          data-content="<ul>{% for key, value in pvc.volume.driver.metadata.items() %}<li>{{ key }}: {{value}}</li>{% endfor %}</ul>"
+                        >
                           {{ pvc.volume.driver.name }}
                         </span>
                       </td>
@@ -426,7 +439,7 @@
           </tr>
           {% endif %}
           {% else %}
-          <tr style="pointer-events: none;"><td colspan="7" class="text-center">No Items</td></tr>
+          <tr class="not-event-pointer"><td colspan="7" class="text-center">No Items</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -455,12 +468,14 @@
               {% if volume.driver.name == '-' %}
               {{ volume.driver.name }}
               {% else %}
-              <span title="Driver Metadata"
-                    style="cursor: help; color: #4bbfaf;"
-                    data-html="true"
-                    data-toggle="popover"
-                    data-trigger="hover"
-                    data-content="<ul>{% for key, value in volume.driver.metadata.items() %}<li>{{ key }}: {{value}}</li>{% endfor %}</ul>">
+              <span
+                title="Driver Metadata"
+                class="driver-meta"
+                data-html="true"
+                data-toggle="popover"
+                data-trigger="hover"
+                data-content="<ul>{% for key, value in volume.driver.metadata.items() %}<li>{{ key }}: {{value}}</li>{% endfor %}</ul>"
+              >
                 {{ volume.driver.name }}
               </span>
               {% endif %}
@@ -471,7 +486,7 @@
             <td>{{ volume.deletion_timestamp }}</td>
           </tr>
           {% else %}
-          <tr style="pointer-events: none;"><td colspan="8" class="text-center">No Items</td></tr>
+          <tr class="not-event-pointer"><td colspan="8" class="text-center">No Items</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -519,32 +534,47 @@
           <svg class="kindInfo" data-kind="Pod">
             <use xlink:href="#vertex-Pod" x="15" y="15"></use>
           </svg>
-          <div>Pods <br/><input class="topology-filter-checkbox" type="checkbox" name="pods" checked></div>
+          <div>
+            Pods <br/>
+            <input class="topology-filter-checkbox" type="checkbox" name="pods" checked />
+          </div>
         </div>
         <div>
           <svg class="kindInfo" data-kind="Service">
             <use xlink:href="#vertex-Service" x="15" y="15"></use>
           </svg>
-          <div>Services <br/><input class="topology-filter-checkbox" type="checkbox" name="services" checked></div>
+          <div>
+            Services <br/>
+            <input class="topology-filter-checkbox" type="checkbox" name="services" checked />
+          </div>
         </div>
         <div>
           <svg class="kindInfo" data-kind="Node">
             <use xlink:href="#vertex-Node" x="15" y="15"></use>
           </svg>
-          <div>Nodes <br/><input class="topology-filter-checkbox" type="checkbox" name="nodes" checked></div>
+          <div>
+            Nodes <br/>
+            <input class="topology-filter-checkbox" type="checkbox" name="nodes" checked />
+          </div>
         </div>
         <br>
         <div>
           <svg class="kindInfo" data-kind="Deployment">
             <use xlink:href="#vertex-Deployment" x="15" y="15"></use>
           </svg>
-          <div>Deploys <br/><input class="topology-filter-checkbox" type="checkbox" name="deploys" checked></div>
+          <div>
+            Deploys <br/>
+            <input class="topology-filter-checkbox" type="checkbox" name="deploys" checked />
+          </div>
         </div>
         <div>
           <svg class="kindInfo" data-kind="Namespace">
             <use xlink:href="#vertex-Namespace" x="15" y="15"></use>
           </svg>
-          <div>Namespaces <br/><input class="topology-filter-checkbox" type="checkbox" name="namespaces" checked></div>
+          <div>
+            Namespaces <br/>
+            <input class="topology-filter-checkbox" type="checkbox" name="namespaces" checked />
+          </div>
         </div>
 
       </div>
@@ -565,11 +595,13 @@
     <h3>Active Addons</h3>
     <div class="filter-box clearfix">
       <div id="filters" class="btn-group btn-group-sm" role="group">
-        <a class="btn btn-default" data-filter="*">All</a>
+        <button class="btn btn-default" data-filter="*">All</button>
         {% set tags = ['-'] %}
         {% for addon in status.addons if addon.get(tag, '-') not in tags %}
         {% set tags = tags + [addon.tag] %}
-        <a class="btn btn-default" data-filter=".{{ addon.tag }}">{{ addon.tag|capitalize }}</a>
+        <button class="btn btn-default" data-filter=".{{ addon.tag }}">
+          {{ addon.tag|capitalize }}
+        </button>
         {% endfor %}
       </div>
     </div>
@@ -584,7 +616,7 @@
       {% endfor %}
     </div>
     <h3>Manage Resources</h3>
-    <div style="padding: 10px 0px;">
+    <div class="manage-resources">
       {{ render_form(form) }}
     </div>
   </div>
