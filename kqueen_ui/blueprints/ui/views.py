@@ -611,6 +611,15 @@ class ClusterCreate(KQueenView):
                     in form._fields.items()
                     if (hasattr(v, 'switchtag') and v.switchtag) and form.provisioner.data in k
                 }
+                if 'override_parameters' in metadata.keys():
+                    override_params = {
+                        d['param_key']: d['param_value'] for d in metadata['override_parameters']
+                        if d['param_key'] != ''
+                    }
+                    if override_params:
+                        metadata['override_parameters'] = override_params
+                    else:
+                        del metadata['override_parameters']
             except Exception as e:
                 user_logger.exception('{}:{}'.format(user_prefix(session), e))
                 flash('Invalid cluster metadata.', 'danger')

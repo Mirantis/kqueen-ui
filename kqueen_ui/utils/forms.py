@@ -10,7 +10,8 @@ from kqueen_ui.utils.fields import (
     SelectField,
     StringField,
     TextAreaField,
-    YamlFileField
+    YamlFileField,
+    ParametersField
 )
 
 
@@ -24,7 +25,8 @@ TYPE_MAP = {
     'select': SelectField,
     'text': StringField,
     'text_area': TextAreaField,
-    'yaml_file': YamlFileField
+    'yaml_file': YamlFileField,
+    'parameters': ParametersField
 }
 
 
@@ -69,5 +71,5 @@ class FlaskExtendableForm(FlaskForm):
                     if field in field_params:
                         field_kwargs[field] = field_params[field]
 
-                field = field_class(label, **field_kwargs)
+                field = field_class(label=label, **field_kwargs)
                 setattr(cls, field_name, field)

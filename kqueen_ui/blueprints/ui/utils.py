@@ -259,6 +259,7 @@ def generate_password(length=20):
 def sanitize_resource_metadata(session, clusters, provisioners):
     from kqueen_ui import cache
 
+    safe_types = ['text', 'integer', 'select', 'parameters']
     token = session.get('user', {}).get('token', None)
     client = None
     engines = cache.get('provisioner-engines')
@@ -306,7 +307,7 @@ def sanitize_resource_metadata(session, clusters, provisioners):
             continue
         engine_params = _engine_params[0].get('cluster')
         for param_name, param in engine_params.items():
-            if param['type'] not in ['text', 'integer', 'select']:
+            if param['type'] not in safe_types:
                 try:
                     cluster['metadata'][param_name] = '*****************'
                 except KeyError:
@@ -331,7 +332,7 @@ def sanitize_resource_metadata(session, clusters, provisioners):
             continue
         engine_params = _engine_params[0].get('provisioner')
         for param_name, param in engine_params.items():
-            if param['type'] not in ['text', 'integer', 'select']:
+            if param['type'] not in safe_types:
                 try:
                     provisioner['parameters'][param_name] = '*****************'
                 except KeyError:
