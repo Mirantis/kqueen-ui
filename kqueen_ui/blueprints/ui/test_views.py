@@ -118,13 +118,13 @@ def test_provisioner_create(client_login):
     }
     response = client_login.post(url_for('ui.provisioner_create'), data=form_data)
     assert response.status_code == 302
-    assert response.headers['Location'].endswith(url_for('ui.index'))
+    assert response.headers['Location'].endswith(url_for('ui.index', _anchor='provisionersTab'))
 
 
 def test_provisioner_delete(client_login, provisioner):
     response = client_login.get(url_for('ui.provisioner_delete', provisioner_id=provisioner['id']))
     assert response.status_code == 302
-    assert response.headers['Location'].endswith(url_for('ui.index'))
+    assert response.headers['Location'].endswith(url_for('ui.index', _anchor='provisionersTab'))
 
 
 def test_cluster_create(client_login, provisioner):

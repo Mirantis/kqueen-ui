@@ -536,7 +536,7 @@ class ProvisionerCreate(KQueenView):
             msg = 'Provisioner {} created.'.format(provisioner['name'])
             user_logger.debug('{}:{}'.format(user_prefix(session), msg))
             flash(msg, 'success')
-            return redirect(url_for('ui.index'))
+            return redirect(url_for('ui.index', _anchor='provisionersTab'))
         return render_template('ui/provisioner_create.html', form=form)
 
 
@@ -561,7 +561,7 @@ class ProvisionerDelete(KQueenView):
             user_logger.debug('{}:{}'.format(user_prefix(session), msg))
             flash(msg, 'warning')
 
-        return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
+        return redirect(url_for('ui.index', _anchor='provisionersTab'))
 
 
 ui.add_url_rule('/provisioners/create', view_func=ProvisionerCreate.as_view('provisioner_create'))
