@@ -155,7 +155,7 @@
       $(window).bind('beforeunload', function(){
         setTimeout(function(){
           $('body').css('overflow', 'hidden');
-          $('.loading-backdrop').css('display', 'initial');
+          $('.loading-backdrop').removeClass('hidden');
           {% if config.PRELOADER == 'hexagon' %}
           particlesJS.load('particles', "{{ url_for('static', filename='js/particles.json') }}");
           {% endif %}
