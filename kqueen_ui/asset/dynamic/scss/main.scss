@@ -464,6 +464,12 @@ button.add-field {
 // Table
 // *****************************************************************************
 
+table {
+  tbody {
+    word-wrap: break-word;
+  }
+}
+
 .table-container {
   .table-actions {
     padding-bottom: 24px;
@@ -472,8 +478,27 @@ button.add-field {
   .table {
     @include table-col-x;
     .status_column {
-      @extend .text-right;
-      width: 120px;
+      width: 160px;
+      div {
+        margin-bottom: 2px;
+        .label {
+          font-weight: normal;
+          display: inline-block;
+          word-break: break-all;
+          white-space: normal;
+          text-align: left;
+        }
+        .label-success {
+          background-color: transparent;
+          border: 1px solid $brand-success;
+          color: $brand-success;
+        }
+        .label-danger {
+          background-color: transparent;
+          border: 1px solid $brand-danger;
+          color: $brand-danger;
+        }
+      }
       .mdi {
         font-size: 22px;
         line-height: 1;
@@ -604,7 +629,7 @@ div:not(.tab-pane) {
   color: #4bbfaf;
 }
 
-td.meta-params {
+.table > tbody td.meta-params {
   padding: 0px;
   border-top: 0px;
   div.collapse {

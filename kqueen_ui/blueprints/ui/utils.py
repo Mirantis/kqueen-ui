@@ -106,13 +106,9 @@ def status_for_cluster_detail(_status):
             node_status = []
             for sc in node['status']['conditions']:
                 if sc['type'] != 'Ready':
-                    if sc['status'] == 'False':
-                        icon = 'mdi-checkbox-marked-circle-outline'
-                    else:
-                        icon = 'mdi-close-circle-outline'
                     node_status.append({
                         'type': sc['type'],
-                        'icon': icon
+                        'health': 'success' if sc['status'] == 'False' else 'danger'
                     })
             _ram = int(node['status']['allocatable']['memory'].replace('Ki', '')) / 1000000
             ram = '{:.2f}'.format(_ram)
