@@ -162,7 +162,7 @@
         },
         "ssh_key":{
           "validators":{
-
+            "required":true
           },
           "label":"SSH Key (public)",
           "type":"text_area"
