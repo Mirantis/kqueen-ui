@@ -9,6 +9,7 @@
 {% set cant_delete = (cluster.state == config.CLUSTER_PROVISIONING_STATE or
                       not is_authorized(session, 'cluster:delete', cluster)) %}
 {% set not_ok_state = cluster.state != config.CLUSTER_OK_STATE %}
+{% set status_message = cluster.get('metadata', {}).get('status_message', {}) %}
 
 {% block content %}
 <div class="overview">
@@ -96,6 +97,9 @@
       </div>
     </div>
   </div>
+  {% if status_message %}
+  <div class="row cluster-status">{{ status_message }}</div>
+  {% endif %}
 </div>
 
 <div class="overview-actions">
