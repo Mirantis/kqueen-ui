@@ -47,7 +47,7 @@ a.disabled {
 
 .disabled-wrapper {
   display: inline-block;
-  cursor: not-allowed;
+  cursor: not-allowed !important;
 }
 
 .box {
@@ -583,6 +583,15 @@ table {
   }
 }
 
+.table-container .table.clusters-list {
+  .action_column {
+    width: 70px;
+  }
+  .status_column {
+    width: 70px;
+  }
+}
+
 div:not(.tab-pane) {
   > .table-container {
     @extend .box;
@@ -663,12 +672,9 @@ div.bulk-action {
 .table > tbody > tr > td.clickable-cluster-name {
   padding: 0;
   &:hover {
-    background: #e8e8e8;
+    background: #ecebeb;
   }
 }
-.table-hover>tbody>tr:hover {
-}
-
 .table-container .table div.cluster-name {
   display: block;
   a {
@@ -694,6 +700,10 @@ input[type="checkbox"] {
     }
     .checkbox-cluster:before {
       content: "\F131"; // mdi-checkbox-blank-outline
+    }
+    .disabled {
+      color: #ccc;
+      pointer-events: none;
     }
   }
   &:checked + label {
