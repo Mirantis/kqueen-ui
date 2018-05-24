@@ -11,10 +11,14 @@
           <td class="col-md-1">
             <input
               type="checkbox"
+              id="select-cluster-{{ cluster.id }}"
               class="select-cluster"
               name="{{ cluster.id }}"
               value="{{ cluster.name }}"
             />
+            <label for="select-cluster-{{ cluster.id }}">
+              <i class="mdi checkbox-cluster"></i>
+            </label>
           </td>
           <td class="col-md-3 clickable-cluster-name">
             {% if is_authorized(session, 'cluster:get', cluster) %}
