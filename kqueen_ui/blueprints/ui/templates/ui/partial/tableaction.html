@@ -9,20 +9,6 @@
   </a>
 {% endmacro %}
 
-{% macro render_cluster_row_actions(cluster) %}
-  {% set cant_get = not is_authorized(session, 'cluster:get', cluster) %}
-  {% set delete_url = url_for('ui.cluster_delete', cluster_id=cluster.id) %}
-  {% set cant_delete = ( cluster.state == config.CLUSTER_PROVISIONING_STATE or not is_authorized(session, 'cluster:delete', cluster) ) %}
-  <a
-    data-target="{{ delete_url }}"
-    data-name="cluster {{ cluster.name }}"
-    class="confirm-delete{% if cant_delete %} disabled{% endif %}"
-    title="Delete cluster"
-  >
-    <i class="mdi mdi-delete-forever"></i>
-  </a>
-{% endmacro %}
-
 {% macro render_provisioner_table_actions() %}
   {% set create_url = url_for('ui.provisioner_create') %}
   {% set cant_create = not is_authorized(session, 'provisioner:create') %}

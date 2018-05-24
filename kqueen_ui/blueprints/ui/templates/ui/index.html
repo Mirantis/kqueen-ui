@@ -35,17 +35,19 @@
           </div>
         </div>
       </div>
-      <table class="table table-hover">
+      <table class="table table-hover clusters-list">
         <thead>
-          <th class="col-md--1">
-            <input type="checkbox" class="select-all" id="select-all" />
-            <label for="select-all"><i class="mdi checkbox-all"></i></label>
+          <th class="col-md-1">
+            {% if clusters %}
+              <input type="checkbox" class="select-all" id="select-all" />
+              <label for="select-all"><i class="mdi checkbox-all"></i></label>
+            {% endif %}
           </th>
-          <th class="col-md-3">Name</th>
-          <th class="col-md-4"">Provisioner</th>
-          <th class="col-md-4"">Created</th>
+          <th class="col-md-4">Name</th>
+          <th class="col-md-4">Provisioner</th>
+          <th class="col-md-3">Created</th>
           <th class="status_column">Status</th>
-          <th class="action_column">Actions</th>
+          <th class="action_column">Info</th>
         </thead>
         <tbody>
           {% for cluster in clusters %}
@@ -55,13 +57,15 @@
           {% endfor %}
         </tbody>
       </table>
-      <div class="bulk-action">
-        <div class="disabled-wrapper">
-          <a class="btn btn-default confirm-delete bulk-delete" title="Delete cluster">
-            <i class="mdi mdi-delete-forever"></i>Delete
-          </a>
+      {% if clusters %}
+        <div class="bulk-action">
+          <div class="disabled-wrapper">
+            <a class="btn btn-default confirm-delete bulk-delete" title="Delete cluster">
+              <i class="mdi mdi-delete-forever"></i>Delete
+            </a>
+          </div>
         </div>
-      </div>
+      {% endif %}
     </div>
   </div>
 
@@ -199,25 +203,22 @@ setInterval(function(){
 }, 15000);
 
 $(document).ready(function() {
-  $('tr.clickable').click(function(e) {
-    if (e.target.tagName === 'TD') {
-      var rowCheckbox = $($(e.target).parent().find('input[type="checkbox"].select-cluster')[0]);
-      rowCheckbox.prop('checked', !rowCheckbox.is(':checked')).trigger('change');
-    }
-  });
-
   // Bulk delete operation on clusters
   var selectAllCheckbox = $('input[type="checkbox"].select-all'),
-      selectRowCheckboxes = $('input[type="checkbox"].select-cluster'),
+      selectRowCheckboxes = $('input[type="checkbox"]:not(:disabled).select-cluster'),
       deleteButton = $('a.bulk-delete'),
       checkedRowsSelector = 'input[type="checkbox"].select-cluster:checked';
 
+  if (!$(selectRowCheckboxes).get().length) {
+    selectAllCheckbox.prop('disabled', true);
+    var label = $(selectAllCheckbox.next('label')[0]);
+    label.addClass('disabled-wrapper');
+    $(label.find('.checkbox-all')[0]).addClass('disabled');
+  }
+
   var setDeleteButtonState = (enable) => {
-    if (enable) {
-      deleteButton.removeClass('disabled');
-    } else {
-      deleteButton.addClass('disabled');
-    }
+    // "disabled" prop is not allowed for anchors, so we use classes instead
+    enable ? deleteButton.removeClass('disabled') : deleteButton.addClass('disabled');
   }
   var getSelectedClusterNames = () => $(checkedRowsSelector).map(function() {
     return this.value;
@@ -238,9 +239,11 @@ $(document).ready(function() {
   }
 
   setDeleteButtonState(selectRowCheckboxes.is(':checked'));
+  setButtonTarget();
+
   selectAllCheckbox.bind('change', function () {
     var allChecked = selectAllCheckbox.is(':checked');
-    $('input[type="checkbox"].select-cluster').prop('checked', allChecked);
+    selectRowCheckboxes.prop('checked', allChecked);
     setDeleteButtonState(allChecked);
     if (allChecked) {
       setButtonTarget();
@@ -249,6 +252,14 @@ $(document).ready(function() {
   selectRowCheckboxes.bind('change', function () {
     setDeleteButtonState(selectRowCheckboxes.is(':checked'));
     setButtonTarget();
+  });
+
+  // Handle table row click
+  $('tr.clickable').click(function(e) {
+    if (e.target.tagName === 'TD') {
+      var rowCheckbox = $($(e.target).parent().find(selectRowCheckboxes)[0]);
+      rowCheckbox.prop('checked', !rowCheckbox.is(':checked')).trigger('change');
+    }
   });
 });
 </script>
