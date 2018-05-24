@@ -43,6 +43,10 @@ h1, h2 {
 a.disabled {
   opacity: 0.5;
   pointer-events: none !important;
+}
+
+.disabled-wrapper {
+  display: inline-block;
   cursor: not-allowed;
 }
 
@@ -662,6 +666,9 @@ div.bulk-action {
     background: #e8e8e8;
   }
 }
+.table-hover>tbody>tr:hover {
+}
+
 .table-container .table div.cluster-name {
   display: block;
   a {
@@ -669,6 +676,33 @@ div.bulk-action {
     width: 100%;
     height: 100%;
     padding: 8px;
+  }
+}
+
+input[type="checkbox"] {
+  display: none;
+  + label {
+    display: inline-block;
+    color: #7b7a7a;
+    cursor: pointer;
+    margin-bottom: 0;
+    .mdi:before {
+      font: normal normal normal 19px/1 "Material Design Icons";
+    }
+    .checkbox-all:before {
+      content: "\F137"; // mdi-checkbox-multiple-blank-outline
+    }
+    .checkbox-cluster:before {
+      content: "\F131"; // mdi-checkbox-blank-outline
+    }
+  }
+  &:checked + label {
+    .checkbox-all:before {
+      content: "\F138"; // mdi-checkbox-multiple-marked
+    }
+    .checkbox-cluster:before {
+      content: "\F132"; // mdi-checkbox-marked
+    }
   }
 }
 

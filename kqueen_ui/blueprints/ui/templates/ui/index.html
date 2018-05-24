@@ -37,8 +37,9 @@
       </div>
       <table class="table table-hover">
         <thead>
-          <th class="col-md-1">
-            <input type="checkbox" class="select-all" />
+          <th class="col-md--1">
+            <input type="checkbox" class="select-all" id="select-all" />
+            <label for="select-all"><i class="mdi checkbox-all"></i></label>
           </th>
           <th class="col-md-3">Name</th>
           <th class="col-md-4"">Provisioner</th>
@@ -55,9 +56,11 @@
         </tbody>
       </table>
       <div class="bulk-action">
-        <a class="btn btn-default confirm-delete bulk-delete" title="Delete cluster">
-          <i class="mdi mdi-delete-forever"></i>Delete
-        </a>
+        <div class="disabled-wrapper">
+          <a class="btn btn-default confirm-delete bulk-delete" title="Delete cluster">
+            <i class="mdi mdi-delete-forever"></i>Delete
+          </a>
+        </div>
       </div>
     </div>
   </div>
