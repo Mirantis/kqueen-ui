@@ -8,7 +8,15 @@
           data-status="{{ cluster.state }}"
           data-href="{{ url_for('ui.cluster_detail', cluster_id=cluster.id) }}"
         >
-          <td class="col-md-4">
+          <td class="col-md-1">
+            <input
+              type="checkbox"
+              class="select-cluster"
+              name="{{ cluster.id }}"
+              value="{{ cluster.name }}"
+            />
+          </td>
+          <td class="col-md-3">
             {% if is_authorized(session, 'cluster:get', cluster) %}
             <div class="cluster-name">
               <a href="{{ url_for('ui.cluster_detail', cluster_id=cluster.id) }}">

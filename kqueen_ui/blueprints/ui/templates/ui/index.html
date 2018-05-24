@@ -37,9 +37,12 @@
       </div>
       <table class="table table-hover">
         <thead>
-          <th class="col-md-4">Name</th>
-          <th class="col-md-4">Provisioner</th>
-          <th class="col-md-4">Created</th>
+          <th class="col-md-1">
+            <input type="checkbox" class="select-all" />
+          </th>
+          <th class="col-md-3">Name</th>
+          <th class="col-md-4"">Provisioner</th>
+          <th class="col-md-4"">Created</th>
           <th class="status_column">Status</th>
           <th class="action_column">Actions</th>
         </thead>
@@ -51,6 +54,11 @@
           {% endfor %}
         </tbody>
       </table>
+      <div class="bulk-action">
+        <a class="btn btn-default confirm-delete disabled bulk-delete" title="Delete cluster">
+          <i class="mdi mdi-delete-forever"></i>Delete
+        </a>
+      </div>
     </div>
   </div>
 
@@ -190,9 +198,53 @@ setInterval(function(){
 $(document).ready(function() {
   $('tr.clickable').click(function(e) {
     if (e.target.tagName === 'TD') {
-      var link = $(this).data('href');
-      if (link) window.location = link;
+      var rowCheckbox = $($(e.target).parent().find('input[type="checkbox"].select-cluster')[0]);
+      rowCheckbox.prop('checked', !rowCheckbox.is(':checked')).trigger('change');
     }
+  });
+
+  // Bulk delete operation on clusters
+  var selectAllCheckbox = $('input[type="checkbox"].select-all'),
+      selectRowCheckboxes = $('input[type="checkbox"].select-cluster'),
+      deleteButton = $('a.bulk-delete'),
+      checkedRowsSelector = 'input[type="checkbox"].select-cluster:checked';
+
+  var setDeleteButtonState = (enable) => {
+    if (enable) {
+      deleteButton.removeClass('disabled');
+    } else {
+      deleteButton.addClass('disabled');
+    }
+  }
+  var getSelectedClusterNames = () => $(checkedRowsSelector).map(function() {
+    return this.value;
+  }).get();
+  var getSelectedClusterIds = () => $(checkedRowsSelector).map(function() {
+    return this.name;
+  }).get();
+  var setButtonTarget = () => {
+    deleteButton.data('target', `/ui/clusters/${getSelectedClusterIds().join('+')}/delete_bulk`);
+    var text = '',
+        names = getSelectedClusterNames();
+    if (!$('input[type="checkbox"].select-cluster:not(:checked)').get().length) {
+      text = `ALL your clusters (${names.join(', ')})`;
+    } else {
+      text = `cluster${names.length === 1 ? '' : 's'} ${names.join(', ')}`;
+    }
+    deleteButton.data('name', text);
+  }
+
+  selectAllCheckbox.bind('change', function () {
+    var allChecked = selectAllCheckbox.is(':checked');
+    $('input[type="checkbox"].select-cluster').prop('checked', allChecked);
+    setDeleteButtonState(allChecked);
+    if (allChecked) {
+      setButtonTarget();
+    }
+  });
+  selectRowCheckboxes.bind('change', function () {
+    setDeleteButtonState(selectRowCheckboxes.is(':checked'));
+    setButtonTarget();
   });
 });
 </script>

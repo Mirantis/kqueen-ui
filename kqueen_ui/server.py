@@ -20,6 +20,9 @@ logger = logging.getLogger('kqueen_ui')
 def create_app(config_file=None):
     app = Flask(__name__, static_folder='./asset/static')
 
+    from .converters import ListConverter  # it's here to avoid circular imports
+    app.url_map.converters['list'] = ListConverter
+
     app.register_blueprint(manager, url_prefix='/manager')
     app.register_blueprint(registration, url_prefix='/registration')
     app.register_blueprint(ui, url_prefix='/ui')
