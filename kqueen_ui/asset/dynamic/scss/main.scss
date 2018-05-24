@@ -43,6 +43,7 @@ h1, h2 {
 a.disabled {
   opacity: 0.5;
   pointer-events: none !important;
+  cursor: not-allowed;
 }
 
 .box {
@@ -552,6 +553,9 @@ table {
         color: $brand-danger;
       }
     }
+    .cluster-name {
+      display: inline-block;
+    }
   }
   &.no-actions {
     margin-top: 20px;
@@ -645,6 +649,11 @@ td.mdi-account {
   font-size: 22px;
   float: left;
   margin-right: 3px;
+}
+
+div.bulk-action {
+  text-align: right;
+  margin-top: -5px;
 }
 
 // *****************************************************************************

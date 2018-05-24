@@ -114,3 +114,7 @@ class KQueenView(View):
             if self.validation_hint == 'uuid':
                 for kwarg in kwargs.values():
                     self._validate_uuid(kwarg)
+            if self.validation_hint == 'uuid_list':
+                for kwarg in kwargs.values():
+                    for kw in kwarg:
+                        self._validate_uuid(kw)

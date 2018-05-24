@@ -667,6 +667,31 @@ class ClusterDelete(KQueenView):
         return redirect(url_for('ui.index'))
 
 
+class ClusterDeleteBulk(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
+    validation_hint = 'uuid_list'
+
+    def handle(self, cluster_ids):
+        for cluster_id in cluster_ids:
+            cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
+            msg = 'Cluster {} successfully deleted.'.format(cluster['name'])
+
+            if cluster['provisioner']['engine'] == 'kqueen.engines.ManualEngine':
+                flash('Manual Engine does not support cluster deleting, cluster will be detached.',
+                      'warning')
+                msg = 'Cluster {} successfully detached.'.format(cluster['name'])
+
+            if cluster['state'] == app.config['CLUSTER_PROVISIONING_STATE']:
+                # TODO: handle state together with policies in helper for allowed table actions
+                flash('Cannot delete clusters during provisioning.', 'warning')
+            else:
+                self.kqueen_request('cluster', 'delete', fnargs=(cluster_id,))
+                user_logger.debug('{}:{}'.format(user_prefix(session), msg))
+                flash(msg, 'success')
+        return redirect(url_for('ui.index'))
+
+
 class ClusterDeploymentStatus(KQueenView):
     decorators = [login_required]
     methods = ['GET']
@@ -812,6 +837,8 @@ class ClusterRow(KQueenView):
 
 ui.add_url_rule('/clusters/create',
                 view_func=ClusterCreate.as_view('cluster_create'))
+ui.add_url_rule('/clusters/<list:cluster_ids>/delete_bulk',
+                view_func=ClusterDeleteBulk.as_view('cluster_delete_bulk'))
 ui.add_url_rule('/clusters/<cluster_id>/delete',
                 view_func=ClusterDelete.as_view('cluster_delete'))
 ui.add_url_rule('/clusters/<cluster_id>/deployment-status',
