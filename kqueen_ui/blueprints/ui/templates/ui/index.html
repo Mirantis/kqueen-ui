@@ -55,7 +55,7 @@
         </tbody>
       </table>
       <div class="bulk-action">
-        <a class="btn btn-default confirm-delete disabled bulk-delete" title="Delete cluster">
+        <a class="btn btn-default confirm-delete bulk-delete" title="Delete cluster">
           <i class="mdi mdi-delete-forever"></i>Delete
         </a>
       </div>
@@ -234,6 +234,7 @@ $(document).ready(function() {
     deleteButton.data('name', text);
   }
 
+  setDeleteButtonState(selectRowCheckboxes.is(':checked'));
   selectAllCheckbox.bind('change', function () {
     var allChecked = selectAllCheckbox.is(':checked');
     $('input[type="checkbox"].select-cluster').prop('checked', allChecked);
