@@ -16,7 +16,7 @@
               value="{{ cluster.name }}"
             />
           </td>
-          <td class="col-md-3">
+          <td class="col-md-3 clickable-cluster-name">
             {% if is_authorized(session, 'cluster:get', cluster) %}
             <div class="cluster-name">
               <a href="{{ url_for('ui.cluster_detail', cluster_id=cluster.id) }}">
