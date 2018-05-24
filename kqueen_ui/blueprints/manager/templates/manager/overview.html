@@ -17,21 +17,21 @@
   </div>
   <table class="table table-hover">
     <thead>
-      <th class="table-col-4">Namespace</th>
-      <th class="table-col-4">Name</th>
-      <th class="table-col-4">Created</th>
+      <th class="col-md-4">Namespace</th>
+      <th class="col-md-4">Name</th>
+      <th class="col-md-4">Created</th>
       <th class="action_column">Actions</th>
     </thead>
     <tbody>
       {% for organization in organizations %}
         <tr>
-          <td>
+          <td class="col-md-4">
             <a href="{{ url_for('manager.organization_detail', organization_id=organization.id) }}">
               {{ organization.namespace }}
             </a>
           </td>
-          <td>{{ organization.name }}</td>
-          <td>{{ organization.created_at }}</td>
+          <td class="col-md-4">{{ organization.name }}</td>
+          <td class="col-md-4">{{ organization.created_at }}</td>
           <td class="action_column">
             {% set detail_url = url_for('manager.organization_detail', organization_id=organization.id) %}
             {% set delete_url = url_for('manager.organization_delete', organization_id=organization.id) %}
@@ -65,10 +65,10 @@
 <div class="table-container no-actions" id="tableClusters">
   <table class="table table-hover">
     <thead>
-      <th class="table-col-3">Namespace</th>
-      <th class="table-col-3">Name</th>
-      <th class="table-col-3">Provisioner</th>
-      <th class="table-col-3">Created</th>
+      <th class="col-md-3">Namespace</th>
+      <th class="col-md-3">Name</th>
+      <th class="col-md-2">Provisioner</th>
+      <th class="col-md-4">Created</th>
       <th class="status_column">Status</th>
       <th class="action_column">Actions</th>
     </thead>
@@ -94,10 +94,10 @@
 <div class="table-container no-actions" id="tableProvisioners">
   <table class="table table-hover">
     <thead>
-      <th class="table-col-3">Namespace</th>
-      <th class="table-col-3">Name</th>
-      <th class="table-col-3">Engine</th>
-      <th class="table-col-3">Created</th>
+      <th class="col-md-3">Namespace</th>
+      <th class="col-md-3">Name</th>
+      <th class="col-md-3">Engine</th>
+      <th class="col-md-3">Created</th>
       <th class="status_column">Status</th>
       <th class="action_column">Actions</th>
     </thead>

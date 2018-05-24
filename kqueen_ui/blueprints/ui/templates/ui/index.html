@@ -37,9 +37,9 @@
       </div>
       <table class="table table-hover">
         <thead>
-          <th class="table-col-4">Name</th>
-          <th class="table-col-4">Provisioner</th>
-          <th class="table-col-4">Created</th>
+          <th class="col-md-4">Name</th>
+          <th class="col-md-4">Provisioner</th>
+          <th class="col-md-4">Created</th>
           <th class="status_column">Status</th>
           <th class="action_column">Actions</th>
         </thead>
@@ -69,18 +69,18 @@
       </div>
       <table class="table table-hover">
         <thead>
-          <th class="table-col-4">Name</th>
-          <th class="table-col-4">Engine</th>
-          <th class="table-col-4">Created</th>
+          <th class="col-md-4">Name</th>
+          <th class="col-md-4">Engine</th>
+          <th class="col-md-4">Created</th>
           <th class="status_column">Status</th>
           <th class="action_column">Actions</th>
         </thead>
         <tbody>
           {% for provisioner in provisioners %}
             <tr>
-              <td class="table-col-4">{{ provisioner.name }}</td>
-              <td class="table-col-4">{{ provisioner.verbose_name }}</td>
-              <td class="table-col-4">{{ provisioner.created_at }}</td>
+              <td class="col-md-4">{{ provisioner.name }}</td>
+              <td class="col-md-4">{{ provisioner.verbose_name }}</td>
+              <td class="col-md-4">{{ provisioner.created_at }}</td>
               <td class="status_column"><i class="mdi {{ provisioner.state|provisioner_status_icon_class }}" title="{{ provisioner.state }}"></i></td>
               <td class="action_column">
                 {% if provisioner.parameters %}

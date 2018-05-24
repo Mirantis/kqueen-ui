@@ -178,6 +178,7 @@ div.login-footer {
   @include prefix(box-shadow, 0px 1px 4px -1px rgba(187,187,187,1), webkit moz);
   .tab-pane h3 {
     margin-top: 10px;
+    margin-bottom: 10px;
   }
   h3 {
     margin: 0;
@@ -477,29 +478,8 @@ table {
     text-align: right;
   }
   .table {
-    @include table-col-x;
     .status_column {
-      width: 160px;
-      div {
-        margin-bottom: 2px;
-        .label {
-          font-weight: normal;
-          display: inline-block;
-          word-break: break-all;
-          white-space: normal;
-          text-align: left;
-        }
-        .label-success {
-          background-color: transparent;
-          border: 1px solid $brand-success;
-          color: $brand-success;
-        }
-        .label-danger {
-          background-color: transparent;
-          border: 1px solid $brand-danger;
-          color: $brand-danger;
-        }
-      }
+      width: 40px;
       .mdi {
         font-size: 22px;
         line-height: 1;
@@ -523,7 +503,7 @@ table {
       }
     }
     .action_column {
-      width: 120px;
+      width: 90px;
       @extend .text-right;
       a {
         color: $brand-primary;
@@ -550,6 +530,26 @@ table {
         display: inline-block;
         cursor: pointer;
         color: $mira-gray-dark;
+      }
+    }
+    .labels-column div {
+      margin-bottom: 2px;
+      .label {
+        font-weight: normal;
+        display: inline-block;
+        word-break: break-all;
+        white-space: normal;
+        text-align: left;
+      }
+      .label-success {
+        background-color: transparent;
+        border: 1px solid $brand-success;
+        color: $brand-success;
+      }
+      .label-danger {
+        background-color: transparent;
+        border: 1px solid $brand-danger;
+        color: $brand-danger;
       }
     }
   }

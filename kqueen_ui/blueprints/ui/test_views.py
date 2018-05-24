@@ -34,7 +34,7 @@ def test_login_required(client, view, values):
     ('ui.user_profile', {}, ['<h2>User Profile</h2>']),
     ('ui.provisioner_create', {}, ['<h2>Create Provisioner</h2>']),
     ('ui.cluster_create', {}, ['<h2>Deploy Kubernetes Cluster</h2>']),
-    ('ui.cluster_detail', {'cluster_id': '1868f6f4-1dbb-4555-ba46-1d2924e81f5e'}, ['<h2>Cluster pytest-cluster detail</h2>', '<td>ip-10-0-10-95.us-west-2.compute.internal</td>']),
+    ('ui.cluster_detail', {'cluster_id': '1868f6f4-1dbb-4555-ba46-1d2924e81f5e'}, ['<h2>Cluster pytest-cluster detail</h2>', '<td class="col-md-3">ip-10-0-10-95.us-west-2.compute.internal</td>']),
 ])
 def test_render_view(client_login, view, values, lookup_html):
     response = client_login.get(url_for(view, **values))
