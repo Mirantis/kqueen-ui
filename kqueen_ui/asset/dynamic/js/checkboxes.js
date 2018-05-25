@@ -41,7 +41,7 @@ function handleBulkDelete(
   // Checkboxes will be still selected if e.g. you open cluster page and then go back,
   // so in this case delete button should be enabled
   if (!isZeroCount(checkedRowsSelector)) {
-    setDeleteButtonState(activeRowCheckboxes.is(':checked'));
+    setDeleteButtonState(true);
     setButtonTarget();
   }
 

@@ -583,12 +583,6 @@ table {
   }
 }
 
-.table-container .table.clusters-list, .table-container .table.provisioners-list {
-  .action_column, .status_column {
-    width: 70px;
-  }
-}
-
 div:not(.tab-pane) {
   > .table-container {
     @extend .box;

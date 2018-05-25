@@ -244,20 +244,14 @@ setInterval(function(){
 }, 15000);
 
 $(document).ready(function() {
-  handleBulkDelete(
-    'input[type="checkbox"].select-all-clusters',
-    'input[type="checkbox"].select-cluster',
-    'a.bulk-delete-clusters',
-    (ids) => `/ui/clusters/${ids}/delete_bulk`,
-    'cluster'
-  );
-  handleBulkDelete(
-    'input[type="checkbox"].select-all-provisioners',
-    'input[type="checkbox"].select-provisioner',
-    'a.bulk-delete-provisioners',
-    (ids) => `/ui/provisioners/${ids}/delete_bulk`,
-    'provisioner'
-  );
+  var bulkTargets = ['cluster', 'provisioner'];
+  bulkTargets.forEach((target) => handleBulkDelete(
+    `input[type="checkbox"].select-all-${target}s`,
+    `input[type="checkbox"].select-${target}`,
+    `a.bulk-delete-${target}s`,
+    (ids) => `/ui/${target}s/${ids}/delete_bulk`,
+    target
+  ));
 });
 </script>
 {% endblock %}
