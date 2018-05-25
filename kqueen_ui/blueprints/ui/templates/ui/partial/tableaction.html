@@ -20,19 +20,6 @@
   </a>
 {% endmacro %}
 
-{% macro render_provisioner_row_actions(provisioner) %}
-  {% set delete_url = url_for('ui.provisioner_delete', provisioner_id=provisioner.id) %}
-  {% set cant_delete = not is_authorized(session, 'provisioner:delete', provisioner) %}
-  <a
-    data-target="{{ delete_url }}"
-    data-name="provisioner {{ provisioner.name }}"
-    class="confirm-delete{% if cant_delete %} disabled{% endif %}"
-    title="Delete provisioner"
-  >
-    <i class="mdi mdi-delete-forever"></i>
-  </a>
-{% endmacro %}
-
 {% macro render_member_table_actions() %}
   {% set invite_url = url_for('ui.user_invite') %}
   {% set cant_create = not is_authorized(session, 'user:create') %}

@@ -540,6 +540,7 @@ class ProvisionerCreate(KQueenView):
         return render_template('ui/provisioner_create.html', form=form)
 
 
+# TODO: remove this one?
 class ProvisionerDelete(KQueenView):
     decorators = [login_required]
     methods = ['GET']
@@ -564,11 +565,36 @@ class ProvisionerDelete(KQueenView):
         return redirect(url_for('ui.index', _anchor='provisionersTab'))
 
 
+class ProvisionerDeleteBulk(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
+    validation_hint = 'uuid_list'
+
+    def handle(self, provisioner_ids):
+        # TODO: block deletion of used provisioner on backend, not here
+        clusters = self.kqueen_request('cluster', 'list')
+        used_provisioners = [p['id'] for p in [c['provisioner'] for c in clusters]]
+        for provisioner_id in provisioner_ids:
+            provisioner = self.kqueen_request('provisioner', 'get', fnargs=(provisioner_id,))
+            if provisioner_id not in used_provisioners:
+                self.kqueen_request('provisioner', 'delete', fnargs=(provisioner_id,))
+                msg = 'Provisioner {} deleted.'.format(provisioner['name'])
+                user_logger.debug('{}:{}'.format(user_prefix(session), msg))
+                flash(msg, 'success')
+            else:
+                msg = 'Provisioner {} is in use, cannot delete.'.format(provisioner['name'])
+                user_logger.debug('{}:{}'.format(user_prefix(session), msg))
+                flash(msg, 'warning')
+        return redirect(url_for('ui.index', _anchor='provisionersTab'))
+
+
 ui.add_url_rule('/provisioners/create', view_func=ProvisionerCreate.as_view('provisioner_create'))
 ui.add_url_rule('/provisioners/<provisioner_id>/delete', view_func=ProvisionerDelete.as_view('provisioner_delete'))
-
+ui.add_url_rule('/provisioners/<list:provisioner_ids>/delete_bulk',
+                view_func=ProvisionerDeleteBulk.as_view('provisioner_delete_bulk'))
 
 # Cluster
+
 
 class ClusterCreate(KQueenView):
     decorators = [login_required]
@@ -644,6 +670,7 @@ class ClusterCreate(KQueenView):
         return render_template('ui/cluster_create.html', form=form)
 
 
+# TODO: delete this one?
 class ClusterDelete(KQueenView):
     decorators = [login_required]
     methods = ['GET']

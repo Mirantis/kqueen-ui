@@ -583,11 +583,8 @@ table {
   }
 }
 
-.table-container .table.clusters-list {
-  .action_column {
-    width: 70px;
-  }
-  .status_column {
+.table-container .table.clusters-list, .table-container .table.provisioners-list {
+  .action_column, .status_column {
     width: 70px;
   }
 }
@@ -698,7 +695,7 @@ input[type="checkbox"] {
     .checkbox-all:before {
       content: "\F137"; // mdi-checkbox-multiple-blank-outline
     }
-    .checkbox-cluster:before {
+    .checkbox-row:before {
       content: "\F131"; // mdi-checkbox-blank-outline
     }
     .disabled {
@@ -710,7 +707,7 @@ input[type="checkbox"] {
     .checkbox-all:before {
       content: "\F138"; // mdi-checkbox-multiple-marked
     }
-    .checkbox-cluster:before {
+    .checkbox-row:before {
       content: "\F132"; // mdi-checkbox-marked
     }
   }
