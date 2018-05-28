@@ -14,9 +14,9 @@ import pytest
     ('ui.user_change_password', {}),
     ('ui.user_profile', {}),
     ('ui.provisioner_create', {}),
-    ('ui.provisioner_delete', {'provisioner_id': 1}),
+    ('ui.provisioner_delete', {'provisioner_ids': [1]}),
     ('ui.cluster_create', {}),
-    ('ui.cluster_delete', {'cluster_id': 1}),
+    ('ui.cluster_delete', {'cluster_ids': [1]}),
     ('ui.cluster_deployment_status', {'cluster_id': 1}),
     ('ui.cluster_detail', {'cluster_id': 1}),
     ('ui.cluster_kubeconfig', {'cluster_id': 1}),
@@ -133,7 +133,8 @@ def test_provisioner_create(client_login):
 
 
 def test_provisioner_delete(client_login, provisioner):
-    response = client_login.get(url_for('ui.provisioner_delete', provisioner_id=provisioner['id']))
+    response = client_login.get(url_for('ui.provisioner_delete',
+                                        provisioner_ids=[provisioner['id']]))
     assert response.status_code == 302
     assert response.headers['Location'].endswith(url_for('ui.index', _anchor='provisionersTab'))
 
@@ -150,7 +151,7 @@ def test_cluster_create(client_login, provisioner):
 
 
 def test_cluster_delete(client_login, cluster):
-    response = client_login.get(url_for('ui.cluster_delete', cluster_id=cluster['id']))
+    response = client_login.get(url_for('ui.cluster_delete', cluster_ids=[cluster['id']]))
     assert response.status_code == 302
     assert response.headers['Location'].endswith(url_for('ui.index'))
 

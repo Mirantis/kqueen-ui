@@ -35,7 +35,7 @@
           </div>
         </div>
       </div>
-      <table class="table table-hover clusters-list">
+      <table class="table table-hover">
         <thead>
           <th class="col-md-1">
             {% if clusters %}
@@ -85,7 +85,7 @@
           </div>
         </div>
       </div>
-      <table class="table table-hover provisioners-list">
+      <table class="table table-hover">
         <thead>
           <th class="col-md-1">
             {% if provisioners %}
@@ -111,7 +111,7 @@
                 <input
                   type="checkbox"
                   id="select-provisioner-{{ provisioner.id }}"
-                  {% if cant_delete %} disabled{% endif %}
+                  {% if cant_delete %}disabled{% endif %}
                   class="select-provisioner"
                   name="{{ provisioner.id }}"
                   value="{{ provisioner.name }}"
@@ -244,14 +244,14 @@ setInterval(function(){
 }, 15000);
 
 $(document).ready(function() {
-  var bulkTargets = ['cluster', 'provisioner'];
-  bulkTargets.forEach((target) => handleBulkDelete(
-    `input[type="checkbox"].select-all-${target}s`,
-    `input[type="checkbox"].select-${target}`,
-    `a.bulk-delete-${target}s`,
-    (ids) => `/ui/${target}s/${ids}/delete_bulk`,
-    target
-  ));
+  var bulkDeleteTargets = ['cluster', 'provisioner'];
+  bulkDeleteTargets.forEach((target) => handleBulkDelete({
+    selectAllCheckboxSelector: `input[type="checkbox"].select-all-${target}s`,
+    rowCheckboxesSelector: `input[type="checkbox"].select-${target}`,
+    buttonSelector: `a.bulk-delete-${target}s`,
+    formTargetUrl: (ids) => `/ui/${target}s/${ids}/delete`,
+    targetName: target
+  }));
 });
 </script>
 {% endblock %}
