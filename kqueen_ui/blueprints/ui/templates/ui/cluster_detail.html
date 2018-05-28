@@ -177,7 +177,7 @@
   </div>
   <div class="col-sm-3">
     <a
-      data-target="{{ url_for('ui.cluster_delete', cluster_id=cluster.id) }}"
+      data-target="{{ url_for('ui.cluster_delete', cluster_ids=[cluster.id]) }}"
       data-name="cluster {{ cluster.name }}"
       {% if cant_delete %}disabled{% endif %}
       class="confirm-delete btn btn-primary btn-xs"

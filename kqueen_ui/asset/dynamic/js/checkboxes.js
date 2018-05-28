@@ -1,7 +1,7 @@
-function handleBulkDelete(
+function handleBulkDelete({
   selectAllCheckboxSelector, rowCheckboxesSelector, buttonSelector, 
   formTargetUrl, targetName
-) {
+}) {
   var selectAllCheckbox = $(selectAllCheckboxSelector),
       activeRowCheckboxes = $(rowCheckboxesSelector + ':not(:disabled)'),
       bulkDeleteButton = $(buttonSelector);
@@ -17,7 +17,7 @@ function handleBulkDelete(
     return this.value;
   }).get();
   var getSelectedObjectsIds = () => $(checkedRowsSelector).map(function() {
-    return this.name;
+    return encodeURIComponent(this.name);
   }).get();
   var setButtonTarget = () => {
     bulkDeleteButton.data('target', formTargetUrl(getSelectedObjectsIds().join('+')));

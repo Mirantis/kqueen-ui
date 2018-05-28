@@ -12,7 +12,7 @@
             <input
               type="checkbox"
               id="select-cluster-{{ cluster.id }}"
-              {% if cant_delete %} disabled{% endif %}
+              {% if cant_delete %}disabled{% endif %}
               class="select-cluster"
               name="{{ cluster.id }}"
               value="{{ cluster.name }}"
