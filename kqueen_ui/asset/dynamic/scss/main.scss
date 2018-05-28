@@ -137,6 +137,50 @@ div.login-footer {
   line-height: 1.1;
 }
 
+.bulk-create-count {
+  text-align: right;
+  input[type="number"] {
+    display: inline-block;
+    width: 50px;
+    margin-left: 3px;
+    padding-right: 2px;
+    padding-left: 10px;
+  }
+  span {
+    margin-left: 15px;
+  }
+  label {
+    font-weight: normal;
+    cursor: pointer;
+  }
+  .index-checkbox {
+    padding: 7px 15px;
+    padding-left: 0;
+  }
+}
+
+input[type="checkbox"] {
+  display: none;
+  + label {
+    display: inline-block;
+    color: #7b7a7a;
+    margin-bottom: 0;
+    height: 21px;
+    vertical-align: bottom;
+    .mdi:before {
+      font: normal normal normal 19px/1 "Material Design Icons";
+    }
+    .checkbox-default:before {
+      content: "\F131"; // mdi-checkbox-blank-outline
+    }
+  }
+  &:checked + label {
+    .checkbox-default:before {
+      content: "\F132"; // mdi-checkbox-marked
+    }
+  }
+}
+
 // *****************************************************************************
 // Tabs
 // *****************************************************************************

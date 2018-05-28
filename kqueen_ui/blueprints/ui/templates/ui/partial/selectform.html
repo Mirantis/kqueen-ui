@@ -17,15 +17,34 @@
       {% endif %}
     {% endif %}
   {% endfor %}
-  <button
-    type="button"
-    name="cancel"
-    class="btn btn-default btn-sm"
-    onclick="window.location.href='{{ url_for('ui.index') }}';"
-  >
-    Cancel
-  </button>
-  <button type="submit" name="submit" class="btn btn-primary btn-sm">Submit</button>
+  <div class="row">
+    <div class="col-xs-6">
+      <button
+        type="button"
+        name="cancel"
+        class="btn btn-default btn-sm"
+        onclick="window.location.href='{{ url_for('ui.index') }}';"
+      >
+        Cancel
+      </button>
+      <button type="submit" name="submit" class="btn btn-primary btn-sm">Submit</button>
+    </div>
+    <div class="col-xs-6 bulk-create-count">
+      <div class="row">
+        <div class="col-xs-8">
+          <span>Quantity:</span>
+          <input name="count" type="number" value="1" min="1" class="form-control" />
+        </div>
+        <div class="col-xs-4 index-checkbox">
+          <label>
+            <span>Add index number</span>
+            <input type="checkbox" name="add-inique-index" id="add-unique-index" />
+            <label for="add-unique-index"><i class="mdi checkbox-default"></i></label>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
 </form>
 {% if switch_fields|length > 0 %}
 <script>
