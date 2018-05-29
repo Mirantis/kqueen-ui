@@ -6,6 +6,7 @@ import pytest
 
 @pytest.mark.parametrize('view,values', [
     ('ui.index', {}),
+    ('ui.overview_pies', {}),
     ('ui.logout', {}),
     ('ui.organization_manage', {}),
     ('ui.user_invite', {}),
@@ -28,6 +29,7 @@ def test_login_required(client, view, values):
 
 @pytest.mark.parametrize('view,values,lookup_html', [
     ('ui.index', {}, ['<h2>Overview</h2>', 'pytest-provisioner', 'pytest-cluster']),
+    ('ui.overview_pies', {}, []),
     ('ui.organization_manage', {}, ['<h2>Manage PytestOrg</h2>']),
     ('ui.user_invite', {}, ['h2>Invite Member</h2>']),
     ('ui.user_change_password', {}, ['<h2>Change Password</h2>']),
