@@ -7,6 +7,7 @@ from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.auth import generate_confirmation_token
 from kqueen_ui.blueprints.ui.utils import generate_password, sanitize_resource_metadata
 from kqueen_ui.generic_views import KQueenView
+from kqueen_ui.exceptions import KQueenAPIException
 from kqueen_ui.utils.email import EmailMessage
 from kqueen_ui.utils.loggers import user_prefix
 from kqueen_ui.utils.wrappers import superadmin_required
@@ -122,7 +123,10 @@ class OrganizationCreate(KQueenView):
                 'namespace': slugify(form.organization_name.data),
                 'created_at': datetime.utcnow()
             }
-            organization = self.kqueen_request('organization', 'create', fnargs=(organization_kw,))
+            try:
+                organization = self.kqueen_request('organization', 'create', fnargs=(organization_kw,))
+            except KQueenAPIException:
+                return redirect(url_for('manager.overview'))
             msg = 'Organization {} successfully created.'.format(organization['name'])
             user_logger.debug('{}:{}'.format(user_prefix(session), msg))
             flash(msg, 'success')
