@@ -8,7 +8,7 @@
           data-status="{{ cluster.state }}"
           data-href="{{ url_for('ui.cluster_detail', cluster_id=cluster.id) }}"
         >
-          <td class="table-col-4">
+          <td class="col-md-4">
             {% if is_authorized(session, 'cluster:get', cluster) %}
             <div class="cluster-name">
               <a href="{{ url_for('ui.cluster_detail', cluster_id=cluster.id) }}">
@@ -19,8 +19,8 @@
             {{ cluster.name }}
             {% endif %}
           </td>
-          <td class="table-col-4">{{ cluster.provisioner.name }}</td>
-          <td class="table-col-4">{{ cluster.created_at }}</td>
+          <td class="col-md-4">{{ cluster.provisioner.name }}</td>
+          <td class="col-md-4">{{ cluster.created_at }}</td>
           <td class="status_column">
             {{ cluster.state|cluster_status_icon|safe }}
           </td>

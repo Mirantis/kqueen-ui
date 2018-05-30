@@ -210,37 +210,37 @@
       <table class="table table-hover no-actions" id="table-nodes">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>IP</th>
-            <th>OS</th>
-            <th>Size</th>
-            <th class="status_column">Status</th>
-            <th class="action_column">Pods</th>
+            <th class="col-md-3">Name</th>
+            <th class="col-md-2">IP</th>
+            <th class="col-md-3">OS</th>
+            <th class="col-md-1">Size</th>
+            <th class="col-md-2">Status</th>
+            <th class="col-md-1">Pods</th>
           </tr>
         </thead>
         <tbody>
           {% for node in status.nodes %}
           <tr>
-            <td>{{ node.name }}</td>
-            <td>
+            <td class="col-md-3">{{ node.name }}</td>
+            <td class="col-md-2">
               <div>
                 {% for ip in node.ip %}
                   <div>{{ ip }}</div>
                 {% endfor %}
               </div>
             </td>
-            <td>{{ node.os.os }}<br>{{ node.os.kernel }}</td>
-            <td>
+            <td class="col-md-3">{{ node.os.os }}<br>{{ node.os.kernel }}</td>
+            <td class="col-md-1">
               {{ node.size }}
             </td>
-            <td class="status_column">
+            <td class="col-md-2 labels-column">
               {% for status in node.status %}
               <div title="{{ 'OK' if status.health == 'success' else 'Error' }}">
                 <span class="label label-{{ status.health }}">{{ status.type }}</span>
               </div>
               {% endfor %}
             </td>
-            <td class="action_column">
+            <td class="col-md-1">
               <div class="progress-bar-background primary">
                 <span>{{ node.pods.pods }}/{{ node.pods.maxpods }}</span>
                 <div class="ui-progress-bar" style="width: {{ node.pods.percentage }}%;"></div>
@@ -259,24 +259,24 @@
       <table class="table table-hover no-actions" id="table-nodes">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Namespace</th>
-            <th>Replicas</th>
-            <th>Containers</th>
+            <th class="col-md-3">Name</th>
+            <th class="col-md-3">Namespace</th>
+            <th class="col-md-1">Replicas</th>
+            <th class="col-md-5">Containers</th>
           </tr>
         </thead>
         <tbody>
           {% for deployment in status.deployments %}
           <tr>
-            <td>{{ deployment.name }}</td>
-            <td>{{ deployment.namespace }}</td>
-            <td>
+            <td class="col-md-3">{{ deployment.name }}</td>
+            <td class="col-md-3"> {{ deployment.namespace }}</td>
+            <td class="col-md-1">
               <div class="progress-bar-background primary">
                 <span>{{ deployment.replicas.ready }}/{{ deployment.replicas.desired }}</span>
                 <div class="ui-progress-bar" style="width: {{ deployment.replicas.percentage }}%;"></div>
               </div>
             </td>
-            <td class="containers">
+            <td class="col-md-5 containers">
               {% for container in deployment.containers %}
               <div><b>{{ container.name }}</b> {{ container.image }}</div>
               {% endfor %}
@@ -294,25 +294,25 @@
       <table class="table table-hover no-actions" id="table-nodes">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Namespace</th>
-            <th>Cluster IP</th>
-            <th>Ports</th>
-            <th>External IP</th>
+            <th class="col-md-3">Name</th>
+            <th class="col-md-2">Namespace</th>
+            <th class="col-md-2">Cluster IP</th>
+            <th class="col-md-3">Ports</th>
+            <th class="col-md-2">External IP</th>
           </tr>
         </thead>
         <tbody>
           {% for service in status.services %}
           <tr>
-            <td>{{ service.name }}</td>
-            <td>{{ service.namespace }}</td>
-            <td><a href="http://{{ service.cluster_ip }}">{{ service.cluster_ip }}</a></td>
-            <td>
+            <td class="col-md-3">{{ service.name }}</td>
+            <td class="col-md-2">{{ service.namespace }}</td>
+            <td class="col-md-2"><a href="http://{{ service.cluster_ip }}">{{ service.cluster_ip }}</a></td>
+            <td class="col-md-3">
               {% for port in service.ports %}
               <div>{{ port }}</div>
               {% endfor %}
             </td>
-            <td>
+            <td class="col-md-2">
               <ul>
                 {% for external_ip in service.external_ip %}
                 <li class="external-ip">
@@ -341,17 +341,17 @@
       <table class="table table-hover no-actions" id="table-images">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Size</th>
+            <th class="col-md-10">Name</th>
+            <th class="col-md-2">Size</th>
           </tr>
         </thead>
         <tbody>
           {% for image in status.images %}
           <tr>
-            <td>
+            <td class="col-md-10">
               <span data-toggle="popover" data-trigger="hover" data-content="{{ image.names[0] }}" class="pop-help">{{ image.names[-1] }}</span>
             </td>
-            <td>{{ image.size_bytes }}</td>
+            <td class="col-md-2">{{ image.size_bytes }}</td>
           </tr>
           {% else %}
           <tr class="not-event-pointer"><td colspan="6" class="text-center">No Items</td></tr>
