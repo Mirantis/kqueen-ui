@@ -1,3 +1,5 @@
+{% from "ui/partial/tableaction.html" import render_cluster_row_actions with context %}
+
 {% macro render_cluster_row(cluster, index) %}
         {% set is_in_progress = cluster.state in config.CLUSTER_TRANSIENT_STATES %}
         {% set not_authorized = not is_authorized(session, 'cluster:delete', cluster) %}
@@ -8,7 +10,7 @@
           data-status="{{ cluster.state }}"
           data-href="{{ url_for('ui.cluster_detail', cluster_id=cluster.id) }}"
         >
-          <td class="col-md-1">
+          <td>
             <input
               type="checkbox"
               id="select-cluster-{{ cluster.id }}"
@@ -36,7 +38,7 @@
             {% endif %}
           </td>
           <td class="col-md-4">{{ cluster.provisioner.name }}</td>
-          <td class="col-md-3">{{ cluster.created_at }}</td>
+          <td class="col-md-4">{{ cluster.created_at }}</td>
           <td class="status_column">
             {{ cluster.state|cluster_status_icon|safe }}
           </td>
@@ -51,6 +53,7 @@
               <i class="mdi mdi-information-outline"></i>
             </a>
             {% endif %}
+            {{ render_cluster_row_actions(cluster) }}
           </td>
         </tr>
         {% if cluster.metadata %}

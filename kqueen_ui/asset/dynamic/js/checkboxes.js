@@ -10,8 +10,7 @@ function handleBulkDelete({
 
   var isZeroCount = (selector) => !$(selector).get().length;
   var setDeleteButtonState = (enable) => {
-    // "disabled" prop is not allowed for anchors, so a class is used instead
-    enable ? bulkDeleteButton.removeClass('disabled') : bulkDeleteButton.addClass('disabled');
+    enable ? bulkDeleteButton.removeClass('hidden') : bulkDeleteButton.addClass('hidden');
   }
   var getSelectedObjectsNames = () => $(checkedRowsSelector).map(function() {
     return this.value;

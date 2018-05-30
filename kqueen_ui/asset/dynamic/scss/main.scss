@@ -481,6 +481,10 @@ table {
   .table-actions {
     padding-bottom: 24px;
     text-align: right;
+    .bulk-delete-clusters, .bulk-delete-provisioners {
+      margin-right: 40px;
+      height: 35px;
+    }
   }
   .table {
     .status_column {
