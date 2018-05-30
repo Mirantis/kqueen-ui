@@ -79,6 +79,12 @@ def test_organization_create(client_login_superadmin, organization, monkeypatch)
     assert response.headers['Location'].endswith(url_for('manager.overview'))
 
 
+def test_organization_delete(client_login_superadmin, organization):
+    response = client_login_superadmin.get(url_for('manager.organization_delete', organization_id=organization['id']))
+    assert response.status_code == 302
+    assert response.headers['Location'].endswith(url_for('manager.overview'))
+
+
 def test_member_create(client_login_superadmin, user, monkeypatch):
     # POST
     def mock_user_list(self):

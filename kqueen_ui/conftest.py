@@ -174,7 +174,10 @@ def cluster():
         'state': 'OK',
         'kubeconfig': kubeconfig(),
         'metadata': {
-            'node_count': '2'
+            'node_count': '2',
+            'network_policy': {
+                'provider': 'CALICO'
+            }
         },
         'created_at': datetime.utcnow(),
         'owner': user()
@@ -280,6 +283,8 @@ def no_kqueen_requests(monkeypatch):
             return obj
         elif action == 'delete':
             return {'id': obj['id'], 'state': 'deleted'}
+        elif action == 'deletable':
+            return {'deletable': True}
         elif action == 'engines':
             return provisioner_engines()
         elif action == 'status':
@@ -291,6 +296,8 @@ def no_kqueen_requests(monkeypatch):
         elif action == 'progress':
             return cluster_progress()
         elif action == 'resize':
+            return obj
+        elif action == 'set_network_policy':
             return obj
         elif action == 'update':
             obj.update(fnkwargs.get('payload', {}))
