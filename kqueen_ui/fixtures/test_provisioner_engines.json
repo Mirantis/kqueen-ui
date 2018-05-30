@@ -111,6 +111,26 @@
               "Asia - Southeast 1 - A"
             ]
           ]
+        },
+        "network_policy": {
+          "type": "select",
+          "label": "Network Policy",
+          "order": 5,
+          "choices": [
+            [
+              "PROVIDER_UNSPECIFIED",
+              "<disabled>"
+            ],
+            [
+              "CALICO",
+              "Calico"
+            ]
+          ],
+          "default": "PROVIDER_UNSPECIFIED",
+          "validators": {
+            "required": false
+          },
+          "class_name": "network-policy"
         }
       }
     },
