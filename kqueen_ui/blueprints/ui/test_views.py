@@ -6,6 +6,7 @@ import pytest
 
 @pytest.mark.parametrize('view,values', [
     ('ui.index', {}),
+    ('ui.overview_pies', {}),
     ('ui.logout', {}),
     ('ui.organization_manage', {}),
     ('ui.user_invite', {}),
@@ -26,8 +27,18 @@ def test_login_required(client, view, values):
     assert response.status_code == 302
 
 
+@pytest.mark.parametrize('view,values', [
+    ('ui.cluster_resize', {'cluster_id': 1}),
+    ('ui.set_network_policy', {'cluster_id': 1})
+])
+def test_login_required_for_post(client, view, values):
+    response = client.post(url_for(view, **values))
+    assert response.status_code == 302
+
+
 @pytest.mark.parametrize('view,values,lookup_html', [
     ('ui.index', {}, ['<h2>Overview</h2>', 'pytest-provisioner', 'pytest-cluster']),
+    ('ui.overview_pies', {}, []),
     ('ui.organization_manage', {}, ['<h2>Manage PytestOrg</h2>']),
     ('ui.user_invite', {}, ['h2>Invite Member</h2>']),
     ('ui.user_change_password', {}, ['<h2>Change Password</h2>']),
@@ -171,3 +182,9 @@ def test_cluster_topology_data(client_login, cluster):
     response = client_login.get(url_for('ui.cluster_topology_data', cluster_id=cluster['id']))
     assert response.status_code == 200
     assert response.json == {}
+
+
+def test_set_cluster_network_policy(client_login, cluster):
+    response = client_login.post(url_for('ui.set_network_policy', cluster_id=cluster['id']))
+    assert response.status_code == 302
+    assert response.headers['Location'].endswith(url_for('ui.index'))
