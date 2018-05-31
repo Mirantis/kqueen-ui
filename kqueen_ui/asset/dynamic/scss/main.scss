@@ -45,6 +45,11 @@ a.disabled {
   pointer-events: none !important;
 }
 
+.disabled-wrapper {
+  display: inline-block;
+  cursor: not-allowed !important;
+}
+
 .box {
   margin-bottom: 50px;
   @include prefix(box-shadow, 1px 1px 4px 0px rgba(187,187,187,1), webkit moz);
@@ -476,6 +481,10 @@ table {
   .table-actions {
     padding-bottom: 24px;
     text-align: right;
+    .bulk-delete-clusters, .bulk-delete-provisioners {
+      margin-right: 40px;
+      height: 35px;
+    }
   }
   .table {
     .status_column {
@@ -551,6 +560,9 @@ table {
         border: 1px solid $brand-danger;
         color: $brand-danger;
       }
+    }
+    .cluster-name {
+      display: inline-block;
     }
   }
   &.no-actions {
@@ -645,6 +657,58 @@ td.mdi-account {
   font-size: 22px;
   float: left;
   margin-right: 3px;
+}
+
+div.bulk-action {
+  text-align: right;
+  margin-top: -5px;
+}
+
+.table > tbody > tr > td.clickable-cluster-name {
+  padding: 0;
+  &:hover {
+    background: #ecebeb;
+  }
+}
+.table-container .table div.cluster-name {
+  display: block;
+  a {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 8px;
+  }
+}
+
+input[type="checkbox"] {
+  display: none;
+  + label {
+    display: inline-block;
+    color: #7b7a7a;
+    cursor: pointer;
+    margin-bottom: 0;
+    .mdi:before {
+      font: normal normal normal 19px/1 "Material Design Icons";
+    }
+    .checkbox-all:before {
+      content: "\F137"; // mdi-checkbox-multiple-blank-outline
+    }
+    .checkbox-row:before {
+      content: "\F131"; // mdi-checkbox-blank-outline
+    }
+    .disabled {
+      color: #ccc;
+      pointer-events: none;
+    }
+  }
+  &:checked + label {
+    .checkbox-all:before {
+      content: "\F138"; // mdi-checkbox-multiple-marked
+    }
+    .checkbox-row:before {
+      content: "\F132"; // mdi-checkbox-marked
+    }
+  }
 }
 
 // *****************************************************************************

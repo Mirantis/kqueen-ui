@@ -4,6 +4,7 @@ from flask import Flask, redirect, request, url_for
 from kqueen_ui.blueprints.manager.views import manager
 from kqueen_ui.blueprints.registration.views import registration
 from kqueen_ui.blueprints.ui.views import ui
+from kqueen_ui.converters import ListConverter
 from kqueen_ui.exceptions import KQueenAPIException
 from kqueen_ui.utils.filters import filters, context_processors
 from kqueen_ui.utils.loggers import setup_logging
@@ -19,6 +20,8 @@ logger = logging.getLogger('kqueen_ui')
 
 def create_app(config_file=None):
     app = Flask(__name__, static_folder='./asset/static')
+
+    app.url_map.converters['list'] = ListConverter
 
     app.register_blueprint(manager, url_prefix='/manager')
     app.register_blueprint(registration, url_prefix='/registration')

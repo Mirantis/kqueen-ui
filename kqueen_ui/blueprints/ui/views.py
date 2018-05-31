@@ -540,32 +540,32 @@ class ProvisionerCreate(KQueenView):
         return render_template('ui/provisioner_create.html', form=form)
 
 
-class ProvisionerDelete(KQueenView):
+class ProvisionerDeleteBulk(KQueenView):
     decorators = [login_required]
     methods = ['GET']
-    validation_hint = 'uuid'
+    validation_hint = 'uuid_list'
 
-    def handle(self, provisioner_id):
+    def handle(self, provisioner_ids):
         # TODO: block deletion of used provisioner on backend, not here
         clusters = self.kqueen_request('cluster', 'list')
-        provisioner = self.kqueen_request('provisioner', 'get', fnargs=(provisioner_id,))
         used_provisioners = [p['id'] for p in [c['provisioner'] for c in clusters]]
-
-        if provisioner_id not in used_provisioners:
-            self.kqueen_request('provisioner', 'delete', fnargs=(provisioner_id,))
-            msg = 'Provisioner {} deleted.'.format(provisioner['name'])
-            user_logger.debug('{}:{}'.format(user_prefix(session), msg))
-            flash(msg, 'success')
-        else:
-            msg = 'Provisioner {} is in use, cannot delete.'.format(provisioner['name'])
-            user_logger.debug('{}:{}'.format(user_prefix(session), msg))
-            flash(msg, 'warning')
-
+        for provisioner_id in provisioner_ids:
+            provisioner = self.kqueen_request('provisioner', 'get', fnargs=(provisioner_id,))
+            if provisioner_id not in used_provisioners:
+                self.kqueen_request('provisioner', 'delete', fnargs=(provisioner_id,))
+                msg = 'Provisioner {} deleted.'.format(provisioner['name'])
+                user_logger.debug('{}:{}'.format(user_prefix(session), msg))
+                flash(msg, 'success')
+            else:
+                msg = 'Provisioner {} is in use, cannot delete.'.format(provisioner['name'])
+                user_logger.debug('{}:{}'.format(user_prefix(session), msg))
+                flash(msg, 'warning')
         return redirect(url_for('ui.index', _anchor='provisionersTab'))
 
 
 ui.add_url_rule('/provisioners/create', view_func=ProvisionerCreate.as_view('provisioner_create'))
-ui.add_url_rule('/provisioners/<provisioner_id>/delete', view_func=ProvisionerDelete.as_view('provisioner_delete'))
+ui.add_url_rule('/provisioners/<list:provisioner_ids>/delete',
+                view_func=ProvisionerDeleteBulk.as_view('provisioner_delete'))
 
 
 # Cluster
@@ -644,26 +644,28 @@ class ClusterCreate(KQueenView):
         return render_template('ui/cluster_create.html', form=form)
 
 
-class ClusterDelete(KQueenView):
+class ClusterDeleteBulk(KQueenView):
     decorators = [login_required]
     methods = ['GET']
-    validation_hint = 'uuid'
+    validation_hint = 'uuid_list'
 
-    def handle(self, cluster_id):
-        cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
-        msg = 'Cluster {} successfully deleted.'.format(cluster['name'])
+    def handle(self, cluster_ids):
+        for cluster_id in cluster_ids:
+            cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
+            msg = 'Cluster {} successfully deleted.'.format(cluster['name'])
 
-        if cluster['provisioner']['engine'] == 'kqueen.engines.ManualEngine':
-            flash('Manual Engine does not support cluster deleting, cluster will be detached.', 'warning')
-            msg = 'Cluster {} successfully detached.'.format(cluster['name'])
+            if cluster['provisioner']['engine'] == 'kqueen.engines.ManualEngine':
+                flash('Manual Engine does not support cluster deleting, cluster will be detached.',
+                      'warning')
+                msg = 'Cluster {} successfully detached.'.format(cluster['name'])
 
-        if cluster['state'] == app.config['CLUSTER_PROVISIONING_STATE']:
-            # TODO: handle state together with policies in helper for allowed table actions
-            flash('Cannot delete clusters during provisioning.', 'warning')
-            return redirect(request.environ.get('HTTP_REFERER', url_for('ui.index')))
-        self.kqueen_request('cluster', 'delete', fnargs=(cluster_id,))
-        user_logger.debug('{}:{}'.format(user_prefix(session), msg))
-        flash(msg, 'success')
+            if cluster['state'] == app.config['CLUSTER_PROVISIONING_STATE']:
+                # TODO: handle state together with policies in helper for allowed table actions
+                flash('Cannot delete clusters during provisioning.', 'warning')
+            else:
+                self.kqueen_request('cluster', 'delete', fnargs=(cluster_id,))
+                user_logger.debug('{}:{}'.format(user_prefix(session), msg))
+                flash(msg, 'success')
         return redirect(url_for('ui.index'))
 
 
@@ -812,8 +814,8 @@ class ClusterRow(KQueenView):
 
 ui.add_url_rule('/clusters/create',
                 view_func=ClusterCreate.as_view('cluster_create'))
-ui.add_url_rule('/clusters/<cluster_id>/delete',
-                view_func=ClusterDelete.as_view('cluster_delete'))
+ui.add_url_rule('/clusters/<list:cluster_ids>/delete',
+                view_func=ClusterDeleteBulk.as_view('cluster_delete'))
 ui.add_url_rule('/clusters/<cluster_id>/deployment-status',
                 view_func=ClusterDeploymentStatus.as_view('cluster_deployment_status'))
 ui.add_url_rule('/clusters/<cluster_id>/detail',

@@ -31,12 +31,26 @@
         </div>
         <div class="col-xs-4">
           <div class="table-actions">
+            {% if clusters %}
+              <a
+                class="btn btn-danger btn-sm hidden confirm-delete bulk-delete-clusters"
+                title="Delete cluster"
+              >
+                <i class="mdi mdi-delete-forever"></i> Delete
+              </a>
+            {% endif %}
             {{ render_cluster_table_actions(provisioners|healthy_provisioners) }}
           </div>
         </div>
       </div>
       <table class="table table-hover">
         <thead>
+          <th>
+            {% if clusters %}
+              <input type="checkbox" class="select-all-clusters" id="select-all-clusters" />
+              <label for="select-all-clusters"><i class="mdi checkbox-all"></i></label>
+            {% endif %}
+          </th>
           <th class="col-md-4">Name</th>
           <th class="col-md-4">Provisioner</th>
           <th class="col-md-4">Created</th>
@@ -63,12 +77,30 @@
         </div>
         <div class="col-xs-4">
           <div class="table-actions">
+            {% if provisioners %}
+              <a
+                class="btn btn-danger btn-sm hidden confirm-delete bulk-delete-provisioners"
+                title="Delete provisioner"
+              >
+                <i class="mdi mdi-delete-forever"></i> Delete
+              </a>
+            {% endif %}
             {{ render_provisioner_table_actions() }}
           </div>
         </div>
       </div>
       <table class="table table-hover">
         <thead>
+          <th>
+            {% if provisioners %}
+              <input
+                type="checkbox"
+                class="select-all-provisioners"
+                id="select-all-provisioners"
+              />
+              <label for="select-all-provisioners"><i class="mdi checkbox-all"></i></label>
+            {% endif %}
+          </th>
           <th class="col-md-4">Name</th>
           <th class="col-md-4">Engine</th>
           <th class="col-md-4">Created</th>
@@ -77,7 +109,24 @@
         </thead>
         <tbody>
           {% for provisioner in provisioners %}
-            <tr>
+            {% set cant_delete = not is_authorized(session, 'provisioner:delete', provisioner) %}
+            <tr class="clickable">
+              <td>
+                <input
+                  type="checkbox"
+                  id="select-provisioner-{{ provisioner.id }}"
+                  {% if cant_delete %}disabled{% endif %}
+                  class="select-provisioner"
+                  name="{{ provisioner.id }}"
+                  value="{{ provisioner.name }}"
+                />
+                <label
+                  for="select-provisioner-{{ provisioner.id }}"
+                  {% if cant_delete %}class="disabled-wrapper"{% endif %}
+                >
+                  <i class="mdi checkbox-row{% if cant_delete %} disabled{% endif %}"></i>
+                </label>
+              </td>
               <td class="col-md-4">{{ provisioner.name }}</td>
               <td class="col-md-4">{{ provisioner.verbose_name }}</td>
               <td class="col-md-4">{{ provisioner.created_at }}</td>
@@ -188,12 +237,14 @@ setInterval(function(){
 }, 15000);
 
 $(document).ready(function() {
-  $('tr.clickable').click(function(e) {
-    if (e.target.tagName === 'TD') {
-      var link = $(this).data('href');
-      if (link) window.location = link;
-    }
-  });
+  var bulkDeleteTargets = ['cluster', 'provisioner'];
+  bulkDeleteTargets.forEach((target) => handleBulkDelete({
+    selectAllCheckboxSelector: `input[type="checkbox"].select-all-${target}s`,
+    rowCheckboxesSelector: `input[type="checkbox"].select-${target}`,
+    buttonSelector: `a.bulk-delete-${target}s`,
+    formTargetUrl: (ids) => `/ui/${target}s/${ids}/delete`,
+    targetName: target
+  }));
 });
 </script>
 {% endblock %}
