@@ -164,34 +164,34 @@ document.addEventListener("DOMContentLoaded", function() {
     >
       <i class="mdi mdi-plus"></i>
     </button>
-    <table class="fieldset-table">
-      {% for subform in field %}
+    {% if field %}
+      <table class="fieldset-table">
         <tr>
-          {% for subfield in subform %}
+          {% for subfield in field[0] %}
             <th>{{ subfield.label }}</th>
           {% endfor %}
           <th></th>
         </tr>
-      {% endfor %}
-      {% for subform in field %}
-        <tr data-toggle="fieldset-entry">
-          {% for subfield in subform %}
-            <td> {{ subfield(class="form-control")|safe }} </td>
-          {% endfor %}
-          <td>
-            <button
-              class="btn btn-xs btn-danger"
-              type="button"
-              data-toggle="tooltip"
-              title="Remove parameter"
-              id="{{ field.name }}-{{ loop.index0 }}-remove-row">
-              <i class="mdi mdi-minus"></i>
-            </button>
-          </td>
-        </tr>
-      {% endfor %}
-    </table>
-    {% if field.errors %}
+        {% for subform in field %}
+          <tr data-toggle="fieldset-entry">
+            {% for subfield in subform %}
+              <td>{{ subfield(class="form-control")|safe }}</td>
+            {% endfor %}
+            <td>
+              <button
+                class="btn btn-xs btn-danger"
+                type="button"
+                data-toggle="tooltip"
+                title="Remove parameter"
+                id="{{ field.name }}-{{ loop.index0 }}-remove-row"
+              >
+                <i class="mdi mdi-minus"></i>
+              </button>
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% elif field.errors %}
       <span class="help-block">
         {% for error in field.errors %}
           {{ error }}
