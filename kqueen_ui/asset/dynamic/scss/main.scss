@@ -434,6 +434,10 @@ label.error {
   margin: 15px;
   td {
     padding: 0 20px 10px 0;
+    vertical-align: top;
+    button {
+      margin-top: 5px;
+    }
   }
   th {
     color: $gray;
@@ -441,8 +445,16 @@ label.error {
       font-weight: 500;
     }
   }
+  input[type="text"].form-control {
+    min-width: 230px;
+  }
   textarea.form-control {
     height: 38px;
+    min-width: 230px;
+    min-height: 38px;
+    max-width: 600px;
+    width: 100%;
+    margin-right: 0 !important;
   }
 }
 
