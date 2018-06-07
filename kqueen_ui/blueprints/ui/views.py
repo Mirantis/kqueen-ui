@@ -523,17 +523,29 @@ class ProvisionerCreate(KQueenView):
                 flash(msg, 'danger')
                 render_template('ui/provisioner_create.html', form=form)
 
-            owner_ref = 'User:{}'.format(session['user']['id'])
-            provisioner_kw = {
-                'name': form.name.data,
-                'engine': form.engine.data,
-                'state': app.config['PROVISIONER_UNKNOWN_STATE'],
-                'parameters': parameters,
-                'created_at': datetime.utcnow(),
-                'owner': owner_ref
-            }
-            provisioner = self.kqueen_request('provisioner', 'create', fnargs=(provisioner_kw,))
-            msg = 'Provisioner {} created.'.format(provisioner['name'])
+            try:
+                count = int(request.form.get('count'))
+            except (ValueError, TypeError):
+                count = 1
+            add_index = request.form.get('add-inique-index') == 'on'
+            created_provisioner_names = []
+            for provisioner_index in range(1, count + 1):
+                owner_ref = 'User:{}'.format(session['user']['id'])
+                provisioner_kw = {
+                    'name': form.name.data + ('-{}'.format(provisioner_index) if add_index else ''),
+                    'engine': form.engine.data,
+                    'state': app.config['PROVISIONER_UNKNOWN_STATE'],
+                    'parameters': parameters,
+                    'created_at': datetime.utcnow(),
+                    'owner': owner_ref
+                }
+                provisioner = self.kqueen_request('provisioner', 'create', fnargs=(provisioner_kw,))
+                created_provisioner_names.append(provisioner['name'])
+
+            msg = 'Provisioner{ending} {names} created.'.format(
+                ending='s' if len(created_provisioner_names) > 1 else '',
+                names=', '.join(created_provisioner_names)
+            )
             user_logger.debug('{}:{}'.format(user_prefix(session), msg))
             flash(msg, 'success')
             return redirect(url_for('ui.index', _anchor='provisionersTab'))
@@ -625,19 +637,29 @@ class ClusterCreate(KQueenView):
                 flash('Invalid cluster metadata.', 'danger')
                 render_template('ui/cluster_create.html', form=form)
 
-            owner_ref = 'User:{}'.format(session['user']['id'])
-            provisioner_id = form.provisioner.data
-            cluster_kw = {
-                'name': form.name.data,
-                'state': app.config['CLUSTER_PROVISIONING_STATE'],
-                'provisioner': 'Provisioner:{}'.format(provisioner_id),
-                'created_at': datetime.utcnow(),
-                'metadata': metadata,
-                'owner': owner_ref
-            }
-
-            cluster = self.kqueen_request('cluster', 'create', fnargs=(cluster_kw,))
-            msg = 'Provisioning of cluster {} is in progress.'.format(cluster['name'])
+            try:
+                count = int(request.form.get('count'))
+            except (ValueError, TypeError):
+                count = 1
+            add_index = request.form.get('add-inique-index') == 'on'
+            created_cluster_names = []
+            for cluster_index in range(1, count + 1):
+                owner_ref = 'User:{}'.format(session['user']['id'])
+                provisioner_id = form.provisioner.data
+                cluster_kw = {
+                    'name': form.name.data + ('-{}'.format(cluster_index) if add_index else ''),
+                    'state': app.config['CLUSTER_PROVISIONING_STATE'],
+                    'provisioner': 'Provisioner:{}'.format(provisioner_id),
+                    'created_at': datetime.utcnow(),
+                    'metadata': metadata,
+                    'owner': owner_ref
+                }
+                cluster = self.kqueen_request('cluster', 'create', fnargs=(cluster_kw,))
+                created_cluster_names.append(cluster['name'])
+            msg = 'Provisioning of cluster{ending} {names} is in progress.'.format(
+                ending='s' if len(created_cluster_names) > 1 else '',
+                names=', '.join(created_cluster_names)
+            )
             user_logger.debug('{}:{}'.format(user_prefix(session), msg))
             flash(msg, 'success')
             return redirect(url_for('ui.index'))
