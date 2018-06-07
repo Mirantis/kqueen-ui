@@ -308,7 +308,7 @@ def sanitize_resource_metadata(session, clusters, provisioners):
                     cluster['metadata'][param_name] = '*****************'
                 except KeyError:
                     pass
-        cluster['metadata'] = OrderedDict(sorted(cluster['metadata'].items(), key=lambda t: t[0]))
+        cluster['metadata'] = OrderedDict(sorted(cluster.get('metadata', {}).items(), key=lambda t: t[0]))
 
     # sort provisioners by date
     if isinstance(provisioners, list):
