@@ -1,51 +1,54 @@
 {% extends "ui/base.html" %}
 
 {% block content %}
-<div class="col-md-6 col-md-offset-3">
-  <div class="panel panel-default text-center login">
-    <div class="panel-heading">
-      <h3>Log In</h3>
+      <div class="panel panel-default text-center login">
+        <img class="logo-img"
+          src="{{ url_for('static', filename='img/kqueen-logo-titul.svg') }}"
+        />
+      <div class="panel-body">
+        <form action="{{ url_for('ui.login') }}" method="post">
+          {{ form.hidden_tag() }}
+          <div class="form-group">
+            <div class="wrapper">
+          <span class="login-icon">
+             <i class="mdi mdi-account"></i>
+          </span>
+              <input
+                type="text"
+                name="username"
+                class="form-control login-input"
+                id="login_username"
+                placeholder="Username"
+              />
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="wrapper">
+          <span class="login-icon">
+             <i class="mdi mdi-lock"></i>
+          </span>
+              <input
+                type="password"
+                name="password"
+                class="form-control login-input"
+                id="login_password"
+                placeholder="Password"
+              />
+            </div>
+          </div>
+          <input type="hidden" name="next" value="{{ request.args.get('next', '/') }}"/>
+          <button type="submit" class="btn btn-primary btn-md">Log In</button>
+        </form>
+      </div>
+      <div class="panel-footer">
+        {% if config.ENABLE_PUBLIC_REGISTRATION %}
+          <span class="sign-up">
+            <a href="{{ url_for('registration.register') }}">Need to sign up?</a>
+          </span>
+        {% endif %}
+        <span>
+          <a href="{{ url_for('ui.user_request_reset_password') }}">Forgot your password?</a>
+        </span>
+      </div>
     </div>
-    <div class="panel-body">
-      <form action="{{ url_for('ui.login') }}" method="post">
-        {% if error %}<p class="text-danger"><strong>Error:</strong> {{ error }}{% endif %}
-        <div class="form-group">
-          <input
-            type="text"
-            name="username"
-            class="form-control text-center"
-            id="login_username"
-            placeholder="Username"
-          />
-        </div>
-        <div class="form-group">
-          <input
-            type="password"
-            name="password"
-            class="form-control text-center"
-            id="login_password"
-            placeholder="Password"
-          />
-        </div>
-        <input type="hidden" name="next" value="{{ request.args.get('next', '/') }}" />
-        <button type="submit" class="btn btn-primary btn-sm">Submit</button>
-      </form>
-    </div>
-  </div>
-  <div class="panel panel-default text-center">
-    <div class="panel-body login-footer">
-      {% if config.ENABLE_PUBLIC_REGISTRATION == 'True' %}
-      <span>
-        Not registered yet? Click
-        <a href="{{ url_for('registration.register') }}">here</a>
-        to set up your user account.
-      </span><br>
-      {% endif %}
-      <span>
-        Forgot your password?
-        <a href="{{ url_for('ui.user_request_reset_password') }}">Request password reset</a>.
-      </span>
-    </div>
-  </div>
-</div>
 {% endblock %}

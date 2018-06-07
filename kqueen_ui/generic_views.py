@@ -25,14 +25,14 @@ class KQueenView(View):
     def _get_kqueen_service_client(self):
         return get_service_client()
 
-    def _handle_response(self, response, resource, action):
+    def handle_response(self, response, resource=None, action=None):
         if response is not None:
             msg = 'Status Code: {}; Data: {}'.format(str(response.status), str(response.data))
 
             if response.status == -1:
                 user_msg = 'Backend is unavailable at this time, please try again later.'
                 self.graceful_exit(msg, user_msg)
-            elif response.status == 401:
+            elif response.status == 401 and response and action:
                 fmt_action = str(action).lower()
                 fmt_resource = str(resource).lower()
                 user_msg = 'You are not authorized to {} {}.'.format(fmt_action, fmt_resource)
@@ -108,7 +108,7 @@ class KQueenView(View):
         except Exception as e:
             msg = 'Unknown error during backend API request'
             self.graceful_exit(msg, user_msg)
-        return self._handle_response(response, resource, action)
+        return self.handle_response(response, resource, action)
 
     def validate(self, **kwargs):
         if self.validation_hint:
