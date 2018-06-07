@@ -37,7 +37,7 @@ setup(
         'pyyaml',
         'python-slugify',
         'pytz',
-        'urllib3'
+        'urllib3==1.22'
     ],
     setup_requires=[
         'pytest-runner',
