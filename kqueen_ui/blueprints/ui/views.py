@@ -13,7 +13,8 @@ from kqueen_ui.utils.wrappers import login_required
 from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
                     ChangePasswordForm, UserInviteForm, UserProfileForm, RequestPasswordResetForm,
                     PasswordResetForm)
-from .utils import generate_password, prettify_engine_name, status_for_cluster_detail, sanitize_resource_metadata
+from .utils import (generate_password, prettify_engine_name, status_for_cluster_detail,
+                    sanitize_resource_metadata, form_overview, form_page_ranges)
 
 import copy
 import logging
@@ -58,24 +59,56 @@ def test_token():
 class Index(KQueenView):
     decorators = [login_required]
     methods = ['GET']
+    objects_per_page = 20
 
     def handle(self):
-        clusters = self.kqueen_request('cluster', 'list')
-        provisioners = self.kqueen_request('provisioner', 'list')
-        clusters, provisioners, overview = sanitize_resource_metadata(session, clusters, provisioners)
+        def request_page(object_name, page_arg):
+            try:
+                page = int(request.args.get(page_arg, 1))
+            except ValueError:
+                page = 1
+            return self.kqueen_request(
+                object_name, 'list', fnkwargs={'page': page, 'per_page': self.objects_per_page}
+            ), page
+
+        def get_pages_count(objects_total):
+            full_pages = objects_total // self.objects_per_page
+            return full_pages + 1 if objects_total % self.objects_per_page else full_pages
+
+        clusters, c_page = request_page('cluster', 'c_page')
+        provisioners, p_page = request_page('provisioner', 'p_page')
+        c_total, p_total = clusters['total'], provisioners['total']
+
+        clusters, provisioners = sanitize_resource_metadata(
+            session, clusters['items'], provisioners['items'])
+
+        c_health = self.kqueen_request('cluster', 'health')
+        p_health = self.kqueen_request('provisioner', 'health')
+
+        overview = form_overview(c_total, c_health, p_total, p_health)
+
+        anchor = request.args.get('_anchor')
+        if anchor:  # switch to the Provisioners tab
+            return redirect(url_for('ui.index', _anchor=anchor, c_page=c_page, p_page=p_page))
+
         return render_template('ui/index.html',
                                overview=overview,
                                clusters=clusters,
-                               provisioners=provisioners)
+                               provisioners=provisioners,
+                               cluster_pages=get_pages_count(c_total),
+                               current_cluster_page=c_page,
+                               provisioner_pages=get_pages_count(p_total),
+                               current_provisioner_page=p_page,
+                               form_page_ranges=form_page_ranges)
 
 
 class OverviewPies(KQueenView):
     decorators = [login_required]
     methods = ['GET']
 
-    def handle(self):
-        clusters = self.kqueen_request('cluster', 'list')
-        provisioners = self.kqueen_request('provisioner', 'list')
+    def handle(self):  # TODO ensure that here are all objects
+        clusters = self.kqueen_request('cluster', 'list', fnkwargs={'page': 0})
+        provisioners = self.kqueen_request('provisioner', 'list', fnkwargs={'page': 0})
         _, _, overview = sanitize_resource_metadata(session, clusters, provisioners)
         data = {
             'response': 200,
@@ -580,7 +613,7 @@ class ClusterCreate(KQueenView):
         unknown_state = app.config['PROVISIONER_UNKNOWN_STATE']
         ok_state = app.config['PROVISIONER_OK_STATE']
         provisioners = [
-            p for p in _provisioners
+            p for p in _provisioners['items']
             if p.get('state', unknown_state) == ok_state
         ]
         engines = self.kqueen_request('provisioner', 'engines')

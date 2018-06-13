@@ -21,6 +21,54 @@
   </li>
 </ul>
 
+{% macro url_for_page(page, is_provisioner) %}
+  {% if is_provisioner %}
+    "{{ url_for('ui.index', c_page=current_cluster_page, p_page=page, _anchor='provisionersTab') }}"
+  {% else %}
+    "{{ url_for('ui.index', c_page=page, p_page=current_provisioner_page) }}"
+  {% endif %}
+{% endmacro %}
+
+{% macro render_pagination(current_page, pages_total, label, is_provisioner) %}
+  <div class="row pagination-row">
+    <nav aria-label="{{ label }} navigation">
+      <ul class="pagination">
+        <li>
+          <a
+            {% if current_page == 1 %}class="disabled"{% endif %}
+            href={{ url_for_page(current_page - 1, is_provisioner) }}
+          >
+            <i class="mdi mdi-menu-left"></i>Previous
+          </a>
+        </li>
+        {# Leave only the first 2 pages, the last 2, and 4 neighbours of the current page #}
+        {% set displayed_ranges = form_page_ranges(current_page, pages_total) %}
+
+        {% for page_range in displayed_ranges %}
+          {% if not loop.first %}
+            <li><a class="disabled">...</a></li>
+          {% endif %}
+          {% for page in page_range %}
+            <li {% if current_page == page %}class="active"{% endif %}>
+              <a href={{ url_for_page(page, is_provisioner) }}>
+                {{ page }}
+              </a>
+            </li>
+          {% endfor %}
+        {% endfor %}
+        <li>
+          <a
+            {% if current_page == pages_total %}class="disabled"{% endif %}
+            href={{ url_for_page(current_page + 1, is_provisioner) }}
+          >
+            Next<i class="mdi mdi-menu-right"></i>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+{% endmacro %}
+
 <div class="tab-content dashboard-tab clearfix">
   {# CLUSTERS TAB #}
   <div class="tab-pane active" id="clusters">
@@ -65,6 +113,9 @@
           {% endfor %}
         </tbody>
       </table>
+      {% if cluster_pages > 1 %}
+        {{ render_pagination(current_cluster_page, cluster_pages, "Clusters", '') }}
+      {% endif %}
     </div>
   </div>
 
@@ -167,6 +218,9 @@
           {% endfor %}
         </tbody>
       </table>
+      {% if provisioner_pages > 1 %}
+        {{ render_pagination(current_provisioner_page, provisioner_pages, "Provisioners", True) }}
+      {% endif %}
     </div>
   </div>
 </div>
@@ -245,6 +299,11 @@ $(document).ready(function() {
     formTargetUrl: (ids) => `/ui/${target}s/${ids}/delete`,
     targetName: target
   }));
+
+  var provisionerAnchor = '{{ provisionerAnchor }}';
+  if (provisionerAnchor) {
+    window.location.hash = provisionerAnchor;
+  }
 });
 </script>
 {% endblock %}

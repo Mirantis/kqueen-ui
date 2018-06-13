@@ -45,6 +45,8 @@ class ParserMixin:
                 _dict[key] = dateutil_parse(value)
             elif isinstance(value, dict):
                 self._parse_response_datetime(value)
+            elif isinstance(value, list):
+                self._parse_response(value)
 
     def _parse_request_payload_datetime(self, _dict):
         for key, value in _dict.items():
@@ -61,7 +63,7 @@ class ParserMixin:
     def _parse_response(self, response):
         if isinstance(response, list):
             for item in response:
-                self._parse_response_datetime(item)
+                self._parse_response(item)
         elif isinstance(response, dict):
             self._parse_response_datetime(response)
         return response
@@ -212,12 +214,44 @@ class ClusterManager(BaseManager):
         }
         return self.request('%s/set_network_policy' % uuid, method='PATCH', payload=payload)
 
+    def list(self, namespace=None, all_namespaces=None, page=1, per_page=20):
+        encode_kw = {'offset': (page - 1) * per_page, 'limit': per_page} if page else {}
+        if all_namespaces:
+            encode_kw['all_namespaces'] = True
+        elif namespace:
+            encode_kw['namespace'] = namespace
+        return self.request('', encode_kw=encode_kw)
+
+    def health(self, namespace=None, all_namespaces=None):
+        encode_kw = None
+        if all_namespaces:
+            encode_kw = {'all_namespaces': True}
+        elif namespace:
+            encode_kw = {'namespace': namespace}
+        return self.request('health', encode_kw=encode_kw)
+
 
 class ProvisionerManager(BaseManager):
     resource_url = 'provisioners/'
 
     def engines(self):
         return self.request('engines')
+
+    def list(self, namespace=None, all_namespaces=None, page=1, per_page=20):
+        encode_kw = {'offset': (page - 1) * per_page, 'limit': per_page} if page else {}
+        if all_namespaces:
+            encode_kw['all_namespaces'] = True
+        elif namespace:
+            encode_kw['namespace'] = namespace
+        return self.request('', encode_kw=encode_kw)
+
+    def health(self, namespace=None, all_namespaces=None):
+        encode_kw = None
+        if all_namespaces:
+            encode_kw = {'all_namespaces': True}
+        elif namespace:
+            encode_kw = {'namespace': namespace}
+        return self.request('health', encode_kw=encode_kw)
 
 
 class OrganizationManager(BaseManager):
