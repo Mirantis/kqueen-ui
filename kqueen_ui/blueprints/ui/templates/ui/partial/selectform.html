@@ -39,6 +39,9 @@ document.addEventListener("DOMContentLoaded", function() {
 {% if tagged_fields|length > 0 %}
 <script>
 document.addEventListener("DOMContentLoaded", function() {
+  $(function () {
+    $("[data-toggle=popover]").popover({html: true, placement: "auto top", trigger: "focus"});
+  });
   $.validator.addMethod("jsonfile", validateJsonFileField, $.validator.format("Test validation"));
   $.validator.addMethod("yamlfile", validateYamlFileField, $.validator.format("Test validation"));
   $.validator.addMethod(

@@ -64,6 +64,11 @@ class FlaskExtendableForm(FlaskForm):
                     'switchtag': switchtag,
                     'jsvalidators': jsvalidators
                 }
+
+                help_message = field_params.get('help_message')
+                if help_message:
+                    field_kwargs['render_kw'] = {'data-toggle': 'popover',
+                                                 'data-content': help_message}
                 if field_class == SelectField:
                     field_kwargs['choices'] = field_params.get('choices', [])
                 additional_fields = ['default', 'class_name', 'checkbox_text', 'placeholder']
