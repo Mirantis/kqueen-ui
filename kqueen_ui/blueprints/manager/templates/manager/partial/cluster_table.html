@@ -1,7 +1,7 @@
 <div class="table-container no-actions" id="tableClusters">
   <table class="table table-hover">
     <thead>
-      <th class="col-md-3">Namespace</th>
+      <th class="col-md-3">Organization</th>
       <th class="col-md-3">Name</th>
       <th class="col-md-3">Provisioner</th>
       <th class="col-md-3">Created</th>
@@ -11,7 +11,7 @@
     <tbody>
       {% for cluster in clusters %}
         <tr {% if cluster.state in config.CLUSTER_TRANSIENT_STATES %} class="in-transition"{% endif %}>
-          <td class="col-md-3">{{ cluster._namespace }}</td>
+          <td class="col-md-3">{{ cluster.owner.organization.name }}</td>
           <td class="col-md-3">{{ cluster.name }}</td>
           <td class="col-md-3">{{ cluster.provisioner.name }}</td>
           <td class="col-md-3">{{ cluster.created_at }}</td>

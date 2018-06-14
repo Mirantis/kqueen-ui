@@ -1,7 +1,7 @@
 <div class="table-container no-actions" id="tableProvisioners">
   <table class="table table-hover">
     <thead>
-      <th class="col-md-3">Namespace</th>
+      <th class="col-md-3">Organization</th>
       <th class="col-md-3">Name</th>
       <th class="col-md-3">Engine</th>
       <th class="col-md-3">Created</th>
@@ -11,7 +11,7 @@
     <tbody>
       {% for provisioner in provisioners %}
         <tr>
-          <td class="col-md-3">{{ provisioner._namespace }}</td>
+          <td class="col-md-3">{{ provisioner.owner.organization.name }}</td>
           <td class="col-md-3">{{ provisioner.name }}</td>
           <td class="col-md-3">{{ provisioner.verbose_name }}</td>
           <td class="col-md-3">{{ provisioner.created_at }}</td>
