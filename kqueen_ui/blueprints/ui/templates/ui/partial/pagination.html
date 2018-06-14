@@ -1,0 +1,47 @@
+{% macro _url_for_page(view, page, anchor) %}
+  {% if anchor %}
+    "{{ url_for(view, c_page=current_cluster_page, p_page=page, _anchor=anchor) }}"
+  {% else %}
+    "{{ url_for(view, c_page=page, p_page=current_provisioner_page) }}"
+  {% endif %}
+{% endmacro %}
+
+{% macro render_pagination(view, current_page, pages_total, label, anchor) %}
+  <div class="row pagination-row">
+    <nav aria-label="{{ label }} navigation">
+      <ul class="pagination">
+        <li>
+          <a
+            {% if current_page == 1 %}class="disabled"{% endif %}
+            href={{ _url_for_page(view, current_page - 1, anchor) }}
+          >
+            <i class="mdi mdi-menu-left"></i><span>Previous</span>
+          </a>
+        </li>
+        {# Leave only the first 2 pages, the last 2, and 4 neighbours of the current page #}
+        {% set displayed_ranges = form_page_ranges(current_page, pages_total) %}
+
+        {% for page_range in displayed_ranges %}
+          {% if not loop.first %}
+            <li><a class="disabled">...</a></li>
+          {% endif %}
+          {% for page in page_range %}
+            <li {% if current_page == page %}class="active"{% endif %}>
+              <a href={{ _url_for_page(view, page, anchor) }}>
+                {{ page }}
+              </a>
+            </li>
+          {% endfor %}
+        {% endfor %}
+        <li>
+          <a
+            {% if current_page == pages_total %}class="disabled"{% endif %}
+            href={{ _url_for_page(view, current_page + 1, anchor) }}
+          >
+            <span>Next</span><i class="mdi mdi-menu-right"></i>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+{% endmacro %}

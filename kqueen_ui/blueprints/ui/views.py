@@ -85,7 +85,8 @@ class Index(KQueenView):
         c_health = self.kqueen_request('cluster', 'health')
         p_health = self.kqueen_request('provisioner', 'health')
 
-        overview = form_overview(c_total, c_health, p_total, p_health)
+        overview = form_overview(c_total, c_health['healthy_percentage'],
+                                 p_total, p_health['healthy_percentage'])
 
         anchor = request.args.get('_anchor')
         if anchor:  # switch to the Provisioners tab
@@ -106,10 +107,13 @@ class OverviewPies(KQueenView):
     decorators = [login_required]
     methods = ['GET']
 
-    def handle(self):  # TODO ensure that here are all objects
-        clusters = self.kqueen_request('cluster', 'list', fnkwargs={'page': 0})
-        provisioners = self.kqueen_request('provisioner', 'list', fnkwargs={'page': 0})
-        _, _, overview = sanitize_resource_metadata(session, clusters, provisioners)
+    def handle(self):
+        c_health = self.kqueen_request('cluster', 'health')
+        p_health = self.kqueen_request('provisioner', 'health')
+
+        overview = form_overview(c_health['total'], c_health['healthy_percentage'],
+                                 p_health['total'], p_health['healthy_percentage'])
+
         data = {
             'response': 200,
             'overview_pies': render_template(
@@ -580,7 +584,7 @@ class ProvisionerDeleteBulk(KQueenView):
 
     def handle(self, provisioner_ids):
         # TODO: block deletion of used provisioner on backend, not here
-        clusters = self.kqueen_request('cluster', 'list')
+        clusters = self.kqueen_request('cluster', 'list', fnkwargs={'page': 0})
         used_provisioners = [p['id'] for p in [c['provisioner'] for c in clusters]]
         for provisioner_id in provisioner_ids:
             provisioner = self.kqueen_request('provisioner', 'get', fnargs=(provisioner_id,))
@@ -609,11 +613,11 @@ class ClusterCreate(KQueenView):
 
     def handle(self):
         # Get all necessary objects from backend
-        _provisioners = self.kqueen_request('provisioner', 'list')
+        _provisioners = self.kqueen_request('provisioner', 'list', fnkwargs={'page': 0})
         unknown_state = app.config['PROVISIONER_UNKNOWN_STATE']
         ok_state = app.config['PROVISIONER_OK_STATE']
         provisioners = [
-            p for p in _provisioners['items']
+            p for p in _provisioners
             if p.get('state', unknown_state) == ok_state
         ]
         engines = self.kqueen_request('provisioner', 'engines')
@@ -831,7 +835,7 @@ class ClusterRow(KQueenView):
 
     def handle(self, cluster_id, index):
         cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
-        clusters, _, _ = sanitize_resource_metadata(session, [cluster], [])
+        clusters, _ = sanitize_resource_metadata(session, [cluster], [])
         cluster = clusters[0]
         data = {
             'response': 200,

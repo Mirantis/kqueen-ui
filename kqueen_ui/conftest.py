@@ -247,7 +247,8 @@ def client_login_superadmin(client, monkeypatch):
 
 @pytest.fixture(autouse=True)
 def no_kqueen_requests(monkeypatch):
-    def mock_kqueen_request(self, resource, action, fnargs=(), fnkwargs={}, service=False):
+    def mock_kqueen_request(self, resource, action, fnargs=(), fnkwargs=None, service=False):
+        fnkwargs = fnkwargs or {}
         if resource == 'cluster':
             obj = cluster()
         elif resource == 'provisioner':
@@ -267,6 +268,8 @@ def no_kqueen_requests(monkeypatch):
         if action == 'get':
             return obj
         elif action == 'list':
+            if fnkwargs.get('page'):
+                return {"total": 1, "items": [obj]}
             return [obj]
         elif action == 'create':
             obj.update(fnkwargs.get('payload', {}))
@@ -299,6 +302,8 @@ def no_kqueen_requests(monkeypatch):
             return obj
         elif action == 'set_network_policy':
             return obj
+        elif action == 'health':
+            return {"total": 1, "healthy_percentage": 100}
         elif action == 'update':
             obj.update(fnkwargs.get('payload', {}))
             return obj

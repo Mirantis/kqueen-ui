@@ -2,6 +2,7 @@
 {% from "ui/partial/tableaction.html" import render_cluster_table_actions, render_provisioner_table_actions, render_provisioner_row_actions with context %}
 {% from "ui/partial/_cluster_row.html" import render_cluster_row with context %}
 {% from "ui/partial/_overview_pies.html" import render_overview_pies with context %}
+{% from "ui/partial/pagination.html" import render_pagination with context %}
 
 {% block page_header %}Overview{% endblock %}
 
@@ -20,54 +21,6 @@
     </a>
   </li>
 </ul>
-
-{% macro url_for_page(page, is_provisioner) %}
-  {% if is_provisioner %}
-    "{{ url_for('ui.index', c_page=current_cluster_page, p_page=page, _anchor='provisionersTab') }}"
-  {% else %}
-    "{{ url_for('ui.index', c_page=page, p_page=current_provisioner_page) }}"
-  {% endif %}
-{% endmacro %}
-
-{% macro render_pagination(current_page, pages_total, label, is_provisioner) %}
-  <div class="row pagination-row">
-    <nav aria-label="{{ label }} navigation">
-      <ul class="pagination">
-        <li>
-          <a
-            {% if current_page == 1 %}class="disabled"{% endif %}
-            href={{ url_for_page(current_page - 1, is_provisioner) }}
-          >
-            <i class="mdi mdi-menu-left"></i>Previous
-          </a>
-        </li>
-        {# Leave only the first 2 pages, the last 2, and 4 neighbours of the current page #}
-        {% set displayed_ranges = form_page_ranges(current_page, pages_total) %}
-
-        {% for page_range in displayed_ranges %}
-          {% if not loop.first %}
-            <li><a class="disabled">...</a></li>
-          {% endif %}
-          {% for page in page_range %}
-            <li {% if current_page == page %}class="active"{% endif %}>
-              <a href={{ url_for_page(page, is_provisioner) }}>
-                {{ page }}
-              </a>
-            </li>
-          {% endfor %}
-        {% endfor %}
-        <li>
-          <a
-            {% if current_page == pages_total %}class="disabled"{% endif %}
-            href={{ url_for_page(current_page + 1, is_provisioner) }}
-          >
-            Next<i class="mdi mdi-menu-right"></i>
-          </a>
-        </li>
-      </ul>
-    </nav>
-  </div>
-{% endmacro %}
 
 <div class="tab-content dashboard-tab clearfix">
   {# CLUSTERS TAB #}
@@ -114,7 +67,7 @@
         </tbody>
       </table>
       {% if cluster_pages > 1 %}
-        {{ render_pagination(current_cluster_page, cluster_pages, "Clusters", '') }}
+        {{ render_pagination("ui.index", current_cluster_page, cluster_pages, "Clusters", "") }}
       {% endif %}
     </div>
   </div>
@@ -219,7 +172,8 @@
         </tbody>
       </table>
       {% if provisioner_pages > 1 %}
-        {{ render_pagination(current_provisioner_page, provisioner_pages, "Provisioners", True) }}
+        {{ render_pagination("ui.index", current_provisioner_page, provisioner_pages,
+                             "Provisioners", "provisionersTab") }}
       {% endif %}
     </div>
   </div>
@@ -299,11 +253,6 @@ $(document).ready(function() {
     formTargetUrl: (ids) => `/ui/${target}s/${ids}/delete`,
     targetName: target
   }));
-
-  var provisionerAnchor = '{{ provisionerAnchor }}';
-  if (provisionerAnchor) {
-    window.location.hash = provisionerAnchor;
-  }
 });
 </script>
 {% endblock %}

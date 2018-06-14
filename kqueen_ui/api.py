@@ -186,7 +186,27 @@ class BaseManager(ParserMixin):
         return self.request(uuid, method='PATCH', payload=payload)
 
 
-class ClusterManager(BaseManager):
+class ListManager(BaseManager):
+    resource_url = ''
+
+    def list(self, namespace=None, all_namespaces=None, page=1, per_page=20):
+        encode_kw = {'offset': (page - 1) * per_page, 'limit': per_page} if page else {}
+        if all_namespaces:
+            encode_kw['all_namespaces'] = True
+        elif namespace:
+            encode_kw['namespace'] = namespace
+        return self.request('', encode_kw=encode_kw)
+
+    def health(self, namespace=None, all_namespaces=None):
+        encode_kw = None
+        if all_namespaces:
+            encode_kw = {'all_namespaces': True}
+        elif namespace:
+            encode_kw = {'namespace': namespace}
+        return self.request('health', encode_kw=encode_kw)
+
+
+class ClusterManager(ListManager):
     resource_url = 'clusters/'
 
     def status(self, uuid):
@@ -214,44 +234,12 @@ class ClusterManager(BaseManager):
         }
         return self.request('%s/set_network_policy' % uuid, method='PATCH', payload=payload)
 
-    def list(self, namespace=None, all_namespaces=None, page=1, per_page=20):
-        encode_kw = {'offset': (page - 1) * per_page, 'limit': per_page} if page else {}
-        if all_namespaces:
-            encode_kw['all_namespaces'] = True
-        elif namespace:
-            encode_kw['namespace'] = namespace
-        return self.request('', encode_kw=encode_kw)
 
-    def health(self, namespace=None, all_namespaces=None):
-        encode_kw = None
-        if all_namespaces:
-            encode_kw = {'all_namespaces': True}
-        elif namespace:
-            encode_kw = {'namespace': namespace}
-        return self.request('health', encode_kw=encode_kw)
-
-
-class ProvisionerManager(BaseManager):
+class ProvisionerManager(ListManager):
     resource_url = 'provisioners/'
 
     def engines(self):
         return self.request('engines')
-
-    def list(self, namespace=None, all_namespaces=None, page=1, per_page=20):
-        encode_kw = {'offset': (page - 1) * per_page, 'limit': per_page} if page else {}
-        if all_namespaces:
-            encode_kw['all_namespaces'] = True
-        elif namespace:
-            encode_kw['namespace'] = namespace
-        return self.request('', encode_kw=encode_kw)
-
-    def health(self, namespace=None, all_namespaces=None):
-        encode_kw = None
-        if all_namespaces:
-            encode_kw = {'all_namespaces': True}
-        elif namespace:
-            encode_kw = {'namespace': namespace}
-        return self.request('health', encode_kw=encode_kw)
 
 
 class OrganizationManager(BaseManager):

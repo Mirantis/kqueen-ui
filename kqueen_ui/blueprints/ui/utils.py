@@ -1,6 +1,5 @@
 from collections import OrderedDict
-from datetime import datetime
-from flask_babel import format_datetime, to_user_timezone
+from flask_babel import format_datetime
 from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.config import current_config
 
