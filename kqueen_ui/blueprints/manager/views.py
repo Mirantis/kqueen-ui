@@ -15,6 +15,7 @@ from slugify import slugify
 
 from ...blueprints.ui.utils import form_page_ranges
 
+import json
 import logging
 
 logger = logging.getLogger('kqueen_ui')
@@ -35,9 +36,24 @@ def get_pages_count(objects_total, objects_per_page):
     return full_pages + 1 if objects_total % objects_per_page else full_pages
 
 
+def handle_exception_for_ajax(e):
+    try:
+        error_details = json.loads(str(e))
+        data = {
+            'response': error_details['code'],
+            'body': error_details['description']
+        }
+    except json.JSONDecodeError:
+        data = {
+            'response': 'unknown',
+            'body': str(e)
+        }
+    return jsonify(data)
+
 ##############
 # Interceptors
 ##############
+
 
 @manager.before_request
 def test_token():
@@ -87,10 +103,13 @@ class DataClusters(KQueenView):
 
     def handle(self):
         page = get_page(request.args, 'c_page')
-        clusters = self.kqueen_request(
-            'cluster', 'list',
-            fnkwargs={'all_namespaces': True, 'page': page, 'per_page': self.objects_per_page}
-        )
+        try:
+            clusters = self.kqueen_request(
+                'cluster', 'list',
+                fnkwargs={'all_namespaces': True, 'page': page, 'per_page': self.objects_per_page}
+            )
+        except Exception as e:
+            return handle_exception_for_ajax(e)
         cluster_pages = get_pages_count(clusters['total'], self.objects_per_page)
         clusters, _ = sanitize_resource_metadata(session, clusters['items'], [])
         clusters.sort(key=lambda k: k['_namespace'])
@@ -114,10 +133,13 @@ class DataProvisioners(KQueenView):
 
     def handle(self):
         page = get_page(request.args, 'p_page')
-        provisioners = self.kqueen_request(
-            'provisioner', 'list',
-            fnkwargs={'all_namespaces': True, 'page': page, 'per_page': self.objects_per_page}
-        )
+        try:
+            provisioners = self.kqueen_request(
+                'provisioner', 'list',
+                fnkwargs={'all_namespaces': True, 'page': page, 'per_page': self.objects_per_page}
+            )
+        except Exception as e:
+            return handle_exception_for_ajax(e)
         provisioner_pages = get_pages_count(provisioners['total'], self.objects_per_page)
         _, provisioners = sanitize_resource_metadata(session, [], provisioners['items'])
         provisioners.sort(key=lambda k: k['_namespace'])
