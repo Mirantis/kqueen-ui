@@ -1,5 +1,6 @@
 {% from "ui/partial/_cluster_row.html" import render_cluster_row with context %}
 {% from "ui/partial/pagination.html" import render_pagination with context %}
+{% from "ui/partial/_column_filter.html" import render_column_filter with context %}
 
 {% macro render_cluster_table(clusters, pages_total, current_page) %}
   <div id="clustersTable">
@@ -12,8 +13,12 @@
               <label for="select-all-clusters"><i class="mdi checkbox-all"></i></label>
             {% endif %}
           </th>
-          <th class="col-md-4">Name</th>
-          <th class="col-md-4">Provisioner</th>
+          <th class="col-md-4 filterable-column">
+            {{ render_column_filter("Name", "cluster_name") }}
+          </th>
+          <th class="col-md-4 filterable-column">
+            {{ render_column_filter("Provisioner", "cluster_provisioner") }}
+          </th>
           <th class="col-md-4">Created</th>
           <th class="status_column">Status</th>
           <th class="action_column">Actions</th>
@@ -28,8 +33,7 @@
       </tbody>
     </table>
     {% if pages_total > 1 %}
-      {{ render_pagination("/ui/clusters/page/", "#clustersTable", current_page,
-                           pages_total, "Clusters") }}
+      {{ render_pagination("cluster", current_page, pages_total, "Clusters") }}
     {% endif %}
   </div>
 

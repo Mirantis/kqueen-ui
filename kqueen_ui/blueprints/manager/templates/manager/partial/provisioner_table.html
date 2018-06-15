@@ -1,11 +1,14 @@
 {% from "ui/partial/pagination.html" import render_pagination with context %}
+{% from "ui/partial/_column_filter.html" import render_column_filter with context %}
 
 <div class="table-container no-actions" id="provisionersTable">
   <table class="table table-hover">
     <thead>
       <tr>
         <th class="col-md-3">Organization</th>
-        <th class="col-md-3">Name</th>
+        <th class="col-md-3 filterable-column">
+          {{ render_column_filter("Provisioner", "provisioner_name") }}
+        </th>
         <th class="col-md-3">Engine</th>
         <th class="col-md-3">Created</th>
         <th class="status_column">Status</th>
@@ -62,7 +65,7 @@
     </tbody>
   </table>
   {% if provisioner_pages > 1 %}
-    {{ render_pagination("/manager/data/provisioners/page/", "#provisionersTable",
-                         current_provisioner_page, provisioner_pages, "Provisioners") }}
+    {{ render_pagination("provisioner", current_provisioner_page,
+                         provisioner_pages, "Provisioners") }}
   {% endif %}
 </div>
