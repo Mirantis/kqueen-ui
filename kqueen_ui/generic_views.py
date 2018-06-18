@@ -83,7 +83,8 @@ class KQueenView(View):
         """
         raise NotImplementedError
 
-    def kqueen_request(self, resource, action, fnargs=(), fnkwargs={}, service=False):
+    def kqueen_request(self, resource, action, fnargs=(), fnkwargs=None, service=False):
+        fnkwargs = fnkwargs or {}
         client = self._get_kqueen_service_client() if service else self._get_kqueen_client()
         if not client:
             return None

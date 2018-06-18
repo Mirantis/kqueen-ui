@@ -156,11 +156,9 @@ def test_sanitize_resource_metadata(app, user, cluster, provisioner, provisioner
         return response
     monkeypatch.setattr('kqueen_ui.api.ProvisionerManager.engines', mock_engines)
     session = {'user': user}
-    parsed_clusters, parsed_provisioners, overview = sanitize_resource_metadata(session, [cluster], [provisioner])
+    parsed_clusters, parsed_provisioners = sanitize_resource_metadata(session, [cluster], [provisioner])
     parsed_cluster_metadata = parsed_clusters[0]['metadata']
     parsed_provisioner_parameters = parsed_provisioners[0]['parameters']
-    overview_keys = ['cluster_count', 'cluster_max', 'cluster_health', 'provisioner_count', 'provisioner_max', 'provisioner_health']
     assert parsed_cluster_metadata == cluster['metadata']
     assert parsed_provisioner_parameters['username'] == provisioner['parameters']['username']
     assert parsed_provisioner_parameters['password'] == '*****************'
-    assert all(key in overview for key in overview_keys)

@@ -2,6 +2,7 @@
 {% from "ui/partial/tableaction.html" import render_cluster_table_actions, render_provisioner_table_actions, render_provisioner_row_actions with context %}
 {% from "ui/partial/_cluster_row.html" import render_cluster_row with context %}
 {% from "ui/partial/_overview_pies.html" import render_overview_pies with context %}
+{% from "ui/partial/pagination.html" import render_pagination with context %}
 
 {% block page_header %}Overview{% endblock %}
 
@@ -65,6 +66,9 @@
           {% endfor %}
         </tbody>
       </table>
+      {% if cluster_pages > 1 %}
+        {{ render_pagination("ui.index", current_cluster_page, cluster_pages, "Clusters", "") }}
+      {% endif %}
     </div>
   </div>
 
@@ -167,6 +171,10 @@
           {% endfor %}
         </tbody>
       </table>
+      {% if provisioner_pages > 1 %}
+        {{ render_pagination("ui.index", current_provisioner_page, provisioner_pages,
+                             "Provisioners", "provisionersTab") }}
+      {% endif %}
     </div>
   </div>
 </div>

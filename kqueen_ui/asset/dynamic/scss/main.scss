@@ -727,6 +727,14 @@ input[type="checkbox"] {
   }
 }
 
+.pagination-row {
+  text-align: center;
+  i.mdi {
+    position: relative;
+    top: 1px;
+  }
+}
+
 // *****************************************************************************
 // Flicker on Load Fix for Glyphicons
 // *****************************************************************************

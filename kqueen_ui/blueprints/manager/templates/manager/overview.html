@@ -1,5 +1,7 @@
 {% extends "ui/base.html" %}
 
+{% from "ui/partial/pagination.html" import render_pagination with context %}
+
 {% block page_header %}Overview{% endblock %}
 
 {% block content %}
@@ -120,33 +122,42 @@
 
 {% block extrajs %}
 <script>
-var loadClusters = function(){
+var loadClusters = function() {
   $('#refreshClusters').addClass('disabled');
-  $.get("{{ url_for('manager.data_clusters') }}", function(data){
-    if( data.response === 200 ){
-      $('#tableClusters').replaceWith(data.body);
+  $.get(
+    "{{ url_for('manager.data_clusters', c_page=c_page, p_page=p_page) | safe }}",
+    function(data) {
+      if (data.response === 200) {
+        $('#tableClusters').replaceWith(data.body);
+      }
     }
-  })
-  .then(function(){
+  ).then(function() {
     $('#refreshClusters').removeClass('disabled');
   });
 };
-var loadProvisioners = function(){
+var loadProvisioners = function() {
   $('#refreshProvisioners').addClass('disabled');
-  $.get("{{ url_for('manager.data_provisioners') }}", function(data){
-    if( data.response === 200 ){
-      $('#tableProvisioners').replaceWith(data.body);
+  $.get(
+    "{{ url_for('manager.data_provisioners', c_page=c_page, p_page=p_page) | safe }}",
+    function(data) {
+      if (data.response === 200) {
+        $('#tableProvisioners').replaceWith(data.body);
+      }
     }
-  })
-  .then(function(){
+  ).then(function() {
     $('#refreshProvisioners').removeClass('disabled');
   });
 };
-(function(){
+$(document).ready(function() {
   loadClusters();
   $('#refreshClusters').click(loadClusters);
   loadProvisioners();
   $('#refreshProvisioners').click(loadProvisioners);
-})();
+
+  // Force scroll to Provisioners table (if there was an interaction with its pagination)
+  if (window.location.hash) {
+    $('html').animate({scrollTop: $(window.location.hash).offset().top}, 700);
+  }
+});
 </script>
 {% endblock %}

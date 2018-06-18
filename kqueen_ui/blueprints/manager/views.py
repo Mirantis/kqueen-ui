@@ -13,12 +13,26 @@ from kqueen_ui.utils.loggers import user_prefix
 from kqueen_ui.utils.wrappers import superadmin_required
 from slugify import slugify
 
+from ...blueprints.ui.utils import form_page_ranges
+
 import logging
 
 logger = logging.getLogger('kqueen_ui')
 user_logger = logging.getLogger('user')
 
 manager = Blueprint('manager', __name__, template_folder='templates')
+
+
+def get_page(args, page_arg):
+    try:
+        return int(args.get(page_arg, 1))
+    except ValueError:
+        return 1
+
+
+def get_pages_count(objects_total, objects_per_page):
+    full_pages = objects_total // objects_per_page
+    return full_pages + 1 if objects_total % objects_per_page else full_pages
 
 
 ##############
@@ -59,20 +73,36 @@ class Overview(KQueenView):
         organizations.sort(key=lambda k: (k['namespace'], k['created_at'], k['name']))
         for organization in organizations:
             organization['created_at'] = format_datetime(organization['created_at'])
-        return render_template('manager/overview.html', organizations=organizations)
+
+        return render_template('manager/overview.html',
+                               organizations=organizations,
+                               c_page=get_page(request.args, 'c_page'),
+                               p_page=get_page(request.args, 'p_page'))
 
 
 class DataClusters(KQueenView):
     decorators = [superadmin_required]
     methods = ['GET']
+    objects_per_page = 20
 
     def handle(self):
-        clusters = self.kqueen_request('cluster', 'list', fnkwargs={'all_namespaces': True})
-        clusters, _, _ = sanitize_resource_metadata(session, clusters, [])
-        clusters.sort(key=lambda k: (k['_namespace'], k['created_at'], k['name']))
+        page = get_page(request.args, 'c_page')
+        clusters = self.kqueen_request(
+            'cluster', 'list',
+            fnkwargs={'all_namespaces': True, 'page': page, 'per_page': self.objects_per_page}
+        )
+        cluster_pages = get_pages_count(clusters['total'], self.objects_per_page)
+        clusters, _ = sanitize_resource_metadata(session, clusters['items'], [])
+        clusters.sort(key=lambda k: k['_namespace'])
+
         data = {
             'response': 200,
-            'body': render_template('manager/partial/cluster_table.html', clusters=clusters)
+            'body': render_template('manager/partial/cluster_table.html',
+                                    clusters=clusters,
+                                    cluster_pages=cluster_pages,
+                                    current_cluster_page=page,
+                                    current_provisioner_page=get_page(request.args, 'p_page'),
+                                    form_page_ranges=form_page_ranges)
         }
         return jsonify(data)
 
@@ -80,14 +110,25 @@ class DataClusters(KQueenView):
 class DataProvisioners(KQueenView):
     decorators = [superadmin_required]
     methods = ['GET']
+    objects_per_page = 20
 
     def handle(self):
-        provisioners = self.kqueen_request('provisioner', 'list', fnkwargs={'all_namespaces': True})
-        _, provisioners, _ = sanitize_resource_metadata(session, [], provisioners)
-        provisioners.sort(key=lambda k: (k['_namespace'], k['created_at'], k['name']))
+        page = get_page(request.args, 'p_page')
+        provisioners = self.kqueen_request(
+            'provisioner', 'list',
+            fnkwargs={'all_namespaces': True, 'page': page, 'per_page': self.objects_per_page}
+        )
+        provisioner_pages = get_pages_count(provisioners['total'], self.objects_per_page)
+        _, provisioners = sanitize_resource_metadata(session, [], provisioners['items'])
+        provisioners.sort(key=lambda k: k['_namespace'])
         data = {
             'response': 200,
-            'body': render_template('manager/partial/provisioner_table.html', provisioners=provisioners)
+            'body': render_template('manager/partial/provisioner_table.html',
+                                    provisioners=provisioners,
+                                    provisioner_pages=provisioner_pages,
+                                    current_cluster_page=get_page(request.args, 'c_page'),
+                                    current_provisioner_page=page,
+                                    form_page_ranges=form_page_ranges)
         }
         return jsonify(data)
 
