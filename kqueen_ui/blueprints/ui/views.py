@@ -12,7 +12,7 @@ from kqueen_ui.utils.wrappers import login_required
 
 from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
                     ChangePasswordForm, UserInviteForm, UserProfileForm, RequestPasswordResetForm,
-                    PasswordResetForm)
+                    PasswordResetForm, LoginForm)
 from .utils import (generate_password, prettify_engine_name, status_for_cluster_detail,
                     sanitize_resource_metadata, form_overview, form_page_ranges)
 
@@ -129,49 +129,45 @@ ui.add_url_rule('/overviewpies', view_func=OverviewPies.as_view('overview_pies')
 
 
 # Auth
+class Login(KQueenView):
+    methods = ['GET', 'POST']
 
-@ui.route('/login', methods=['GET', 'POST'])
-def login():
-    error = None
-    if request.method == 'POST':
-        user, _error = authenticate(request.form['username'], request.form['password'])
-        if user:
-            session['user'] = user
-            client = get_kqueen_client(token=user['token'])
-            organization_id = user['organization']['id']
-            response = client.organization.policy(organization_id)
-            if response.status == -1:
-                flash('Backend is unavailable at this time, please try again later.', 'danger')
-                del session['user']
-                if 'policy' in session:
-                    del session['policy']
-                return render_template('ui/login.html', error=error)
-            elif response.status > 200:
-                flash('Could not contact authentication backend, please try again later.', 'danger')
-                del session['user']
-                if 'policy' in session:
-                    del session['policy']
-                return render_template('ui/login.html', error=error)
-            policy = response.data
-            if policy and isinstance(policy, dict):
-                session['policy'] = policy
-            else:
-                del session['user']
-                if 'policy' in session:
-                    del session['policy']
-                return render_template('ui/login.html', error=error)
+    def handle(self):
+        error = None
+        form = LoginForm(request.form)
 
-            flash('You have been logged in', 'success')
-            next_url = request.form.get('next', '')
-            if next_url:
-                return redirect(next_url)
-            return redirect(url_for('ui.index'))
-        elif _error:
-            if _error['status'] == 401:
-                error = 'Invalid credentials.'
-            else:
-                error = 'Could not contact authentication backend, please try again later.'
-    return render_template('ui/login.html', error=error)
+        if form.validate_on_submit():
+            user, response = authenticate(form.username.data, form.password.data)
+            self.handle_response(response)
+            if user:
+                session['user'] = user
+                organization_id = user['organization']['id']
+                try:
+                    policies = self.kqueen_request('organization', 'policy', fnargs=(organization_id,))
+                except KQueenAPIException:
+                    msg = 'Unable to get policies for the organization {}'.format(organization_id)
+                    logger.exception(msg)
+                    flash(msg, 'danger')
+                    return render_template('ui/login.html', form=form)
+
+                if policies and isinstance(policies, dict):
+                    session['policy'] = policies
+                else:
+                    flash('You have been logged in', 'success')
+                    del session['user']
+                    if 'policy' in session:
+                        del session['policy']
+                    return render_template('ui/login.html', form=form)
+
+                flash('You have been logged in', 'success')
+                next_url = request.form.get('next', '')
+                if next_url:
+                    return redirect(next_url)
+                return redirect(url_for('ui.index'))
+        return render_template('ui/login.html', form=form, error=error)
+
+
+ui.add_url_rule('/login', view_func=Login.as_view('login'))
 
 
 @ui.route('/logout')

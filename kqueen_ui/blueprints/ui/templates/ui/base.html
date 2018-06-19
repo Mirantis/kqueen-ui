@@ -26,6 +26,7 @@
     <![endif]-->
   </head>
   <body class="bp-{{ request.blueprint }}">
+  {% if request.path != url_for('ui.login') %}
     <div class="corner-ribbon top-left sticky red shadow">Beta</div>
     <nav class="navbar navbar-inverse navbar-static-top">
       <div class="container">
@@ -70,7 +71,7 @@
       </div>
     {% endif %}
     </div>
-
+ {% endif %}
     <input id="BaseURI" type="hidden" value="/" />
     <div id="flash-container">
     {% for category, message in get_flashed_messages(with_categories=true) %}

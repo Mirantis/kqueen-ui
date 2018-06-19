@@ -115,31 +115,49 @@ a, input[type="checkbox"] {
   pointer-events: none;
 }
 
-div.login {
-  margin-top: 20%;
-  h3 {
-    margin: 5px 0px;
-  }
-  ::-webkit-input-placeholder {
-    text-align: center;
-  }
-  :-moz-placeholder {
-    text-align: center;
-  }
-  ::-moz-placeholder {
-    text-align: center;
-  }
-  :-ms-input-placeholder {
-    text-align: center;
-  }
-}
-
-div.login-footer {
-  font-size: 0.9em;
-}
-
 .provisioner-pie {
   line-height: 1.1;
+}
+
+// *****************************************************************************
+// Login
+// *****************************************************************************
+
+div.login {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  max-width: 600px;
+  width: 50%;
+  min-width: 300px;
+  img {
+    margin-top: 35px;
+    width: 30%;
+  }
+  form {
+    margin: 20px;
+  }
+  .wrapper {
+    width: 70%;
+    position: relative;
+    padding: 0;
+    margin: auto;
+  }
+  .panel-footer {
+    font-size: 0.9em;
+    .sign-up {
+      margin-right: 30px;
+    }
+  }
+  .login-icon {
+    position: absolute;
+    bottom: 8px;
+    left: 10px;
+  }
+  .login-input {
+    padding-left: 32px;
+  }
 }
 
 // *****************************************************************************

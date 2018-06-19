@@ -12,12 +12,12 @@ config = current_config()
 def authenticate(username, password):
     user = {}
     client = get_kqueen_client(username=username, password=password)
-    token, error = client.base.login()
+    token, response = client.base.login()
     if token:
         _user = client.user.whoami()
         user = _user.data
         user['token'] = token
-    return user, error
+    return user, response
 
 
 def generate_confirmation_token(email):
