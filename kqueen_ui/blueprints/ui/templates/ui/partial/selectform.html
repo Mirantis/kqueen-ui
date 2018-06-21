@@ -1,5 +1,6 @@
 {% macro render_selectform(form, action='') %}
  <script src="{{ url_for('static', filename='js/fieldlist.js') }}"></script>
+ <script src="//code.simplesvg.com/1/1.0.0-beta5/simple-svg.min.js"></script>
  <form id="switchableForm" method="post" action="{{ action }}" enctype="multipart/form-data">
   {{ form.hidden_tag() }}
   {% set tagged_fields = [] %}
@@ -44,6 +45,14 @@ document.addEventListener("DOMContentLoaded", function() {
   $.validator.addMethod(
     "cidr", validateFieldIsIpCidr, $.validator.format("Value doesn't match CIDR format."));
   $.validator.addMethod('uuid', validateFieldIsUuid, 'Entered value is not a valid UUID.');
+
+  // Insert icon with link to the documentation
+  var docLink = `
+    <a href="http://kqueen.readthedocs.io/en/latest/kqueen.html#provision-a-kubernetes-cluster"
+       target="_blank">
+      <span class="simple-svg" data-icon="fa-solid:book" data-inline="false"></span> Documentation
+    </a>`;
+  $(".page-header h2").append(docLink);
 
   $("#switchableForm").validate({
     rules: {

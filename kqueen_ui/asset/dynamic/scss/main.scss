@@ -497,6 +497,20 @@ button.add-field {
   }
 }
 
+.page-header a {
+  font-size: 20px;
+  font-weight: bold;
+  text-decoration: none;
+  float: right;
+  position: relative;
+  top: 10px;
+
+  svg {
+    margin-right: 3px;
+    position: relative;
+    top: 3px;
+  }
+}
 // *****************************************************************************
 // Table
 // *****************************************************************************
