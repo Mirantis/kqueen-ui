@@ -122,6 +122,17 @@
 
 {% block extrajs %}
 <script>
+var handleError = function (elId, errorDetails) {
+  var error = `
+    <tr>
+      <td colspan='6' class='text-center'>
+        <i class='mdi mdi-alert-circle-outline'></i> Error occured while loading the content
+      </td>
+    </tr>`;
+  $(elId + ' .not-event-pointer').replaceWith(error);
+  $(elId + ' table').addClass('table-error');
+  $('.error td').attr('title', errorDetails);
+};
 var loadClusters = function() {
   $('#refreshClusters').addClass('disabled');
   $.get(
@@ -129,12 +140,15 @@ var loadClusters = function() {
     function(data) {
       if (data.response === 200) {
         $('#tableClusters').replaceWith(data.body);
+    } else {
+        handleError('#tableClusters', data.body)
       }
     }
-  ).then(function() {
+  ).always(function() {
     $('#refreshClusters').removeClass('disabled');
   });
 };
+
 var loadProvisioners = function() {
   $('#refreshProvisioners').addClass('disabled');
   $.get(
@@ -142,9 +156,11 @@ var loadProvisioners = function() {
     function(data) {
       if (data.response === 200) {
         $('#tableProvisioners').replaceWith(data.body);
+      } else {
+        handleError('#tableProvisioners', data.body)
       }
     }
-  ).then(function() {
+  ).always(function() {
     $('#refreshProvisioners').removeClass('disabled');
   });
 };

@@ -752,7 +752,19 @@ input[type="checkbox"] {
     top: 1px;
   }
 }
-
+.table-error {
+  th {
+    border-bottom-color: $mira-red !important;
+  }
+  td i.mdi {
+    position: relative;
+    top: 2px;
+  }
+  .mdi-alert-circle-outline {
+    font-size: 20px;
+    color: $mira-red;
+  }
+}
 // *****************************************************************************
 // Flicker on Load Fix for Glyphicons
 // *****************************************************************************
