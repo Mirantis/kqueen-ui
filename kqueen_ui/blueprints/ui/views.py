@@ -17,12 +17,33 @@ from .utils import (generate_password, prettify_engine_name, status_for_cluster_
                     sanitize_resource_metadata, form_overview, form_page_ranges)
 
 import copy
+import json
 import logging
 
 logger = logging.getLogger('kqueen_ui')
 user_logger = logging.getLogger('user')
 
 ui = Blueprint('ui', __name__, template_folder='templates')
+
+
+def get_pages_count(objects_total, objects_per_page):
+    full_pages = objects_total // objects_per_page
+    return full_pages + 1 if objects_total % objects_per_page else full_pages
+
+
+def handle_exception_for_ajax(e):
+    try:
+        error_details = json.loads(str(e))
+        data = {
+            'response': error_details['code'],
+            'body': error_details['description']
+        }
+    except json.JSONDecodeError:
+        data = {
+            'response': 'unknown',
+            'body': str(e)
+        }
+    return jsonify(data)
 
 
 ##############
@@ -59,48 +80,15 @@ def test_token():
 class Index(KQueenView):
     decorators = [login_required]
     methods = ['GET']
-    objects_per_page = 20
 
     def handle(self):
-        def request_page(object_name, page_arg):
-            try:
-                page = int(request.args.get(page_arg, 1))
-            except ValueError:
-                page = 1
-            return self.kqueen_request(
-                object_name, 'list', fnkwargs={'page': page, 'per_page': self.objects_per_page}
-            ), page
-
-        def get_pages_count(objects_total):
-            full_pages = objects_total // self.objects_per_page
-            return full_pages + 1 if objects_total % self.objects_per_page else full_pages
-
-        clusters, c_page = request_page('cluster', 'c_page')
-        provisioners, p_page = request_page('provisioner', 'p_page')
-        c_total, p_total = clusters['total'], provisioners['total']
-
-        clusters, provisioners = sanitize_resource_metadata(
-            session, clusters['items'], provisioners['items'])
-
         c_health = self.kqueen_request('cluster', 'health')
         p_health = self.kqueen_request('provisioner', 'health')
 
-        overview = form_overview(c_total, c_health['healthy_percentage'],
-                                 p_total, p_health['healthy_percentage'])
+        overview = form_overview(c_health['total'], c_health['healthy_percentage'],
+                                 p_health['total'], p_health['healthy_percentage'])
 
-        anchor = request.args.get('_anchor')
-        if anchor:  # switch to the Provisioners tab
-            return redirect(url_for('ui.index', _anchor=anchor, c_page=c_page, p_page=p_page))
-
-        return render_template('ui/index.html',
-                               overview=overview,
-                               clusters=clusters,
-                               provisioners=provisioners,
-                               cluster_pages=get_pages_count(c_total),
-                               current_cluster_page=c_page,
-                               provisioner_pages=get_pages_count(p_total),
-                               current_provisioner_page=p_page,
-                               form_page_ranges=form_page_ranges)
+        return render_template('ui/index.html', overview=overview)
 
 
 class OverviewPies(KQueenView):
@@ -596,6 +584,36 @@ class ProvisionerDeleteBulk(KQueenView):
         return redirect(url_for('ui.index', _anchor='provisionersTab'))
 
 
+class ProvisionerPage(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
+    objects_per_page = 20
+
+    def handle(self, page):
+        try:
+            provisioners = self.kqueen_request(
+                'provisioner', 'list',
+                fnkwargs={'page': page, 'per_page': self.objects_per_page}
+            )
+        except Exception as e:
+            return handle_exception_for_ajax(e)
+        total = provisioners['total']
+        _, provisioners = sanitize_resource_metadata(session, [], provisioners['items'])
+
+        data = {
+            'response': 200,
+            'allowClusterDeploy': bool(provisioners),
+            'body': render_template('ui/partial/provisioner_table.html',
+                                    provisioners=provisioners,
+                                    current_provisioner_page=page,
+                                    form_page_ranges=form_page_ranges,
+                                    provisioner_pages=get_pages_count(total, self.objects_per_page))
+        }
+        return jsonify(data)
+
+
+ui.add_url_rule('/provisioners/page/<int:page>',
+                view_func=ProvisionerPage.as_view('provisioner_page'))
 ui.add_url_rule('/provisioners/create', view_func=ProvisionerCreate.as_view('provisioner_create'))
 ui.add_url_rule('/provisioners/<list:provisioner_ids>/delete',
                 view_func=ProvisionerDeleteBulk.as_view('provisioner_delete'))
@@ -845,6 +863,36 @@ class ClusterRow(KQueenView):
         return jsonify(data)
 
 
+class ClusterPage(KQueenView):
+    decorators = [login_required]
+    methods = ['GET']
+    objects_per_page = 20
+
+    def handle(self, page):
+        try:
+            clusters = self.kqueen_request(
+                'cluster', 'list',
+                fnkwargs={'page': page, 'per_page': self.objects_per_page}
+            )
+        except Exception as e:
+            return handle_exception_for_ajax(e)
+        total = clusters['total']
+        clusters, _ = sanitize_resource_metadata(session, clusters['items'], [])
+
+        data = {
+            'response': 200,
+            'allowClusterDeploy': bool(clusters),
+            'body': render_template('ui/partial/cluster_table.html',
+                                    clusters=clusters,
+                                    current_cluster_page=page,
+                                    form_page_ranges=form_page_ranges,
+                                    cluster_pages=get_pages_count(total, self.objects_per_page))
+        }
+        return jsonify(data)
+
+
+ui.add_url_rule('/clusters/page/<int:page>',
+                view_func=ClusterPage.as_view('cluster_page'))
 ui.add_url_rule('/clusters/create',
                 view_func=ClusterCreate.as_view('cluster_create'))
 ui.add_url_rule('/clusters/<list:cluster_ids>/delete',

@@ -1,19 +1,11 @@
-{% macro _url_for_page(view, page, anchor) %}
-  {% if anchor %}
-    "{{ url_for(view, c_page=current_cluster_page, p_page=page, _anchor=anchor) }}"
-  {% else %}
-    "{{ url_for(view, c_page=page, p_page=current_provisioner_page) }}"
-  {% endif %}
-{% endmacro %}
-
-{% macro render_pagination(view, current_page, pages_total, label, anchor) %}
+{% macro render_pagination(url_prefix, table_selector, current_page, pages_total, label) %}
   <div class="row pagination-row">
     <nav aria-label="{{ label }} navigation">
       <ul class="pagination">
         <li>
           <a
             {% if current_page == 1 %}class="disabled"{% endif %}
-            href={{ _url_for_page(view, current_page - 1, anchor) }}
+            onClick="loadPage('{{ url_prefix }}{{ current_page - 1 }}', '{{ table_selector }}')"
           >
             <i class="mdi mdi-menu-left"></i><span>Previous</span>
           </a>
@@ -27,7 +19,7 @@
           {% endif %}
           {% for page in page_range %}
             <li {% if current_page == page %}class="active"{% endif %}>
-              <a href={{ _url_for_page(view, page, anchor) }}>
+              <a onClick="loadPage('{{ url_prefix }}{{ page }}', '{{ table_selector }}')">
                 {{ page }}
               </a>
             </li>
@@ -36,7 +28,7 @@
         <li>
           <a
             {% if current_page == pages_total %}class="disabled"{% endif %}
-            href={{ _url_for_page(view, current_page + 1, anchor) }}
+            onClick="loadPage('{{ url_prefix }}{{ current_page + 1 }}', '{{ table_selector }}')"
           >
             <span>Next</span><i class="mdi mdi-menu-right"></i>
           </a>

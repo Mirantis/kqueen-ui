@@ -37,7 +37,7 @@ def test_login_required_for_post(client, view, values):
 
 
 @pytest.mark.parametrize('view,values,lookup_html', [
-    ('ui.index', {}, ['<h2>Overview</h2>', 'pytest-provisioner', 'pytest-cluster']),
+    ('ui.index', {}, ['<h2>Overview</h2>']),
     ('ui.overview_pies', {}, []),
     ('ui.organization_manage', {}, ['<h2>Manage PytestOrg</h2>']),
     ('ui.user_invite', {}, ['h2>Invite Member</h2>']),

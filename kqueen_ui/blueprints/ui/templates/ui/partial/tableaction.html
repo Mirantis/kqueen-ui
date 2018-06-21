@@ -2,6 +2,7 @@
   {% set create_url = url_for('ui.cluster_create') %}
   {% set cant_create = not is_authorized(session, 'cluster:create') %}
   <a
+    id="clusterCreateButton"
     href="{{ create_url }}"
     class="btn btn-primary btn-sm{% if cant_create or not provisioners %} disabled{% endif %}"
   >
