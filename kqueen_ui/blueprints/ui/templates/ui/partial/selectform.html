@@ -43,6 +43,7 @@ document.addEventListener("DOMContentLoaded", function() {
   $.validator.addMethod("yamlfile", validateYamlFileField, $.validator.format("Test validation"));
   $.validator.addMethod(
     "cidr", validateFieldIsIpCidr, $.validator.format("Value doesn't match CIDR format."));
+  $.validator.addMethod('uuid', validateFieldIsUuid, 'Entered value is not a valid UUID.');
 
   $("#switchableForm").validate({
     rules: {
