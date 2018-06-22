@@ -501,6 +501,7 @@ button.add-field {
   font-size: 20px;
   font-weight: bold;
   text-decoration: none;
+  border: none;
   float: right;
   position: relative;
   top: 10px;
@@ -511,6 +512,23 @@ button.add-field {
     top: 3px;
   }
 }
+
+form {
+  .field_help {
+    font-size: 19px;
+    margin-left: 4px;
+    position: relative;
+    top: 1px;
+    color: $mira-purple-dark;
+  }
+  .popover {
+    border-radius: 4px;
+    .popover-content {
+      font-size: 14px;
+    }
+  }
+}
+
 // *****************************************************************************
 // Table
 // *****************************************************************************

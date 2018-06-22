@@ -60,9 +60,11 @@ class FlaskExtendableForm(FlaskForm):
             if field_class:
                 label = field_params.get('label', field_name)
                 jsvalidators = field_params.get('validators', {})
+                help_message = field_params.get('help_message')
                 field_kwargs = {
                     'switchtag': switchtag,
-                    'jsvalidators': jsvalidators
+                    'jsvalidators': jsvalidators,
+                    'help_message': help_message
                 }
                 if field_class == SelectField:
                     field_kwargs['choices'] = field_params.get('choices', [])
