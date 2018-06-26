@@ -35,8 +35,6 @@ $(document).ready(function() {
     setTimeout(function () {
       $(".alert.fade").alert('close');
     }, 7000);
-
-    $.validator.addMethod('uuid', validateFieldIsUuid, 'Entered value is not a valid UUID.');
 });
 
 $(window).on("popstate", function() {

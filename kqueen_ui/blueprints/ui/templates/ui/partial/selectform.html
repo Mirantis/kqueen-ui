@@ -1,5 +1,6 @@
 {% macro render_selectform(form, action='') %}
  <script src="{{ url_for('static', filename='js/fieldlist.js') }}"></script>
+ <script src="//code.simplesvg.com/1/1.0.0-beta5/simple-svg.min.js"></script>
  <form id="switchableForm" method="post" action="{{ action }}" enctype="multipart/form-data">
   {{ form.hidden_tag() }}
   {% set tagged_fields = [] %}
@@ -43,6 +44,35 @@ document.addEventListener("DOMContentLoaded", function() {
   $.validator.addMethod("yamlfile", validateYamlFileField, $.validator.format("Test validation"));
   $.validator.addMethod(
     "cidr", validateFieldIsIpCidr, $.validator.format("Value doesn't match CIDR format."));
+  $.validator.addMethod('uuid', validateFieldIsUuid, 'Entered value is not a valid UUID.');
+
+  // Insert icon with link to the documentation
+  var docLink = `
+    <a href="http://kqueen.readthedocs.io/en/latest/kqueen.html#provision-a-kubernetes-cluster"
+       target="_blank">
+      <span class="simple-svg" data-icon="fa-solid:book" data-inline="false"></span> Documentation
+    </a>`;
+  $(".page-header h2").append(docLink);
+
+  // Show popover on icon hover and keep opened while hovering the popover itself
+  $(".field_help")
+    .popover({placement: "auto right", trigger: "manual", animation: false})
+    .on({
+      mouseenter: function () {
+        $(this).popover('show');
+        $('.popover').one('mouseleave', () => {
+          $(this).popover('hide');
+        });
+      },
+      mouseleave: function () {
+        // Timeout is needed for FF, so that the popover does not close while we are entering it
+        setTimeout(() => {
+          if (!$('.popover:hover').length) {
+            $(this).popover('hide');
+          }
+        }, 300);
+      }
+    });
 
   $("#switchableForm").validate({
     rules: {
@@ -107,6 +137,7 @@ document.addEventListener("DOMContentLoaded", function() {
 {% macro render_field(field) %}
   <div class="form-group{% if field.errors %} has-error{% endif %}">
     <label for="{{ field.id }}" class="control-label">{{ field.label }}</label>
+
     {{ field(class_="form-control")|safe }}
   {% if field.errors %}
     <span class="help-block">
@@ -126,7 +157,11 @@ document.addEventListener("DOMContentLoaded", function() {
       class="form-group {% if field.errors %}has-error{% endif %} hidden"
       data-switchtag="{{ field.switchtag }}"
     >
-      <label for="{{ field.id }}" class="control-label">{{ field.label }}</label>
+      <label for="{{ field.id }}" class="control-label">{{ field.label }}
+      {% if field.help_message %}
+        <i class="mdi mdi-help-circle-outline field_help" data-toggle="popover" data-content="{{ field.help_message }}"></i>
+      {% endif %}
+      </label>
       <div class="field-group">
         {{ field(class_="form-control " + (field.class_name if field.class_name else ""),
                  placeholder=field.placeholder, accept=field.accept_files)|safe }}
