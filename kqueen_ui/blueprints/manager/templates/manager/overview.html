@@ -1,7 +1,5 @@
 {% extends "ui/base.html" %}
 
-{% from "ui/partial/pagination.html" import render_pagination with context %}
-
 {% block page_header %}Overview{% endblock %}
 
 {% block content %}
@@ -68,7 +66,7 @@
   </a>
 </h3>
 
-<div class="table-container no-actions" id="tableClusters">
+<div class="table-container no-actions" id="clustersTable">
   <table class="table table-hover">
     <thead>
       <th class="col-md-3">Organization</th>
@@ -97,7 +95,7 @@
   </a>
 </h3>
 
-<div class="table-container no-actions" id="tableProvisioners">
+<div class="table-container no-actions" id="provisionersTable">
   <table class="table table-hover">
     <thead>
       <th class="col-md-3">Organization</th>
@@ -122,58 +120,48 @@
 
 {% block extrajs %}
 <script>
-var handleError = function (elId, errorDetails) {
-  var error = `
-    <tr>
-      <td colspan='6' class='text-center'>
-        <i class='mdi mdi-alert-circle-outline'></i> Error occured while loading the content
-      </td>
-    </tr>`;
-  $(elId + ' .not-event-pointer').replaceWith(error);
-  $(elId + ' table').addClass('table-error');
-  $('.error td').attr('title', errorDetails);
-};
-var loadClusters = function() {
-  $('#refreshClusters').addClass('disabled');
-  $.get(
-    "{{ url_for('manager.data_clusters', c_page=c_page, p_page=p_page) | safe }}",
-    function(data) {
-      if (data.response === 200) {
-        $('#tableClusters').replaceWith(data.body);
-    } else {
-        handleError('#tableClusters', data.body)
-      }
-    }
-  ).always(function() {
-    $('#refreshClusters').removeClass('disabled');
-  });
-};
+  function handleError(tableSelector, errorDetails) {
+    var error = `
+      <tbody>
+        <tr>
+          <td colspan='6' class='text-center' title='${errorDetails}'>
+            <i class='mdi mdi-alert-circle-outline'></i>
+            Error occurred while loading the content
+          </td>
+        </tr>
+      </tbody>
+    `;
 
-var loadProvisioners = function() {
-  $('#refreshProvisioners').addClass('disabled');
-  $.get(
-    "{{ url_for('manager.data_provisioners', c_page=c_page, p_page=p_page) | safe }}",
-    function(data) {
+    $(tableSelector + ' tbody').replaceWith(error);
+    $(tableSelector + ' table').addClass('table-error');
+  }
+
+  refreshButtonsMapping = {
+    '#clustersTable': '#refreshClusters',
+    '#provisionersTable': '#refreshProvisioners'
+  }
+
+  function loadPage(url, targetSelector) {
+    $(refreshButtonsMapping[targetSelector]).addClass('disabled');
+    $.get(url, function(data) {
       if (data.response === 200) {
-        $('#tableProvisioners').replaceWith(data.body);
+        $(targetSelector).replaceWith(data.body);
       } else {
-        handleError('#tableProvisioners', data.body)
+        handleError(targetSelector, data.body);
       }
-    }
-  ).always(function() {
-    $('#refreshProvisioners').removeClass('disabled');
-  });
+    }).fail(function() {
+      handleError(targetSelector, 'Unexpected error occurred');
+    }).always(function() {
+      $(refreshButtonsMapping[targetSelector]).removeClass('disabled');
+    });
 };
 $(document).ready(function() {
-  loadClusters();
-  $('#refreshClusters').click(loadClusters);
-  loadProvisioners();
-  $('#refreshProvisioners').click(loadProvisioners);
-
-  // Force scroll to Provisioners table (if there was an interaction with its pagination)
-  if (window.location.hash) {
-    $('html').animate({scrollTop: $(window.location.hash).offset().top}, 700);
-  }
+  $('#refreshClusters').click(function() {
+    loadPage('/manager/data/clusters/page/1', '#clustersTable');
+  }).click();
+  $('#refreshProvisioners').click(function() {
+    loadPage('/manager/data/provisioners/page/1', '#provisionersTable');
+  }).click();
 });
 </script>
 {% endblock %}

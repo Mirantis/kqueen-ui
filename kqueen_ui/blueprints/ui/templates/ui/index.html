@@ -1,6 +1,5 @@
 {% extends "ui/base.html" %}
-{% from "ui/partial/tableaction.html" import render_cluster_table_actions, render_provisioner_table_actions, render_provisioner_row_actions with context %}
-{% from "ui/partial/_cluster_row.html" import render_cluster_row with context %}
+{% from "ui/partial/tableaction.html" import render_cluster_table_actions, render_provisioner_table_actions with context %}
 {% from "ui/partial/_overview_pies.html" import render_overview_pies with context %}
 {% from "ui/partial/pagination.html" import render_pagination with context %}
 
@@ -32,43 +31,39 @@
         </div>
         <div class="col-xs-4">
           <div class="table-actions">
-            {% if clusters %}
-              <a
-                class="btn btn-danger btn-sm hidden confirm-delete bulk-delete-clusters"
-                title="Delete cluster"
-              >
-                <i class="mdi mdi-delete-forever"></i> Delete
-              </a>
-            {% endif %}
+            <a
+              class="btn btn-danger btn-sm hidden confirm-delete bulk-delete-clusters"
+              title="Delete cluster"
+            >
+              <i class="mdi mdi-delete-forever"></i> Delete
+            </a>
             {{ render_cluster_table_actions(provisioners|healthy_provisioners) }}
           </div>
         </div>
       </div>
-      <table class="table table-hover">
-        <thead>
-          <th>
-            {% if clusters %}
-              <input type="checkbox" class="select-all-clusters" id="select-all-clusters" />
-              <label for="select-all-clusters"><i class="mdi checkbox-all"></i></label>
-            {% endif %}
-          </th>
-          <th class="col-md-4">Name</th>
-          <th class="col-md-4">Provisioner</th>
-          <th class="col-md-4">Created</th>
-          <th class="status_column">Status</th>
-          <th class="action_column">Actions</th>
-        </thead>
-        <tbody>
-          {% for cluster in clusters %}
-            {{ render_cluster_row(cluster, loop.index) }}
-          {% else %}
-            <tr class="not-event-pointer"><td colspan="5" class="text-center">No Items</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% if cluster_pages > 1 %}
-        {{ render_pagination("ui.index", current_cluster_page, cluster_pages, "Clusters", "") }}
-      {% endif %}
+      <div id="clustersTable">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th></th>
+              <th class="col-md-4">Name</th>
+              <th class="col-md-4">Provisioner</th>
+              <th class="col-md-4">Created</th>
+              <th class="status_column">Status</th>
+              <th class="action_column">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="not-event-pointer">
+              <td colspan="6" class="text-center">
+                <div class="icon-container">
+                  <div class="loading-icon"></div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -81,106 +76,70 @@
         </div>
         <div class="col-xs-4">
           <div class="table-actions">
-            {% if provisioners %}
-              <a
-                class="btn btn-danger btn-sm hidden confirm-delete bulk-delete-provisioners"
-                title="Delete provisioner"
-              >
-                <i class="mdi mdi-delete-forever"></i> Delete
-              </a>
-            {% endif %}
+            <a
+              class="btn btn-danger btn-sm hidden confirm-delete bulk-delete-provisioners"
+              title="Delete provisioner"
+            >
+              <i class="mdi mdi-delete-forever"></i> Delete
+            </a>
             {{ render_provisioner_table_actions() }}
           </div>
         </div>
       </div>
-      <table class="table table-hover">
-        <thead>
-          <th>
-            {% if provisioners %}
-              <input
-                type="checkbox"
-                class="select-all-provisioners"
-                id="select-all-provisioners"
-              />
-              <label for="select-all-provisioners"><i class="mdi checkbox-all"></i></label>
-            {% endif %}
-          </th>
-          <th class="col-md-4">Name</th>
-          <th class="col-md-4">Engine</th>
-          <th class="col-md-4">Created</th>
-          <th class="status_column">Status</th>
-          <th class="action_column">Actions</th>
-        </thead>
-        <tbody>
-          {% for provisioner in provisioners %}
-            {% set cant_delete = not is_authorized(session, 'provisioner:delete', provisioner) %}
-            <tr class="clickable">
-              <td>
-                <input
-                  type="checkbox"
-                  id="select-provisioner-{{ provisioner.id }}"
-                  {% if cant_delete %}disabled{% endif %}
-                  class="select-provisioner"
-                  name="{{ provisioner.id }}"
-                  value="{{ provisioner.name }}"
-                />
-                <label
-                  for="select-provisioner-{{ provisioner.id }}"
-                  {% if cant_delete %}class="disabled-wrapper"{% endif %}
-                >
-                  <i class="mdi checkbox-row{% if cant_delete %} disabled{% endif %}"></i>
-                </label>
-              </td>
-              <td class="col-md-4">{{ provisioner.name }}</td>
-              <td class="col-md-4">{{ provisioner.verbose_name }}</td>
-              <td class="col-md-4">{{ provisioner.created_at }}</td>
-              <td class="status_column"><i class="mdi {{ provisioner.state|provisioner_status_icon_class }}" title="{{ provisioner.state }}"></i></td>
-              <td class="action_column">
-                {% if provisioner.parameters %}
-                <a
-                  data-toggle="collapse"
-                  data-target="#provisioner-{{ loop.index }}"
-                  title="More information"
-                >
-                  <i class="mdi mdi-information-outline"></i>
-                </a>
-                {% endif %}
-                {{ render_provisioner_row_actions(provisioner) }}
-              </td>
-            </tr>
-            {% if provisioner.parameters %}
-            <tr>
-              <td colspan="5" class="meta-params">
-                <div id="provisioner-{{ loop.index }}" class="collapse">
-                  <table class="table table-hover no-actions" id="table-provisionerparams">
-                    <tbody>
-                      {% for key, value in provisioner.parameters.items() %}
-                      <tr>
-                        <th>{{ key }}</th>
-                        <td>{{ value }}</td>
-                      </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                </div>
-              </td>
-            </tr>
-            {% endif %}
-          {% else %}
-            <tr class="not-event-pointer"><td colspan="5" class="text-center">No Items</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% if provisioner_pages > 1 %}
-        {{ render_pagination("ui.index", current_provisioner_page, provisioner_pages,
-                             "Provisioners", "provisionersTab") }}
-      {% endif %}
+      <div id="provisionersTable">
+        <table class="table table-hover">
+          <tr class="not-event-pointer">
+            <td colspan="6" class="text-center">
+              <div class="icon-container">
+                <div class="loading-icon"></div>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
   </div>
 </div>
 {% endblock %}
 
 {% block extrajs %}
+<script>
+  function handleError(tableSelector, errorDetails) {
+    var error = `
+      <tbody>
+        <tr>
+          <td colspan='6' class='text-center' title='${errorDetails}'>
+            <i class='mdi mdi-alert-circle-outline'></i>
+            Error occurred while loading the content
+          </td>
+        </tr>
+      </tbody>
+    `;
+    $(tableSelector + ' table').addClass('table-error');
+    $(tableSelector + ' tbody').replaceWith(error);
+  }
+
+  function loadPage(url, targetSelector) {
+    $.get(url, function(data) {
+      if (data.response === 200) {
+        $(targetSelector).replaceWith(data.body);
+        if (data.allowClusterDeploy) {
+          $('#clusterCreateButton').removeClass('disabled');
+        } else {
+          $('#clusterCreateButton').addClass('disabled');
+        }
+      } else {
+        handleError(targetSelector, data.body);
+      }
+    }).fail(function() {
+      handleError(targetSelector, 'Unexpected error occurred');
+    });
+  };
+
+  loadPage('/ui/clusters/page/1', '#clustersTable');
+  loadPage('/ui/provisioners/page/1', '#provisionersTable');
+</script>
+
 <script>
 function setupPieProgress(){
   $('.pie_progress_static').asPieProgress({
@@ -243,16 +202,5 @@ setInterval(function(){
     });
   });
 }, 15000);
-
-$(document).ready(function() {
-  var bulkDeleteTargets = ['cluster', 'provisioner'];
-  bulkDeleteTargets.forEach((target) => handleBulkDelete({
-    selectAllCheckboxSelector: `input[type="checkbox"].select-all-${target}s`,
-    rowCheckboxesSelector: `input[type="checkbox"].select-${target}`,
-    buttonSelector: `a.bulk-delete-${target}s`,
-    formTargetUrl: (ids) => `/ui/${target}s/${ids}/delete`,
-    targetName: target
-  }));
-});
 </script>
 {% endblock %}

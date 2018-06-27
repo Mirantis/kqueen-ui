@@ -1,0 +1,102 @@
+{% from "ui/partial/pagination.html" import render_pagination with context %}
+{% from "ui/partial/tableaction.html" import render_provisioner_row_actions with context %}
+
+{% macro render_provisioner_table(provisioners, pages_total, current_page) %}
+  <div id="provisionersTable">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>
+            {% if provisioners %}
+              <input
+                type="checkbox"
+                class="select-all-provisioners"
+                id="select-all-provisioners"
+              />
+              <label for="select-all-provisioners"><i class="mdi checkbox-all"></i></label>
+            {% endif %}
+          </th>
+          <th class="col-md-4">Name</th>
+          <th class="col-md-4">Engine</th>
+          <th class="col-md-4">Created</th>
+          <th class="status_column">Status</th>
+          <th class="action_column">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for provisioner in provisioners %}
+          {% set cant_delete = not is_authorized(session, 'provisioner:delete', provisioner) %}
+          <tr class="clickable">
+            <td>
+              <input
+                type="checkbox"
+                id="select-provisioner-{{ provisioner.id }}"
+                {% if cant_delete %}disabled{% endif %}
+                class="select-provisioner"
+                name="{{ provisioner.id }}"
+                value="{{ provisioner.name }}"
+              />
+              <label
+                for="select-provisioner-{{ provisioner.id }}"
+                {% if cant_delete %}class="disabled-wrapper"{% endif %}
+              >
+                <i class="mdi checkbox-row{% if cant_delete %} disabled{% endif %}"></i>
+              </label>
+            </td>
+            <td class="col-md-4">{{ provisioner.name }}</td>
+            <td class="col-md-4">{{ provisioner.verbose_name }}</td>
+            <td class="col-md-4">{{ provisioner.created_at }}</td>
+            <td class="status_column">
+              <i
+                class="mdi {{ provisioner.state|provisioner_status_icon_class }}"
+                title="{{ provisioner.state }}"
+              ></i>
+            </td>
+            <td class="action_column">
+              {% if provisioner.parameters %}
+              <a
+                data-toggle="collapse"
+                data-target="#provisioner-{{ loop.index }}"
+                title="More information"
+              >
+                <i class="mdi mdi-information-outline"></i>
+              </a>
+              {% endif %}
+              {{ render_provisioner_row_actions(provisioner) }}
+            </td>
+          </tr>
+          {% if provisioner.parameters %}
+          <tr>
+            <td colspan="5" class="meta-params">
+              <div id="provisioner-{{ loop.index }}" class="collapse">
+                <table class="table table-hover no-actions" id="table-provisionerparams">
+                  <tbody>
+                    {% for key, value in provisioner.parameters.items() %}
+                    <tr>
+                      <th>{{ key }}</th>
+                      <td>{{ value }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+          {% endif %}
+        {% else %}
+          <tr class="not-event-pointer"><td colspan="5" class="text-center">No Items</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if pages_total > 1 %}
+      {{ render_pagination("/ui/provisioners/page/", "#provisionersTable", current_page,
+                           pages_total, "Provisioners") }}
+    {% endif %}
+  </div>
+
+  <script>
+    handleProvisionerDelete();
+  </script>
+{% endmacro %}
+
+{{ render_provisioner_table(provisioners, provisioner_pages, current_provisioner_page) }}

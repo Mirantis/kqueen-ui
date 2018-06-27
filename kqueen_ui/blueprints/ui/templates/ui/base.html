@@ -99,13 +99,12 @@
     
     {% block extrajs %}{% endblock %}
     <script>
-    $(document).ready(function(){
-      $('.confirm-delete').click(function(ev){
+    $(document).ready(function() {
+      $(document).on('click', '.confirm-delete', function(ev) {
         ev.preventDefault();
-        var $this = $( this )
-         ,  questionText = 'Do you wish to permanently delete ' + $this.data('name') + '?'
-         ,  href = $this.data('target')
-         ;
+        var $this = $(this),
+            questionText = 'Do you wish to permanently delete ' + $this.data('name') + '?',
+            href = $this.data('target');
         swal({
           title: 'Are you sure?',
           text: questionText,

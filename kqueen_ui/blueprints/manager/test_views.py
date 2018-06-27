@@ -6,8 +6,8 @@ import pytest
 
 @pytest.mark.parametrize('view,values', [
     ('manager.overview', {}),
-    ('manager.data_clusters', {}),
-    ('manager.data_provisioners', {}),
+    ('manager.data_clusters', {'page': 1}),
+    ('manager.data_provisioners', {'page': 1}),
     ('manager.organization_create', {}),
     ('manager.organization_delete', {'organization_id': 1}),
     ('manager.organization_detail', {'organization_id': 1}),
@@ -21,8 +21,8 @@ def test_login_required(client, view, values):
 
 @pytest.mark.parametrize('view,values', [
     ('manager.overview', {}),
-    ('manager.data_clusters', {}),
-    ('manager.data_provisioners', {}),
+    ('manager.data_clusters', {'page': 1}),
+    ('manager.data_provisioners', {'page': 1}),
     ('manager.organization_create', {}),
     ('manager.organization_delete', {'organization_id': 1}),
     ('manager.organization_detail', {'organization_id': 1}),
@@ -50,14 +50,14 @@ def test_render_view(client_login_superadmin, view, values, lookup_html):
 
 
 def test_data_clusters(client_login_superadmin, cluster, monkeypatch):
-    response = client_login_superadmin.get(url_for('manager.data_clusters'))
+    response = client_login_superadmin.get(url_for('manager.data_clusters', page=1))
     assert response.status_code == 200
     assert response.json['response'] == 200
     assert '<table' in response.json['body']
 
 
 def test_data_provisioners(client_login_superadmin, provisioner, monkeypatch):
-    response = client_login_superadmin.get(url_for('manager.data_provisioners'))
+    response = client_login_superadmin.get(url_for('manager.data_provisioners', page=1))
     assert response.status_code == 200
     assert response.json['response'] == 200
     assert '<table' in response.json['body']

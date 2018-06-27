@@ -5,6 +5,7 @@ function handleBulkDelete({
   var selectAllCheckbox = $(selectAllCheckboxSelector),
       activeRowCheckboxes = $(rowCheckboxesSelector + ':not(:disabled)'),
       bulkDeleteButton = $(buttonSelector);
+
   var checkedRowsSelector = rowCheckboxesSelector + ':checked',
       notCheckedRowsSelector = rowCheckboxesSelector + ':not(:checked)';
 
@@ -23,7 +24,7 @@ function handleBulkDelete({
     var names = getSelectedObjectsNames();
     var confirmationText = (
       isZeroCount(notCheckedRowsSelector) ?
-      `ALL your ${targetName}s (${names.join(', ')})` :
+      `ALL your ${targetName}s on the page (${names.join(', ')})` :
       `${targetName}${names.length === 1 ? '' : 's'} ${names.join(', ')}`
     );
     bulkDeleteButton.data('name', confirmationText);
@@ -52,6 +53,7 @@ function handleBulkDelete({
       setButtonTarget();
     }
   });
+
   activeRowCheckboxes.bind('change', function () {
     setDeleteButtonState(activeRowCheckboxes.is(':checked'));
     setButtonTarget();
@@ -71,3 +73,20 @@ function handleBulkDelete({
   });
 }
 
+function handleOverviewTableBulkDelete(target) {
+  return handleBulkDelete({
+    selectAllCheckboxSelector: `input[type="checkbox"].select-all-${target}s`,
+    rowCheckboxesSelector: `input[type="checkbox"].select-${target}`,
+    buttonSelector: `a.bulk-delete-${target}s`,
+    formTargetUrl: (ids) => `/ui/${target}s/${ids}/delete`,
+    targetName: target
+  });
+}
+
+function handleClusterDelete() {
+  return handleOverviewTableBulkDelete('cluster');
+}
+
+function handleProvisionerDelete() {
+  return handleOverviewTableBulkDelete('provisioner');
+}

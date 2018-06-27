@@ -91,9 +91,7 @@ class Overview(KQueenView):
             organization['created_at'] = format_datetime(organization['created_at'])
 
         return render_template('manager/overview.html',
-                               organizations=organizations,
-                               c_page=get_page(request.args, 'c_page'),
-                               p_page=get_page(request.args, 'p_page'))
+                               organizations=organizations)
 
 
 class DataClusters(KQueenView):
@@ -101,8 +99,7 @@ class DataClusters(KQueenView):
     methods = ['GET']
     objects_per_page = 20
 
-    def handle(self):
-        page = get_page(request.args, 'c_page')
+    def handle(self, page):
         try:
             clusters = self.kqueen_request(
                 'cluster', 'list',
@@ -120,7 +117,6 @@ class DataClusters(KQueenView):
                                     clusters=clusters,
                                     cluster_pages=cluster_pages,
                                     current_cluster_page=page,
-                                    current_provisioner_page=get_page(request.args, 'p_page'),
                                     form_page_ranges=form_page_ranges)
         }
         return jsonify(data)
@@ -131,8 +127,7 @@ class DataProvisioners(KQueenView):
     methods = ['GET']
     objects_per_page = 20
 
-    def handle(self):
-        page = get_page(request.args, 'p_page')
+    def handle(self, page):
         try:
             provisioners = self.kqueen_request(
                 'provisioner', 'list',
@@ -148,7 +143,6 @@ class DataProvisioners(KQueenView):
             'body': render_template('manager/partial/provisioner_table.html',
                                     provisioners=provisioners,
                                     provisioner_pages=provisioner_pages,
-                                    current_cluster_page=get_page(request.args, 'c_page'),
                                     current_provisioner_page=page,
                                     form_page_ranges=form_page_ranges)
         }
@@ -338,10 +332,17 @@ class MemberChangeRole(KQueenView):
 
 
 manager.add_url_rule('/', view_func=Overview.as_view('overview'))
-manager.add_url_rule('/data/clusters', view_func=DataClusters.as_view('data_clusters'))
-manager.add_url_rule('/data/provisioners', view_func=DataProvisioners.as_view('data_provisioners'))
-manager.add_url_rule('/organization/create', view_func=OrganizationCreate.as_view('organization_create'))
-manager.add_url_rule('/organization/<organization_id>/delete', view_func=OrganizationDelete.as_view('organization_delete'))
-manager.add_url_rule('/organization/<organization_id>/detail', view_func=OrganizationDetail.as_view('organization_detail'))
-manager.add_url_rule('/organization/<organization_id>/member/create', view_func=MemberCreate.as_view('member_create'))
-manager.add_url_rule('/organization/<organization_id>/member/<user_id>/changerole', view_func=MemberChangeRole.as_view('member_change_role'))
+manager.add_url_rule('/data/clusters/page/<int:page>',
+                     view_func=DataClusters.as_view('data_clusters'))
+manager.add_url_rule('/data/provisioners/page/<int:page>',
+                     view_func=DataProvisioners.as_view('data_provisioners'))
+manager.add_url_rule('/organization/create',
+                     view_func=OrganizationCreate.as_view('organization_create'))
+manager.add_url_rule('/organization/<organization_id>/delete',
+                     view_func=OrganizationDelete.as_view('organization_delete'))
+manager.add_url_rule('/organization/<organization_id>/detail',
+                     view_func=OrganizationDetail.as_view('organization_detail'))
+manager.add_url_rule('/organization/<organization_id>/member/create',
+                     view_func=MemberCreate.as_view('member_create'))
+manager.add_url_rule('/organization/<organization_id>/member/<user_id>/changerole',
+                     view_func=MemberChangeRole.as_view('member_change_role'))
