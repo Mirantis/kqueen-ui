@@ -72,3 +72,8 @@ function validateFieldIsUuid(value, element, condition) {
   );
   return this.optional(element) || regexp.test(value) === condition;
 }
+
+function validateFieldParity(value, element, parityChecker) {
+  var parity = value % 2;
+  return parityChecker === 'odd' ? parity : parityChecker === 'even' ? !parity : false;
+}
