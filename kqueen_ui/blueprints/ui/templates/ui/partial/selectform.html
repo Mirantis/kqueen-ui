@@ -46,8 +46,7 @@ document.addEventListener("DOMContentLoaded", function() {
     "cidr", validateFieldIsIpCidr, $.validator.format("Value doesn't match CIDR format."));
   $.validator.addMethod('uuid', validateFieldIsUuid, 'Entered value is not a valid UUID.');
   $.validator.addMethod('parity', validateFieldParity, (parity) => `Value is not ${parity}.`);
-  $.validator.addMethod(
-    'ip_list', validateFieldIsListOfIps, $.validator.format("Make sure all provided IPs are correct."));
+  $.validator.addMethod('ip_list', validateFieldIsListOfIps, "Make sure all provided IPs are correct.");
 
   // Insert icon with link to the documentation
   var docLink = `

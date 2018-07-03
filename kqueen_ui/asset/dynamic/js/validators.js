@@ -80,17 +80,21 @@ function validateFieldParity(value, element, parityChecker) {
 }
 
 function validateFieldIsListOfIps(value, element, condition) {
+  // Do not validate empty and optional element
+  // this.optional is false when it is not empty
+  if (this.optional(element) != false) {
+    return true;
+  };
+
   var regexp = new RegExp(
     '^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.' +
     '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', 'i'
   );
   var arr = value.split(",");
-  var toReturn = true;
-  arr.forEach(function(entry) {
-    entry = entry.trim();
-    if (regexp.test(entry) !== condition) {
-      toReturn = false;
-    }
-  });
-  return toReturn;
+  for (var ip of arr) {
+     if (regexp.test(ip.trim()) !== condition) {
+      return false;
+     }
+  }
+  return true;
 }

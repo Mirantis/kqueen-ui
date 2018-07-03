@@ -26,15 +26,19 @@ USER_STATE_MAP = {
 }
 
 
-def cluster_status_icon(status):
-    icon = '<i class="mdi {}" title="{}"></i>'.format(
-        CLUSTER_STATE_MAP.get(status, 'mdi-alert-circle-outline'),
-        status
+def cluster_status_icon(cluster):
+    state = cluster['state']
+    title = cluster['metadata'].get('status_message')
+    title = title.replace('"', "'") if title else state
+
+    icon = '<i class="mdi {class_name}" title="{title}"></i>'.format(
+        class_name=CLUSTER_STATE_MAP.get(state, 'mdi-alert-circle-outline'),
+        title=title
     )
-    if status in [config['CLUSTER_PROVISIONING_STATE'], config['CLUSTER_UPDATING_STATE']]:
-        icon = '<div class="icon-container"><div class="{}" title="{}"></div></div>'.format(
-            CLUSTER_STATE_MAP.get(status, 'mdi-alert-circle-outline'),
-            status
+    if state in [config['CLUSTER_PROVISIONING_STATE'], config['CLUSTER_UPDATING_STATE']]:
+        icon = '<div class="icon-container"><div class="{class_name}" title="{title}"></div></div>'.format(
+            class_name=CLUSTER_STATE_MAP.get(state, 'mdi-alert-circle-outline'),
+            title=state
         )
     return icon
 
