@@ -100,10 +100,17 @@ class DataClusters(KQueenView):
     objects_per_page = 20
 
     def handle(self, page):
+        name_filter = request.args.get('cluster_name', '')
+        provisioner_filter = request.args.get('cluster_provisioner', '')
         try:
             clusters = self.kqueen_request(
                 'cluster', 'list',
-                fnkwargs={'all_namespaces': True, 'page': page, 'per_page': self.objects_per_page}
+                fnkwargs={
+                    'all_namespaces': True,
+                    'page': page,
+                    'per_page': self.objects_per_page,
+                    'filters': {'name': name_filter, 'provisioner': provisioner_filter}
+                }
             )
         except Exception as e:
             return handle_exception_for_ajax(e)
@@ -128,10 +135,16 @@ class DataProvisioners(KQueenView):
     objects_per_page = 20
 
     def handle(self, page):
+        name_filter = request.args.get('provisioner_name', '')
         try:
             provisioners = self.kqueen_request(
                 'provisioner', 'list',
-                fnkwargs={'all_namespaces': True, 'page': page, 'per_page': self.objects_per_page}
+                fnkwargs={
+                    'all_namespaces': True,
+                    'page': page,
+                    'per_page': self.objects_per_page,
+                    'filters': {'name': name_filter}
+                }
             )
         except Exception as e:
             return handle_exception_for_ajax(e)

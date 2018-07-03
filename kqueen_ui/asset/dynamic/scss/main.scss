@@ -799,6 +799,61 @@ input[type="checkbox"] {
   }
 }
 
+.table > thead > tr > th.filterable-column {
+  > div {
+    width: auto;
+    display: inline-block;
+    .filter-icon {
+      margin-left: 10px;
+      padding: 0;
+      height: 19px;
+      position: relative;
+      top: -4px;
+      span.filter-value {
+        display: inline-block;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        max-width: 130px;
+        white-space: nowrap;
+        text-transform: none;
+        font-weight: 500;
+        font-size: 14px;
+        color: white;
+        background: #6c567b;
+        border-radius: 3px;
+        padding: 2px 10px;
+      }
+      .clear-filter-value {
+        position: relative;
+        top: -5px;
+      }
+      &:hover {
+        text-decoration: none;
+      }
+    }
+  }
+  .filtering-popover {
+    position: absolute;
+    width: 280px;
+    visibility: hidden;
+    .popover-content {
+      margin-top: 5px;
+      padding: 15px;
+      background: white;
+      border: 1px solid #ccc;
+      box-shadow: 0px 1px 4px -1px #bbb;
+      border-top: 1px solid #f2f2f2;
+      font-weight: 400;
+    }
+    &.preserved-popover, &.preserved-popover:hover {
+      visibility: visible;
+    }
+  }
+  .form-group {
+    margin-top: 3px;
+  }
+}
+
 // *****************************************************************************
 // Flicker on Load Fix for Glyphicons
 // *****************************************************************************

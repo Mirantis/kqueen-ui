@@ -1,11 +1,11 @@
-{% macro render_pagination(url_prefix, table_selector, current_page, pages_total, label) %}
+{% macro render_pagination(targetName, current_page, pages_total, label) %}
   <div class="row pagination-row">
     <nav aria-label="{{ label }} navigation">
       <ul class="pagination">
         <li>
           <a
             {% if current_page == 1 %}class="disabled"{% endif %}
-            onClick="loadPage('{{ url_prefix }}{{ current_page - 1 }}', '{{ table_selector }}')"
+            onClick="updatePageParam('{{ targetName }}', '{{ current_page - 1 }}')"
           >
             <i class="mdi mdi-menu-left"></i><span>Previous</span>
           </a>
@@ -19,7 +19,7 @@
           {% endif %}
           {% for page in page_range %}
             <li {% if current_page == page %}class="active"{% endif %}>
-              <a onClick="loadPage('{{ url_prefix }}{{ page }}', '{{ table_selector }}')">
+              <a onClick="updatePageParam('{{ targetName }}', '{{ page }}')">
                 {{ page }}
               </a>
             </li>
@@ -28,7 +28,7 @@
         <li>
           <a
             {% if current_page == pages_total %}class="disabled"{% endif %}
-            onClick="loadPage('{{ url_prefix }}{{ current_page + 1 }}', '{{ table_selector }}')"
+            onClick="updatePageParam('{{ targetName }}', '{{ current_page + 1 }}')"
           >
             <span>Next</span><i class="mdi mdi-menu-right"></i>
           </a>

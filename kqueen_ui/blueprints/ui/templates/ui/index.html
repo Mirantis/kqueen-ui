@@ -104,6 +104,46 @@
 
 {% block extrajs %}
 <script>
+  var queryParams = {cluster_page: 1, provisioner_page: 1, ...getQueryParameters()};
+
+  function updatePageParam(targetName, value) {
+    queryParams[`${targetName}_page`] = value;
+    loadPage(targetName);
+  }
+
+  function updateFilterParam(targetName, params) {
+    queryParams = {...queryParams, ...params, [`${targetName}_page`]: 1};
+    loadPage(targetName);
+  }
+
+  var pageLoadOptions = {
+    cluster: {
+      targetToUpdate: '#clustersTable',
+      urlPrefix: '/ui/clusters/page/',
+      pageParamKey: 'cluster_page',
+      filtersParamKeys: ['cluster_name', 'cluster_provisioner']
+    },
+    provisioner: {
+      targetToUpdate: '#provisionersTable',
+      urlPrefix: '/ui/provisioners/page/',
+      pageParamKey: 'provisioner_page',
+      filtersParamKeys: ['provisioner_name']
+    }
+  }
+
+  function setUpFilters() {
+    $(document).on('click', '.filter-button', function(e) {
+      e.preventDefault();
+
+      // Get and apply filter values
+      var filterForm = $(this).parents('.filter-form');
+      var data = filterForm.serializeArray().reduce((obj, item) => (
+        {...obj, [item.name]: item.value}
+      ), {});
+      updateFilterParam(filterForm.attr('name').split('_')[0], data);
+    });
+  };
+
   function handleError(tableSelector, errorDetails) {
     var error = `
       <tbody>
@@ -119,25 +159,46 @@
     $(tableSelector + ' tbody').replaceWith(error);
   }
 
-  function loadPage(url, targetSelector) {
+  function loadPage(target) {
+    setQueryParameters(queryParams);
+    $(`a.bulk-delete-${target}s`).addClass('hidden');
+
+    var options = pageLoadOptions[target];
+    if (!options) {
+      return;
+    }
+    var {urlPrefix, targetToUpdate, pageParamKey, filtersParamKeys} = options;
+
+    var filtersQueryString = serializeToQueryString(filtersParamKeys.reduce(
+      (result, filterKey) => ({...result, [filterKey]: queryParams[filterKey]}), {}
+    ));
+    var url = urlPrefix + queryParams[pageParamKey] + filtersQueryString;
+
     $.get(url, function(data) {
       if (data.response === 200) {
-        $(targetSelector).replaceWith(data.body);
+        $(targetToUpdate).replaceWith(data.body);
         if (data.allowClusterDeploy) {
           $('#clusterCreateButton').removeClass('disabled');
         } else {
           $('#clusterCreateButton').addClass('disabled');
         }
       } else {
-        handleError(targetSelector, data.body);
+        handleError(targetToUpdate, data.body);
       }
     }).fail(function() {
-      handleError(targetSelector, 'Unexpected error occurred');
+      handleError(targetToUpdate, 'Unexpected error occurred');
+    }).always(function() {
+      handleFilterView(filtersParamKeys, queryParams);
     });
-  };
+  }
 
-  loadPage('/ui/clusters/page/1', '#clustersTable');
-  loadPage('/ui/provisioners/page/1', '#provisionersTable');
+  $(document).ready(function() {
+    loadPage('cluster');
+    loadPage('provisioner');
+
+    handlePopoverDisplaying();
+    setUpFilters();
+  });
 </script>
 
 <script>

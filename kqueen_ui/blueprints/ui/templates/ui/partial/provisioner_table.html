@@ -1,5 +1,6 @@
 {% from "ui/partial/pagination.html" import render_pagination with context %}
 {% from "ui/partial/tableaction.html" import render_provisioner_row_actions with context %}
+{% from "ui/partial/_column_filter.html" import render_column_filter with context %}
 
 {% macro render_provisioner_table(provisioners, pages_total, current_page) %}
   <div id="provisionersTable">
@@ -16,7 +17,9 @@
               <label for="select-all-provisioners"><i class="mdi checkbox-all"></i></label>
             {% endif %}
           </th>
-          <th class="col-md-4">Name</th>
+          <th class="col-md-4 filterable-column">
+            {{ render_column_filter("Name", "provisioner_name") }}
+          </th>
           <th class="col-md-4">Engine</th>
           <th class="col-md-4">Created</th>
           <th class="status_column">Status</th>
@@ -89,8 +92,7 @@
         </tbody>
     </table>
     {% if pages_total > 1 %}
-      {{ render_pagination("/ui/provisioners/page/", "#provisionersTable", current_page,
-                           pages_total, "Provisioners") }}
+      {{ render_pagination("provisioner", current_page, pages_total, "Provisioners") }}
     {% endif %}
   </div>
 

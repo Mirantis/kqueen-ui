@@ -120,6 +120,48 @@
 
 {% block extrajs %}
 <script>
+  var queryParams = {cluster_page: 1, provisioner_page: 1, ...getQueryParameters()};
+
+  function updatePageParam(targetName, value) {
+    queryParams[`${targetName}_page`] = value;
+    loadPage(targetName);
+  }
+
+  function updateFilterParam(targetName, params) {
+    queryParams = {...queryParams, ...params, [`${targetName}_page`]: 1};
+    loadPage(targetName);
+  }
+
+  var pageLoadOptions = {
+    cluster: {
+      refreshButton: '#refreshClusters',
+      targetToUpdate: '#clustersTable',
+      urlPrefix: '/manager/data/clusters/page/',
+      pageParamKey: 'cluster_page',
+      filtersParamKeys: ['cluster_name', 'cluster_provisioner']
+    },
+    provisioner: {
+      refreshButton: '#refreshProvisioners',
+      targetToUpdate: '#provisionersTable',
+      urlPrefix: '/manager/data/provisioners/page/',
+      pageParamKey: 'provisioner_page',
+      filtersParamKeys: ['provisioner_name']
+    }
+  }
+
+  function setUpFilters() {
+    $(document).on('click', '.filter-button', function(e) {
+      e.preventDefault();
+
+      // Get and apply filter values
+      var filterForm = $(this).parents('.filter-form');
+      var data = filterForm.serializeArray().reduce((obj, item) => (
+        {...obj, [item.name]: item.value}
+      ), {});
+      updateFilterParam(filterForm.attr('name').split('_')[0], data);
+    });
+  };
+
   function handleError(tableSelector, errorDetails) {
     var error = `
       <tbody>
@@ -131,37 +173,55 @@
         </tr>
       </tbody>
     `;
-
-    $(tableSelector + ' tbody').replaceWith(error);
     $(tableSelector + ' table').addClass('table-error');
+    $(tableSelector + ' tbody').replaceWith(error);
   }
 
-  refreshButtonsMapping = {
-    '#clustersTable': '#refreshClusters',
-    '#provisionersTable': '#refreshProvisioners'
-  }
+  function loadPage(target) {
+    setQueryParameters(queryParams);
+    $(`a.bulk-delete-${target}s`).addClass('hidden');
 
-  function loadPage(url, targetSelector) {
-    $(refreshButtonsMapping[targetSelector]).addClass('disabled');
+    var options = pageLoadOptions[target];
+    if (!options) {
+      return;
+    }
+    var {urlPrefix, targetToUpdate, pageParamKey, filtersParamKeys, refreshButton} = options;
+
+    var filtersQueryString = serializeToQueryString(filtersParamKeys.reduce(
+      (result, filterKey) => ({...result, [filterKey]: queryParams[filterKey]}), {}
+    ));
+    var url = urlPrefix + queryParams[pageParamKey] + filtersQueryString;
+
+    $(refreshButton).addClass('disabled');
     $.get(url, function(data) {
       if (data.response === 200) {
-        $(targetSelector).replaceWith(data.body);
+        $(targetToUpdate).replaceWith(data.body);
+        if (data.allowClusterDeploy) {
+          $('#clusterCreateButton').removeClass('disabled');
+        } else {
+          $('#clusterCreateButton').addClass('disabled');
+        }
       } else {
-        handleError(targetSelector, data.body);
+        handleError(targetToUpdate, data.body);
       }
     }).fail(function() {
-      handleError(targetSelector, 'Unexpected error occurred');
+      handleError(targetToUpdate, 'Unexpected error occurred');
     }).always(function() {
-      $(refreshButtonsMapping[targetSelector]).removeClass('disabled');
+      $(refreshButton).removeClass('disabled');
+      handleFilterView(filtersParamKeys, queryParams);
     });
-};
-$(document).ready(function() {
-  $('#refreshClusters').click(function() {
-    loadPage('/manager/data/clusters/page/1', '#clustersTable');
-  }).click();
-  $('#refreshProvisioners').click(function() {
-    loadPage('/manager/data/provisioners/page/1', '#provisionersTable');
-  }).click();
-});
+  }
+
+  $(document).ready(function() {
+    $('#refreshClusters').click(function() {
+      loadPage('cluster');
+    }).click();
+    $('#refreshProvisioners').click(function() {
+      loadPage('provisioner');
+    }).click();
+
+    handlePopoverDisplaying();
+    setUpFilters();
+  });
 </script>
 {% endblock %}

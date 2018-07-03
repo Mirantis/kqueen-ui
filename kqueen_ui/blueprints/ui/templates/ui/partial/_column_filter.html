@@ -1,0 +1,28 @@
+{% macro render_filter_icon() %}
+  <div class="btn btn-link filter-icon">
+    <i class="mdi mdi-filter hidden"></i>
+    <span class="filter-value hidden"></span>
+    <i class="mdi mdi-close clear-filter-value hidden"></i>
+  </div>
+{% endmacro %}
+
+{% macro render_column_filter(column_name, filter_name, form_contents) %}
+  <div class="js-{{ filter_name }}">
+    <div data-toggle="popover">
+      {{ column_name }}
+      {{ render_filter_icon() }}
+    </div>
+    <div class="filtering-popover">
+      <div class="popover-content">
+        <form class="filter-form" name="{{ filter_name }}-form">
+          <div class="form-group">
+            <input type="text" name="{{ filter_name }}" class="form-control" maxlength="50"/>
+          </div>
+          <button class="btn btn-primary btn-sm filter-button">
+            Filter
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endmacro %}

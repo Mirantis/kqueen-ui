@@ -1,12 +1,17 @@
 {% from "ui/partial/pagination.html" import render_pagination with context %}
+{% from "ui/partial/_column_filter.html" import render_column_filter with context %}
 
 <div class="table-container no-actions" id="clustersTable">
   <table class="table table-hover">
     <thead>
       <tr>
         <th class="col-md-3">Organization</th>
-        <th class="col-md-3">Name</th>
-        <th class="col-md-3">Provisioner</th>
+        <th class="col-md-3 filterable-column">
+          {{ render_column_filter("Name", "cluster_name") }}
+        </th>
+        <th class="col-md-3 filterable-column">
+          {{ render_column_filter("Provisioner", "cluster_provisioner") }}
+        </th>
         <th class="col-md-3">Created</th>
         <th class="status_column">Status</th>
         <th class="action_column">Actions</th>
@@ -59,7 +64,6 @@
     </tbody>
   </table>
   {% if cluster_pages > 1 %}
-    {{ render_pagination("/manager/data/clusters/page/", "#clustersTable", current_cluster_page,
-                         cluster_pages, "Clusters") }}
+    {{ render_pagination("cluster", current_cluster_page, cluster_pages, "Clusters") }}
   {% endif %}
 </div>
