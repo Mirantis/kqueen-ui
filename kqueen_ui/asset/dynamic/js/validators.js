@@ -70,10 +70,27 @@ function validateFieldIsUuid(value, element, condition) {
   var regexp = new RegExp(
     '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$', 'i'
   );
+  // Immediately return true if the element is blank AND it is not required
   return this.optional(element) || regexp.test(value) === condition;
 }
 
 function validateFieldParity(value, element, parityChecker) {
   var parity = value % 2;
   return parityChecker === 'odd' ? parity : parityChecker === 'even' ? !parity : false;
+}
+
+function validateFieldIsListOfIps(value, element, condition) {
+  var regexp = new RegExp(
+    '^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.' +
+    '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', 'i'
+  );
+  var arr = value.split(",");
+  var toReturn = true;
+  arr.forEach(function(entry) {
+    entry = entry.trim();
+    if (regexp.test(entry) !== condition) {
+      toReturn = false;
+    }
+  });
+  return toReturn;
 }
