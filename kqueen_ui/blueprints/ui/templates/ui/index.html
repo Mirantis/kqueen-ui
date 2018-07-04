@@ -104,7 +104,12 @@
 
 {% block extrajs %}
 <script>
-  var queryParams = {cluster_page: 1, provisioner_page: 1, ...getQueryParameters()};
+  var queryParams = {
+    cluster_page: 1, provisioner_page: 1,
+    sort_clusters_by: 'created', clusters_order: 'asc',
+    sort_provisioners_by: 'created', provisioners_order: 'asc',
+    ...getQueryParameters()
+  };
 
   function updatePageParam(targetName, value) {
     queryParams[`${targetName}_page`] = value;
@@ -116,18 +121,31 @@
     loadPage(targetName);
   }
 
+  function updateSortingParam(targetName, value, order) {
+    queryParams = {
+      ...queryParams,
+      [`sort_${targetName}s_by`]: value,
+      [`${targetName}s_order`]: order
+    };
+    loadPage(targetName);
+  }
+
   var pageLoadOptions = {
     cluster: {
       targetToUpdate: '#clustersTable',
       urlPrefix: '/ui/clusters/page/',
       pageParamKey: 'cluster_page',
-      filtersParamKeys: ['cluster_name', 'cluster_provisioner']
+      filtersParamKeys: ['cluster_name', 'cluster_provisioner'],
+      sortingParamKey: 'sort_clusters_by',
+      sortingParamOrder: 'clusters_order'
     },
     provisioner: {
       targetToUpdate: '#provisionersTable',
       urlPrefix: '/ui/provisioners/page/',
       pageParamKey: 'provisioner_page',
-      filtersParamKeys: ['provisioner_name']
+      filtersParamKeys: ['provisioner_name', 'provisioner_engine'],
+      sortingParamKey: 'sort_provisioners_by',
+      sortingParamOrder: 'provisioners_order'
     }
   }
 
@@ -156,6 +174,7 @@
       </tbody>
     `;
     $(tableSelector + ' table').addClass('table-error');
+    $(tableSelector + ' table').removeClass('updating');
     $(tableSelector + ' tbody').replaceWith(error);
   }
 
@@ -167,12 +186,17 @@
     if (!options) {
       return;
     }
-    var {urlPrefix, targetToUpdate, pageParamKey, filtersParamKeys} = options;
+    var {urlPrefix, targetToUpdate, pageParamKey, filtersParamKeys, sortingParamKey,
+         sortingParamOrder} = options;
 
-    var filtersQueryString = serializeToQueryString(filtersParamKeys.reduce(
-      (result, filterKey) => ({...result, [filterKey]: queryParams[filterKey]}), {}
-    ));
-    var url = urlPrefix + queryParams[pageParamKey] + filtersQueryString;
+    $(targetToUpdate + ' table').addClass('updating');
+
+    var additionalQueryString = serializeToQueryString(
+      filtersParamKeys.concat([sortingParamKey, sortingParamOrder]).reduce(
+        (result, filterKey) => ({...result, [filterKey]: queryParams[filterKey]}), {}
+      )
+    );
+    var url = urlPrefix + queryParams[pageParamKey] + additionalQueryString;
 
     $.get(url, function(data) {
       if (data.response === 200) {
@@ -189,6 +213,7 @@
       handleError(targetToUpdate, 'Unexpected error occurred');
     }).always(function() {
       handleFilterView(filtersParamKeys, queryParams);
+      handleSortingView(target, sortingParamKey, sortingParamOrder, queryParams);
     });
   }
 
@@ -198,6 +223,7 @@
 
     handlePopoverDisplaying();
     setUpFilters();
+    setUpSorting();
   });
 </script>
 

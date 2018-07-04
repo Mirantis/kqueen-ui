@@ -1,29 +1,37 @@
 {% from "ui/partial/pagination.html" import render_pagination with context %}
-{% from "ui/partial/_column_filter.html" import render_column_filter with context %}
+{% from "ui/partial/_column_operations.html" import render_column_filter, render_column_sorting with context %}
 
 <div class="table-container no-actions" id="clustersTable">
   <table class="table table-hover">
     <thead>
       <tr>
-        <th class="col-md-3">Organization</th>
-        <th class="col-md-3 filterable-column">
+        <th class="organization_column">Organization</th>
+        <th class="name_column filterable-column sortable-column">
           {{ render_column_filter("Name", "cluster_name") }}
+          {{ render_column_sorting("cluster_name") }}
         </th>
-        <th class="col-md-3 filterable-column">
+        <th class="provisioner_manager_column filterable-column sortable-column">
           {{ render_column_filter("Provisioner", "cluster_provisioner") }}
+          {{ render_column_sorting("cluster_provisioner") }}
         </th>
-        <th class="col-md-3">Created</th>
-        <th class="status_column">Status</th>
+        <th class="created_column sortable-column">
+          Created
+          {{ render_column_sorting("cluster_created") }}
+        </th>
+        <th class="status_column sortable-column">
+          Status
+          {{ render_column_sorting("cluster_status") }}
+        </th>
         <th class="action_column">Actions</th>
       </tr>
     </thead>
     <tbody>
       {% for cluster in clusters %}
         <tr {% if cluster.state in config.CLUSTER_TRANSIENT_STATES %} class="in-transition"{% endif %}>
-          <td class="col-md-3">{{ cluster.owner.organization.name }}</td>
-          <td class="col-md-3">{{ cluster.name }}</td>
-          <td class="col-md-3">{{ cluster.provisioner.name }}</td>
-          <td class="col-md-3">{{ cluster.created_at }}</td>
+          <td class="organization_column">{{ cluster.owner.organization.name }}</td>
+          <td class="name_column">{{ cluster.name }}</td>
+          <td class="provisioner_manager_column">{{ cluster.provisioner.name }}</td>
+          <td class="created_column">{{ cluster.created_at }}</td>
           <td class="status_column">
             {{ cluster.state|cluster_status_icon|safe }}
           </td>

@@ -1,27 +1,37 @@
 {% from "ui/partial/pagination.html" import render_pagination with context %}
-{% from "ui/partial/_column_filter.html" import render_column_filter with context %}
+{% from "ui/partial/_column_operations.html" import render_column_filter, render_column_sorting with context %}
 
 <div class="table-container no-actions" id="provisionersTable">
   <table class="table table-hover">
     <thead>
       <tr>
-        <th class="col-md-3">Organization</th>
-        <th class="col-md-3 filterable-column">
+        <th class="organization_column">Organization</th>
+        <th class="name_column filterable-column sortable-column">
           {{ render_column_filter("Provisioner", "provisioner_name") }}
+          {{ render_column_sorting("provisioner_name") }}
         </th>
-        <th class="col-md-3">Engine</th>
-        <th class="col-md-3">Created</th>
-        <th class="status_column">Status</th>
+        <th class="engine_manager_column filterable-column sortable-column">
+          {{ render_column_filter("Engine", "provisioner_engine") }}
+          {{ render_column_sorting("provisioner_engine") }}
+        </th>
+        <th class="created_column sortable-column">
+          Created
+          {{ render_column_sorting("provisioner_created") }}
+        </th>
+        <th class="status_column sortable-column">
+          Status
+          {{ render_column_sorting("provisioner_status") }}
+        </th>
         <th class="action_column">Actions</th>
       </tr>
     </thead>
     <tbody>
       {% for provisioner in provisioners %}
         <tr>
-          <td class="col-md-3">{{ provisioner.owner.organization.name }}</td>
-          <td class="col-md-3">{{ provisioner.name }}</td>
-          <td class="col-md-3">{{ provisioner.verbose_name }}</td>
-          <td class="col-md-3">{{ provisioner.created_at }}</td>
+          <td class="organization_column">{{ provisioner.owner.organization.name }}</td>
+          <td class="name_column">{{ provisioner.name }}</td>
+          <td class="engine_manager_column">{{ provisioner.verbose_name }}</td>
+          <td class="created_column">{{ provisioner.created_at }}</td>
           <td class="status_column">
             <i
               class="mdi {{ provisioner.state|provisioner_status_icon_class }}"
