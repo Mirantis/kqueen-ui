@@ -38,6 +38,9 @@ h1, h2 {
 
 .clickable {
   cursor: pointer;
+  &.selected {
+    background: #f5f5f5;
+  }
 }
 
 a.disabled {

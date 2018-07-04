@@ -51,12 +51,16 @@ function handleBulkDelete({
     setDeleteButtonState(selectAllChecked);
     if (selectAllChecked) {
       setButtonTarget();
+      $(this).parents('table').find('tr.clickable').addClass('selected');
+    } else {
+      $(this).parents('table').find('tr.clickable').removeClass('selected');
     }
   });
 
   activeRowCheckboxes.bind('change', function () {
     setDeleteButtonState(activeRowCheckboxes.is(':checked'));
     setButtonTarget();
+    $(this).parents('tr.clickable').toggleClass('selected');
     if (isZeroCount(notCheckedRowsSelector)) {
       selectAllCheckbox.prop('checked', true).trigger('change');
     } else if (isZeroCount(checkedRowsSelector)) {
@@ -67,7 +71,7 @@ function handleBulkDelete({
   // Handle table row click
   $('tr.clickable').click(function(e) {
     if (e.target.tagName === 'TD') {
-      var rowCheckbox = $($(e.target).parent().find(activeRowCheckboxes)[0]);
+      var rowCheckbox = $($(e.target).parent().find(activeRowCheckboxes).first());
       rowCheckbox.prop('checked', !rowCheckbox.is(':checked')).trigger('change');
     }
   });
