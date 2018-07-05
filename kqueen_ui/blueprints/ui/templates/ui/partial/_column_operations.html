@@ -26,3 +26,12 @@
     </div>
   </div>
 {% endmacro %}
+
+{% macro render_column_sorting(name) %}
+  <a class="btn btn-link sort-column-btn pull-right" name="{{ name }}">
+    <i class="mdi mdi-arrow-down-bold"></i>
+  </a>
+  <a class="btn btn-link sort-column-btn pull-right" name="{{ name }}">
+    <i class="mdi mdi-arrow-up-bold"></i>
+  </a>
+{% endmacro %}

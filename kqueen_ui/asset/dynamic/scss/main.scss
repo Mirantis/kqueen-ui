@@ -537,6 +537,12 @@ table {
   tbody {
     word-wrap: break-word;
   }
+  &.updating {
+    color: #ccc;
+    a, i {
+      color: #ccc !important;
+    }
+  }
 }
 
 .table-container {
@@ -554,7 +560,7 @@ table {
   }
   .table {
     .status_column {
-      width: 40px;
+      width: 110px;
       .mdi {
         font-size: 22px;
         line-height: 1;
@@ -578,7 +584,7 @@ table {
       }
     }
     .action_column {
-      width: 90px;
+      width: 20px;
       @extend .text-right;
       a {
         color: $brand-primary;
@@ -606,6 +612,21 @@ table {
         cursor: pointer;
         color: $mira-gray-dark;
       }
+    }
+    .checkboxes_column {
+      width: 20px;
+    }
+    .created_column {
+      width: 250px;
+    }
+    .provisioner_column, .engine_column {
+      width: 270px;
+    }
+    .provisioner_manager_column, .engine_manager_column {
+      width: 200px;
+    }
+    .organization_column {
+      width: 150px;
     }
     .labels-column div {
       margin-bottom: 2px;
@@ -851,6 +872,23 @@ input[type="checkbox"] {
   }
   .form-group {
     margin-top: 3px;
+  }
+}
+
+.table > thead > tr > th.sortable-column {
+  .sort-column-btn {
+    padding: 0;
+    i.mdi {
+      font-size: 14px;
+      color: #ccc;
+      margin-right: -5px;
+      &.active {
+        color: $mira-purple-dark;
+      }
+    }
+    &:hover i.mdi {
+      color: lighten($mira-purple-dark, 20%);
+    }
   }
 }
 

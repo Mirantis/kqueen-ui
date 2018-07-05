@@ -1,13 +1,13 @@
 {% from "ui/partial/pagination.html" import render_pagination with context %}
 {% from "ui/partial/tableaction.html" import render_provisioner_row_actions with context %}
-{% from "ui/partial/_column_filter.html" import render_column_filter with context %}
+{% from "ui/partial/_column_operations.html" import render_column_filter, render_column_sorting with context %}
 
 {% macro render_provisioner_table(provisioners, pages_total, current_page) %}
   <div id="provisionersTable">
     <table class="table table-hover">
       <thead>
         <tr>
-          <th>
+          <th class="checkboxes_column">
             {% if provisioners %}
               <input
                 type="checkbox"
@@ -17,12 +17,22 @@
               <label for="select-all-provisioners"><i class="mdi checkbox-all"></i></label>
             {% endif %}
           </th>
-          <th class="col-md-4 filterable-column">
+          <th class="name_column filterable-column sortable-column">
             {{ render_column_filter("Name", "provisioner_name") }}
+            {{ render_column_sorting("provisioner_name") }}
           </th>
-          <th class="col-md-4">Engine</th>
-          <th class="col-md-4">Created</th>
-          <th class="status_column">Status</th>
+          <th class="engine_column filterable-column sortable-column">
+            {{ render_column_filter("Engine", "provisioner_engine") }}
+            {{ render_column_sorting("provisioner_engine") }}
+          </th>
+          <th class="created_column sortable-column">
+            Created
+            {{ render_column_sorting("provisioner_created") }}
+          </th>
+          <th class="status_column sortable-column">
+            Status
+            {{ render_column_sorting("provisioner_status") }}
+          </th>
           <th class="action_column">Actions</th>
         </tr>
       </thead>
@@ -30,7 +40,7 @@
         {% for provisioner in provisioners %}
           {% set cant_delete = not is_authorized(session, 'provisioner:delete', provisioner) %}
           <tr class="clickable">
-            <td>
+            <td class="checkboxes_column">
               <input
                 type="checkbox"
                 id="select-provisioner-{{ provisioner.id }}"
@@ -46,9 +56,9 @@
                 <i class="mdi checkbox-row{% if cant_delete %} disabled{% endif %}"></i>
               </label>
             </td>
-            <td class="col-md-4">{{ provisioner.name }}</td>
-            <td class="col-md-4">{{ provisioner.verbose_name }}</td>
-            <td class="col-md-4">{{ provisioner.created_at }}</td>
+            <td class="name_column">{{ provisioner.name }}</td>
+            <td class="engine_column">{{ provisioner.verbose_name }}</td>
+            <td class="created_column">{{ provisioner.created_at }}</td>
             <td class="status_column">
               <i
                 class="mdi {{ provisioner.state|provisioner_status_icon_class }}"
@@ -94,11 +104,11 @@
     {% if pages_total > 1 %}
       {{ render_pagination("provisioner", current_page, pages_total, "Provisioners") }}
     {% endif %}
-  </div>
 
-  <script>
-    handleProvisionerDelete();
-  </script>
+    <script>
+      handleProvisionerDelete();
+    </script>
+  </div>
 {% endmacro %}
 
 {{ render_provisioner_table(provisioners, provisioner_pages, current_provisioner_page) }}

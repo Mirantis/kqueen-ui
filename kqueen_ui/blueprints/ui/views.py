@@ -590,14 +590,22 @@ class ProvisionerPage(KQueenView):
     objects_per_page = 20
 
     def handle(self, page):
-        name_filter = request.args.get('provisioner_name', '')
+        supported_filters = {
+            'name': 'provisioner_name',
+            'engine': 'provisioner_engine'
+        }
+        sorting = {
+            'sortby': 'sort_provisioners_by',
+            'order': 'provisioners_order'
+        }
         try:
             provisioners = self.kqueen_request(
                 'provisioner', 'list',
                 fnkwargs={
                     'page': page,
                     'per_page': self.objects_per_page,
-                    'filters': {'name': name_filter}
+                    'filters': {k: request.args.get(v, '') for k, v in supported_filters.items()},
+                    'sort': {k: request.args.get(v, '') for k, v in sorting.items()}
                 }
             )
         except Exception as e:
@@ -874,15 +882,22 @@ class ClusterPage(KQueenView):
     objects_per_page = 20
 
     def handle(self, page):
-        name_filter = request.args.get('cluster_name', '')
-        provisioner_filter = request.args.get('cluster_provisioner', '')
+        supported_filters = {
+            'name': 'cluster_name',
+            'provisioner': 'cluster_provisioner'
+        }
+        sorting = {
+            'sortby': 'sort_clusters_by',
+            'order': 'clusters_order'
+        }
         try:
             clusters = self.kqueen_request(
                 'cluster', 'list',
                 fnkwargs={
                     'page': page,
                     'per_page': self.objects_per_page,
-                    'filters': {'name': name_filter, 'provisioner': provisioner_filter}
+                    'filters': {k: request.args.get(v, '') for k, v in supported_filters.items()},
+                    'sort': {k: request.args.get(v, '') for k, v in sorting.items()}
                 }
             )
         except Exception as e:

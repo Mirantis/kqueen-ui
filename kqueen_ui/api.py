@@ -177,10 +177,13 @@ class BaseManager(ParserMixin):
 class ListManager(BaseManager):
     resource_url = ''
 
-    def list(self, namespace=None, all_namespaces=None, page=1, per_page=20, filters=None):
+    def list(self, namespace=None, all_namespaces=None, page=1, per_page=20,
+             filters=None, sort=None):
         encode_kw = {'offset': (page - 1) * per_page, 'limit': per_page} if page else {}
         if filters:
             encode_kw.update(filters)
+        if sort:
+            encode_kw.update(sort)
         if all_namespaces:
             encode_kw['all_namespaces'] = True
         elif namespace:

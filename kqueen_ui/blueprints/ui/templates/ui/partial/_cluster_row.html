@@ -10,7 +10,7 @@
           data-status="{{ cluster.state }}"
           data-href="{{ url_for('ui.cluster_detail', cluster_id=cluster.id) }}"
         >
-          <td>
+          <td class="checkboxes_column">
             <input
               type="checkbox"
               id="select-cluster-{{ cluster.id }}"
@@ -26,7 +26,7 @@
               <i class="mdi checkbox-row{% if cant_delete %} disabled{% endif %}"></i>
             </label>
           </td>
-          <td class="col-md-4 clickable-cluster-name">
+          <td class="name_column clickable-cluster-name">
             {% if is_authorized(session, 'cluster:get', cluster) %}
             <div class="cluster-name">
               <a href="{{ url_for('ui.cluster_detail', cluster_id=cluster.id) }}">
@@ -37,8 +37,8 @@
             {{ cluster.name }}
             {% endif %}
           </td>
-          <td class="col-md-4">{{ cluster.provisioner.name }}</td>
-          <td class="col-md-4">{{ cluster.created_at }}</td>
+          <td class="provisioner_column">{{ cluster.provisioner.name }}</td>
+          <td class="created_column">{{ cluster.created_at }}</td>
           <td class="status_column">
             {{ cluster.state|cluster_status_icon|safe }}
           </td>

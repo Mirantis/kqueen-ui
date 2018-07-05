@@ -1,26 +1,34 @@
 {% from "ui/partial/_cluster_row.html" import render_cluster_row with context %}
 {% from "ui/partial/pagination.html" import render_pagination with context %}
-{% from "ui/partial/_column_filter.html" import render_column_filter with context %}
+{% from "ui/partial/_column_operations.html" import render_column_filter, render_column_sorting with context %}
 
 {% macro render_cluster_table(clusters, pages_total, current_page) %}
   <div id="clustersTable">
     <table class="table table-hover">
       <thead>
         <tr>
-          <th>
+          <th class="checkboxes_column">
             {% if clusters %}
               <input type="checkbox" class="select-all-clusters" id="select-all-clusters" />
               <label for="select-all-clusters"><i class="mdi checkbox-all"></i></label>
             {% endif %}
           </th>
-          <th class="col-md-4 filterable-column">
+          <th class="name_column filterable-column sortable-column">
             {{ render_column_filter("Name", "cluster_name") }}
+            {{ render_column_sorting("cluster_name") }}
           </th>
-          <th class="col-md-4 filterable-column">
+          <th class="provisioner_column filterable-column sortable-column">
             {{ render_column_filter("Provisioner", "cluster_provisioner") }}
+            {{ render_column_sorting("cluster_provisioner") }}
           </th>
-          <th class="col-md-4">Created</th>
-          <th class="status_column">Status</th>
+          <th class="created_column sortable-column">
+            Created
+            {{ render_column_sorting("cluster_created") }}
+          </th>
+          <th class="status_column sortable-column">
+            Status
+            {{ render_column_sorting("cluster_status") }}
+          </th>
           <th class="action_column">Actions</th>
         </tr>
       </thead>
@@ -35,11 +43,11 @@
     {% if pages_total > 1 %}
       {{ render_pagination("cluster", current_page, pages_total, "Clusters") }}
     {% endif %}
-  </div>
 
-  <script>
-    handleClusterDelete();
-  </script>
+    <script>
+      handleClusterDelete();
+    </script>
+  </div>
 {% endmacro %}
 
 {{ render_cluster_table(clusters, cluster_pages, current_cluster_page) }}
