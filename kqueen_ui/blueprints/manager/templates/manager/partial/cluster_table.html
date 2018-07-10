@@ -33,7 +33,7 @@
           <td class="provisioner_manager_column">{{ cluster.provisioner.name }}</td>
           <td class="created_column">{{ cluster.created_at }}</td>
           <td class="status_column">
-            {{ cluster.state|cluster_status_icon|safe }}
+            {{ cluster|cluster_status_icon|safe }}
           </td>
           <td class="action_column">
             {% if cluster.metadata %}

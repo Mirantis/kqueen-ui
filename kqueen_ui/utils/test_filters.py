@@ -8,9 +8,12 @@ from kqueen_ui.utils.filters import cluster_status_icon, provisioner_status_icon
 from kqueen_ui.utils.filters import base_url, policy_handler
 
 
-@pytest.mark.parametrize('state,icon_class', CLUSTER_STATE_MAP.items())
-def test_cluster_status_icon_class(state, icon_class):
-    assert icon_class in cluster_status_icon(state)
+@pytest.mark.parametrize('cluster,icon_class',
+                         [({'metadata': {'status_message': 'Error creating server'}, 'state': k}, v)
+                          for k, v in CLUSTER_STATE_MAP.items()])
+def test_cluster_status_icon_class(cluster, icon_class):
+    assert icon_class in cluster_status_icon(cluster)
+    assert any(item in cluster_status_icon(cluster) for item in ['Error creating server', cluster['state']])
 
 
 @pytest.mark.parametrize('state,icon_class', PROVISIONER_STATE_MAP.items())
