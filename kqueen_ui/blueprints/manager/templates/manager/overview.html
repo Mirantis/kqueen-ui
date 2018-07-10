@@ -225,6 +225,8 @@
         } else {
           $('#clusterCreateButton').addClass('disabled');
         }
+      } else if (data.session_expired) {
+        window.location.replace(`/ui/login?next=${encodeURIComponent(window.location.href)}`);
       } else {
         handleError(targetToUpdate, data.body);
       }

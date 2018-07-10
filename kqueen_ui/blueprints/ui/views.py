@@ -585,7 +585,6 @@ class ProvisionerDeleteBulk(KQueenView):
 
 
 class ProvisionerPage(KQueenView):
-    decorators = [login_required]
     methods = ['GET']
     objects_per_page = 20
 
@@ -610,6 +609,9 @@ class ProvisionerPage(KQueenView):
             )
         except Exception as e:
             return handle_exception_for_ajax(e)
+        if provisioners is None:
+            return jsonify({'session_expired': True})
+
         total = provisioners['total']
         _, provisioners = sanitize_resource_metadata(session, [], provisioners['items'])
 
@@ -877,7 +879,6 @@ class ClusterRow(KQueenView):
 
 
 class ClusterPage(KQueenView):
-    decorators = [login_required]
     methods = ['GET']
     objects_per_page = 20
 
@@ -902,6 +903,9 @@ class ClusterPage(KQueenView):
             )
         except Exception as e:
             return handle_exception_for_ajax(e)
+        if clusters is None:
+            return jsonify({'session_expired': True})
+
         total = clusters['total']
         clusters, _ = sanitize_resource_metadata(session, clusters['items'], [])
 
