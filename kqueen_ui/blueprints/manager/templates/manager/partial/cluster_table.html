@@ -31,7 +31,7 @@
           <td class="organization_column">{{ cluster.owner.organization.name }}</td>
           <td class="name_column">{{ cluster.name }}</td>
           <td class="provisioner_manager_column">{{ cluster.provisioner.name }}</td>
-          <td class="created_column">{{ cluster.created_at }}</td>
+          <td class="created_column">js-replace-datetime({{ cluster.created_at }})</td>
           <td class="status_column">
             {{ cluster|cluster_status_icon|safe }}
           </td>

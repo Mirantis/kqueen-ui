@@ -1,5 +1,4 @@
 from collections import OrderedDict
-from flask_babel import format_datetime
 from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.config import current_config
 
@@ -281,9 +280,6 @@ def sanitize_resource_metadata(session, clusters, provisioners):
             engines = []
 
     for cluster in clusters:
-        if 'created_at' in cluster:
-            cluster['created_at'] = format_datetime(cluster['created_at'])
-
         cluster_engine = cluster.get('provisioner', {}).get('engine')
         _engine_params = [e['parameters'] for e in engines if e['name'] == cluster_engine]
         if not len(_engine_params) == 1:
@@ -299,9 +295,6 @@ def sanitize_resource_metadata(session, clusters, provisioners):
         cluster['metadata'] = OrderedDict(sorted(cluster.get('metadata', {}).items(), key=lambda t: t[0]))
 
     for provisioner in provisioners:
-        if 'created_at' in provisioner:
-            provisioner['created_at'] = format_datetime(provisioner['created_at'])
-
         provisioner_engine = provisioner.get('engine')
         _engine_params = [e['parameters'] for e in engines if e['name'] == provisioner_engine]
         if not len(_engine_params) == 1:

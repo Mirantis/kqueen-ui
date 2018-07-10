@@ -1,7 +1,6 @@
 from datetime import datetime
 from flask import (current_app as app, Blueprint, flash, jsonify, redirect,
                    render_template, request, session, url_for)
-from flask_babel import format_datetime
 from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.auth import authenticate, confirm_token, generate_confirmation_token
 from kqueen_ui.exceptions import KQueenAPIException
@@ -11,12 +10,11 @@ from kqueen_ui.utils.loggers import user_prefix
 from kqueen_ui.utils.wrappers import login_required
 
 from .forms import (ClusterCreateForm, ProvisionerCreateForm, ClusterApplyForm,
-                    ChangePasswordForm, UserInviteForm, UserProfileForm, RequestPasswordResetForm,
+                    ChangePasswordForm, UserInviteForm, RequestPasswordResetForm,
                     PasswordResetForm, LoginForm)
 from .utils import (generate_password, prettify_engine_name, status_for_cluster_detail,
                     sanitize_resource_metadata, form_overview, form_page_ranges)
 
-import copy
 import json
 import logging
 
@@ -205,8 +203,6 @@ class OrganizationManage(KQueenView):
             member['role'] = member['role'].capitalize()
             if 'email' not in member:
                 member['email'] = '-'
-            if 'created_at' in member:
-                member['created_at'] = format_datetime(member['created_at'])
 
         return render_template('ui/organization_manage.html',
                                organization=organization,
@@ -367,34 +363,6 @@ class UserProfile(KQueenView):
     decorators = [login_required]
     methods = ['GET', 'POST']
 
-    def handle(self):
-        form_cls = UserProfileForm
-
-        # set default for timezone field
-        user = copy.deepcopy(session['user'])
-        user_metadata = user.get('metadata', {})
-        timezone_field = getattr(form_cls, 'timezone')
-        timezone_field.kwargs['default'] = app.config.get('BABEL_DEFAULT_TIMEZONE', 'UTC')
-        if 'timezone' in user_metadata:
-            timezone_field.kwargs['default'] = user_metadata.get('timezone')
-
-        form = form_cls()
-        if form.validate_on_submit():
-            # update current user timezone
-            user_metadata['timezone'] = form.timezone.data
-            user_id = session['user']['id']
-            self.kqueen_request('user', 'update', fnargs=(user_id, user))
-
-            # update current session
-            if 'metadata' not in session['user']:
-                session['user']['metadata'] = {}
-            session['user']['metadata']['timezone'] = form.timezone.data
-
-            user_logger.debug('User profile updated for user {}'.format(session['user']['username']))
-            flash('User profile successfully updated.', 'success')
-            return redirect(url_for('ui.index'))
-        return render_template('ui/user_profile.html', form=form)
-
 
 class UserChangePassword(KQueenView):
     decorators = [login_required]
@@ -500,7 +468,6 @@ class UserRequestResetPassword(KQueenView):
 
 
 ui.add_url_rule('/users/invite', view_func=UserInvite.as_view('user_invite'))
-ui.add_url_rule('/users/profile', view_func=UserProfile.as_view('user_profile'))
 ui.add_url_rule('/users/<user_id>/reinvite', view_func=UserReinvite.as_view('user_reinvite'))
 ui.add_url_rule('/users/<user_id>/delete', view_func=UserDelete.as_view('user_delete'))
 ui.add_url_rule('/users/changepw', view_func=UserChangePassword.as_view('user_change_password'))

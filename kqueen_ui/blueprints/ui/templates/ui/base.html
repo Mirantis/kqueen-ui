@@ -24,6 +24,23 @@
     <script src="//oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.js"></script>
     <script src="//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+    <script>
+      function formatDate(date) {
+        var months = [
+          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        ];
+        date = new Date(date + ' UTC');
+        var trailingZero = (number) => number < 10 ? '0' + number : number;
+        return (
+          `${months[date.getMonth() + 1]} ` +
+          `${date.getDate()}, ` +
+          `${date.getFullYear()}, ` +
+          `${date.getHours()}:` +
+          `${trailingZero(date.getMinutes())}:` +
+          `${trailingZero(date.getSeconds())}`
+        );
+      }
+    </script>
   </head>
   <body class="bp-{{ request.blueprint }}">
   {% if request.path != url_for('ui.login') %}
