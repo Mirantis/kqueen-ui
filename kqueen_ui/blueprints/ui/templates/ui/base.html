@@ -84,9 +84,11 @@
 
     <div id="content">
       <div class="container">
+      {% block main_page_header %}
         <div class="page-header">
           <h2>{% block page_header %}{% endblock %}</h2>
         </div>
+      {% endblock %}
         {% block content %}{% endblock %}
       </div>
     </div>

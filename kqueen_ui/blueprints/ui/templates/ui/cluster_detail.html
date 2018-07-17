@@ -2,7 +2,12 @@
 
 {% from "ui/partial/form.html" import render_form %}
 
-{% block page_header %}Cluster {{ cluster.name }} detail{% endblock %}
+{% block main_page_header %}
+<div class="page-header">
+  <h2>Cluster {{ cluster.name }} detail</h2>
+  <h5>ID: {{ cluster.id }}</h5>
+</div>
+{%endblock%}
 
 {% block breadcrumb %}<li class="breadcrumb-item active">Cluster {{ cluster.name }} detail</li>{% endblock %}
 
