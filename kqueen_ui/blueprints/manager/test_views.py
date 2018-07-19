@@ -6,8 +6,6 @@ import pytest
 
 @pytest.mark.parametrize('view,values', [
     ('manager.overview', {}),
-    ('manager.data_clusters', {'page': 1}),
-    ('manager.data_provisioners', {'page': 1}),
     ('manager.organization_create', {}),
     ('manager.organization_delete', {'organization_id': 1}),
     ('manager.organization_detail', {'organization_id': 1}),
@@ -21,8 +19,6 @@ def test_login_required(client, view, values):
 
 @pytest.mark.parametrize('view,values', [
     ('manager.overview', {}),
-    ('manager.data_clusters', {'page': 1}),
-    ('manager.data_provisioners', {'page': 1}),
     ('manager.organization_create', {}),
     ('manager.organization_delete', {'organization_id': 1}),
     ('manager.organization_detail', {'organization_id': 1}),

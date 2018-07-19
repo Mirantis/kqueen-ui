@@ -95,7 +95,6 @@ class Overview(KQueenView):
 
 
 class DataClusters(KQueenView):
-    decorators = [superadmin_required]
     methods = ['GET']
     objects_per_page = 20
 
@@ -121,6 +120,9 @@ class DataClusters(KQueenView):
             )
         except Exception as e:
             return handle_exception_for_ajax(e)
+        if clusters is None:
+            return jsonify({'session_expired': True})
+
         cluster_pages = get_pages_count(clusters['total'], self.objects_per_page)
         clusters, _ = sanitize_resource_metadata(session, clusters['items'], [])
         clusters.sort(key=lambda k: k['_namespace'])
@@ -137,7 +139,6 @@ class DataClusters(KQueenView):
 
 
 class DataProvisioners(KQueenView):
-    decorators = [superadmin_required]
     methods = ['GET']
     objects_per_page = 20
 
@@ -163,6 +164,9 @@ class DataProvisioners(KQueenView):
             )
         except Exception as e:
             return handle_exception_for_ajax(e)
+        if provisioners is None:
+            return jsonify({'session_expired': True})
+
         provisioner_pages = get_pages_count(provisioners['total'], self.objects_per_page)
         _, provisioners = sanitize_resource_metadata(session, [], provisioners['items'])
         provisioners.sort(key=lambda k: k['_namespace'])
