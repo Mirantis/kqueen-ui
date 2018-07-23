@@ -751,6 +751,20 @@ class ClusterDetail(KQueenView):
     validation_hint = 'uuid'
 
     def handle(self, cluster_id):
+        def _update_status_with_floatingips(status, cluster):
+            if 'resources' not in cluster['metadata']:
+                return status
+            resources = cluster['metadata']['resources']
+            instances = (*resources['masters'], *resources['slaves'])
+            ip_map = {instance['ip']: instance['fip'] for instance in instances if instance.get('fip')}
+
+            for n in status['nodes']:
+                internal_ip = [ip[len('InternalIP: '):] for ip in n['ip'] if 'InternalIP' in ip][0]
+                fip = ip_map.get(internal_ip)
+                if fip:
+                    n['ip'].append('FloatingIP: {}'.format(fip))
+            return status
+
         cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
         state_class = 'info'
         _status_data = {}
@@ -771,6 +785,7 @@ class ClusterDetail(KQueenView):
             # obj.apply(form.apply.data)
             pass
 
+        status = _update_status_with_floatingips(status, cluster)
         return render_template(
             'ui/cluster_detail.html',
             cluster=cluster,
