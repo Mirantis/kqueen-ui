@@ -1294,6 +1294,25 @@ footer {
   @include mirantis-button-variant($btn-danger-color, $btn-danger-bg, $btn-danger-border);
 }
 
+.kubeconfig-download {
+  background: white;
+  .kubeconfig-type {
+    display: none;
+    width: 49%;
+  }
+  .kubeconfig-label {
+    display: inline-block;
+  }
+  &:hover {
+    .kubeconfig-type {
+      display: inline-block;
+    }
+    .kubeconfig-label {
+      display: none;
+    }
+  }
+}
+
 //*****************************************************************************
 //SweetAlert
 //*****************************************************************************

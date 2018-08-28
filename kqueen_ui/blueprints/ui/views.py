@@ -1,6 +1,6 @@
 from datetime import datetime
 from flask import (current_app as app, Blueprint, flash, jsonify, redirect,
-                   render_template, request, session, url_for)
+                   render_template, request, session, url_for, Response)
 from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.auth import authenticate, confirm_token, generate_confirmation_token
 from kqueen_ui.exceptions import KQueenAPIException
@@ -17,6 +17,7 @@ from .utils import (generate_password, prettify_engine_name, status_for_cluster_
 
 import json
 import logging
+import yaml
 
 logger = logging.getLogger('kqueen_ui')
 user_logger = logging.getLogger('user')
@@ -837,11 +838,15 @@ class ClusterSetNetworkPolicy(KQueenView):
 class ClusterKubeconfig(KQueenView):
     decorators = [login_required]
     methods = ['GET']
-    validation_hint = 'uuid'
+    validation_hint = 'uuid,format'
 
-    def handle(self, cluster_id):
+    def handle(self, cluster_id, data_format='json'):
         cluster = self.kqueen_request('cluster', 'get', fnargs=(cluster_id,))
-        return jsonify(cluster['kubeconfig'])
+        kubeconfig = cluster['kubeconfig']
+        if data_format == 'json':
+            return jsonify(kubeconfig)
+        return Response(response=yaml.dump(kubeconfig, default_flow_style=False),
+                        content_type='text/yaml')
 
 
 class ClusterTopologyData(KQueenView):
@@ -931,8 +936,11 @@ ui.add_url_rule('/clusters/<cluster_id>/set_network_policy',
                 view_func=ClusterSetNetworkPolicy.as_view('set_network_policy'))
 ui.add_url_rule('/clusters/<cluster_id>/resize',
                 view_func=ClusterResize.as_view('cluster_resize'))
+kubeconfig_view = ClusterKubeconfig.as_view('cluster_kubeconfig')
+ui.add_url_rule('/clusters/<cluster_id>/kubeconfig/<data_format>',
+                view_func=kubeconfig_view)
 ui.add_url_rule('/clusters/<cluster_id>/kubeconfig',
-                view_func=ClusterKubeconfig.as_view('cluster_kubeconfig'))
+                view_func=kubeconfig_view, defaults={'data_format': 'json'})
 ui.add_url_rule('/clusters/<cluster_id>/topology-data',
                 view_func=ClusterTopologyData.as_view('cluster_topology_data'))
 ui.add_url_rule('/clusters/<cluster_id>/row/<index>',

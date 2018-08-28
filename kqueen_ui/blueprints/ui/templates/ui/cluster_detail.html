@@ -113,13 +113,29 @@
     {% if not_ok_state %}
       <button class="btn btn-primary btn-xs disabled">Kubeconfig N/A</button>
     {% else %}
-      <a
-        href="{{ url_for('ui.cluster_kubeconfig', cluster_id=cluster.id) }}"
-        class="btn btn-primary btn-xs"
-        target="_blank"
-      >
-        Download Kubeconfig
-      </a>
+      <div class="kubeconfig-download">
+        <a
+          href="{{ url_for('ui.cluster_kubeconfig', cluster_id=cluster.id) }}"
+          class="btn btn-primary btn-xs kubeconfig-label"
+          target="_blank"
+        >
+          Download Kubeconfig
+        </a>
+        <a
+          href="{{ url_for('ui.cluster_kubeconfig', cluster_id=cluster.id, data_format='yaml') }}"
+          class="btn btn-primary btn-xs kubeconfig-type"
+          target="_blank"
+        >
+          YAML
+        </a>
+        <a
+          href="{{ url_for('ui.cluster_kubeconfig', cluster_id=cluster.id, data_format='json') }}"
+          class="btn btn-primary btn-xs kubeconfig-type"
+          target="_blank"
+        >
+          JSON
+        </a>
+      </div>
     {% endif %}
   </div>
   <div class="col-sm-3">
