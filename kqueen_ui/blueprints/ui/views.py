@@ -188,10 +188,8 @@ class OrganizationManage(KQueenView):
         organization = self.kqueen_request('organization', 'get', fnargs=(organization_id,))
         users = self.kqueen_request('user', 'list')
         members = [
-            u
-            for u
-            in users
-            if u['organization']['id'] == organization_id and u['id'] != user_id
+            u for u in users
+            if u['organization']['id'] == organization_id
         ]
         # sort members by date
         members.sort(key=lambda k: (k['created_at'], k['username']))
@@ -207,7 +205,8 @@ class OrganizationManage(KQueenView):
 
         return render_template('ui/organization_manage.html',
                                organization=organization,
-                               members=members)
+                               members=members,
+                               current_user_id=user_id)
 
 
 ui.add_url_rule('/organizations/manage', view_func=OrganizationManage.as_view('organization_manage'))
