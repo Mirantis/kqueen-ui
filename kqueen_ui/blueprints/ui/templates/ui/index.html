@@ -200,7 +200,9 @@
 
     $.get(url, function(data) {
       if (data.response === 200) {
-        $(targetToUpdate).replaceWith(data.body);
+        $(targetToUpdate).replaceWith(
+          data.body.replace(/js-replace-datetime\(([^)]+)\)/g, (_, date) => formatDate(date))
+        );
         if (data.allowClusterDeploy) {
           $('#clusterCreateButton').removeClass('disabled');
         } else {

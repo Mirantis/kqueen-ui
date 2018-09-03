@@ -23,9 +23,11 @@
   </div>
   <table class="table table-hover">
     <thead>
-      <th class="col-md">Name</th>
-      <th class="col-md">Created</th>
-      <th class="action_column">Actions</th>
+      <tr>
+        <th class="col-md">Name</th>
+        <th class="col-md">Created</th>
+        <th class="action_column">Actions</th>
+      </tr>
     </thead>
     <tbody>
       {% for organization in organizations %}
@@ -35,7 +37,11 @@
                {{ organization.name }}
              </a>
           </td>
-          <td class="col-md">{{ organization.created_at }}</td>
+          <td class="col-md">
+            <script>
+              document.write(formatDate('{{ organization.created_at }}'))
+            </script>
+          </td>
           <td class="action_column">
             {% set detail_url = url_for('manager.organization_detail', organization_id=organization.id) %}
             {% set delete_url = url_for('manager.organization_delete', organization_id=organization.id) %}
@@ -69,12 +75,14 @@
 <div class="table-container no-actions" id="clustersTable">
   <table class="table table-hover">
     <thead>
-      <th class="col-md-3">Organization</th>
-      <th class="col-md-3">Name</th>
-      <th class="col-md-2">Provisioner</th>
-      <th class="col-md-4">Created</th>
-      <th class="status_column">Status</th>
-      <th class="action_column">Actions</th>
+      <tr>
+        <th class="col-md-3">Organization</th>
+        <th class="col-md-3">Name</th>
+        <th class="col-md-2">Provisioner</th>
+        <th class="col-md-4">Created</th>
+        <th class="status_column">Status</th>
+        <th class="action_column">Actions</th>
+      </tr>
     </thead>
     <tbody>
       <tr class="not-event-pointer">
@@ -98,12 +106,14 @@
 <div class="table-container no-actions" id="provisionersTable">
   <table class="table table-hover">
     <thead>
-      <th class="col-md-3">Organization</th>
-      <th class="col-md-3">Name</th>
-      <th class="col-md-3">Engine</th>
-      <th class="col-md-3">Created</th>
-      <th class="status_column">Status</th>
-      <th class="action_column">Actions</th>
+      <tr>
+        <th class="col-md-3">Organization</th>
+        <th class="col-md-3">Name</th>
+        <th class="col-md-3">Engine</th>
+        <th class="col-md-3">Created</th>
+        <th class="status_column">Status</th>
+        <th class="action_column">Actions</th>
+      </tr>
     </thead>
     <tbody>
       <tr class="not-event-pointer">
@@ -219,7 +229,9 @@
     $(refreshButton).addClass('disabled');
     $.get(url, function(data) {
       if (data.response === 200) {
-        $(targetToUpdate).replaceWith(data.body);
+        $(targetToUpdate).replaceWith(
+          data.body.replace(/js-replace-datetime\(([^)]+)\)/g, (_, date) => formatDate(date))
+        );
         if (data.allowClusterDeploy) {
           $('#clusterCreateButton').removeClass('disabled');
         } else {

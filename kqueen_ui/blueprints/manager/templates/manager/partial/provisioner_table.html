@@ -31,7 +31,7 @@
           <td class="organization_column">{{ provisioner.owner.organization.name }}</td>
           <td class="name_column">{{ provisioner.name }}</td>
           <td class="engine_manager_column">{{ provisioner.verbose_name }}</td>
-          <td class="created_column">{{ provisioner.created_at }}</td>
+          <td class="created_column">js-replace-datetime({{ provisioner.created_at }})</td>
           <td class="status_column">
             <i
               class="mdi {{ provisioner.state|provisioner_status_icon_class }}"

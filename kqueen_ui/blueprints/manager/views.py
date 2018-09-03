@@ -2,7 +2,6 @@ from .forms import MemberChangeRoleForm, MemberCreateForm, OrganizationCreateFor
 from .forms import ROLE_CHOICES
 from datetime import datetime
 from flask import Blueprint, current_app as app, flash, jsonify, redirect, render_template, request, session, url_for
-from flask_babel import format_datetime
 from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.auth import generate_confirmation_token
 from kqueen_ui.blueprints.ui.utils import generate_password, sanitize_resource_metadata
@@ -87,9 +86,6 @@ class Overview(KQueenView):
     def handle(self):
         organizations = self.kqueen_request('organization', 'list')
         organizations.sort(key=lambda k: (k['namespace'], k['created_at'], k['name']))
-        for organization in organizations:
-            organization['created_at'] = format_datetime(organization['created_at'])
-
         return render_template('manager/overview.html',
                                organizations=organizations)
 
@@ -248,8 +244,6 @@ class OrganizationDetail(KQueenView):
             member['role'] = member['role'].capitalize()
             if 'email' not in member:
                 member['email'] = '-'
-            if 'created_at' in member:
-                member['created_at'] = format_datetime(member['created_at'])
 
         return render_template('manager/organization_detail.html',
                                organization=organization,

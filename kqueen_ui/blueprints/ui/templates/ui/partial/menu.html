@@ -2,7 +2,6 @@
 {% if user %}
   {% set index_url = url_for('ui.index') %}
   {% set manager_url = url_for('manager.overview') %}
-  {% set user_profile_url = url_for('ui.user_profile') %}
   {% set change_pw_url = url_for('ui.user_change_password') %}
   {% set organization_url = url_for('ui.organization_manage') %}
   {% set logout_url = url_for('ui.logout') %}
@@ -23,9 +22,6 @@
       <ul class="dropdown-menu">
         <li>
           <a href="{{ organization_url }}">Manage Organization</a>
-        </li>
-        <li>
-          <a href="{{ user_profile_url }}">User Profile</a>
         </li>
         {% if user.auth != 'ldap' %}
         <li>
