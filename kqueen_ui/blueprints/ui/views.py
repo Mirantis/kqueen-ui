@@ -59,6 +59,11 @@ def test_token():
         if response.status == 401:
             flash('Session expired, please log in again.', 'warning')
             del session['user']
+            # check if logging out on post request (provisioner create or cluster)
+            if request.endpoint == "ui.cluster_create":
+                session['cluster_create'] = request.values
+            elif request.endpoint == "ui.provisioner_create":
+                session['provisioner_create'] = request.values
             if 'policy' in session:
                 del session['policy']
         elif response.status == -1:
@@ -557,6 +562,11 @@ class ProvisionerCreate(KQueenView):
             user_logger.debug('{}:{}'.format(user_prefix(session), msg))
             flash(msg, 'success')
             return redirect(url_for('ui.index', _anchor='provisionersTab'))
+        if 'provisioner_create' in session:
+            for field_name, filled_value in session['provisioner_create'].items():
+                if field_name in form:
+                    form[field_name].data = filled_value
+            del session['provisioner_create']
         return render_template('ui/provisioner_create.html', form=form)
 
 
@@ -706,6 +716,11 @@ class ClusterCreate(KQueenView):
             user_logger.debug('{}:{}'.format(user_prefix(session), msg))
             flash(msg, 'success')
             return redirect(url_for('ui.index'))
+        if 'cluster_create' in session:
+            for field_name, filled_value in session['cluster_create'].items():
+                if field_name in form:
+                    form[field_name].data = filled_value
+            del session['cluster_create']
         return render_template('ui/cluster_create.html', form=form)
 
 
