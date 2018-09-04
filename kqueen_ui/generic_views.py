@@ -115,7 +115,17 @@ class KQueenView(View):
             if self.validation_hint == 'uuid':
                 for kwarg in kwargs.values():
                     self._validate_uuid(kwarg)
-            if self.validation_hint == 'uuid_list':
+            elif self.validation_hint == 'uuid,format':
+                for key, value in kwargs.items():
+                    if key == 'data_format':
+                        if value not in ['json', 'yaml']:
+                            msg = 'Invalid data format {}'.format(value)
+                            logger.exception(msg)
+                            flash(msg, 'warning')
+                            raise KQueenAPIException()
+                    else:
+                        self._validate_uuid(value)
+            elif self.validation_hint == 'uuid_list':
                 for kwarg in kwargs.values():
                     for kw in kwarg:
                         self._validate_uuid(kw)
