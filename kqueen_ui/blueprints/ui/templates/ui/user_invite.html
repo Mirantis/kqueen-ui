@@ -3,9 +3,11 @@
 
 {% block page_header %}Invite Member{% endblock %}
 
+{% set previous_page = url_for('ui.organization_manage', organization_id=session.user.organization.id) %}
+
 {% block breadcrumb %}
 <li class="breadcrumb-item">
-  <a href="{{ url_for('ui.organization_manage', organization_id=session.user.organization.id) }}">
+  <a href="{{ previous_page }}">
     Manage {{ session.user.organization.name }}
   </a>
 </li>
@@ -14,7 +16,6 @@
 
 {% block content %}
 <div class="box">
-  {{ render_selectform(form) }}
+  {{ render_selectform(form, cancel_link=previous_page) }}
 </div>
 {% endblock %}
-
