@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function() {
   nodesCountInput.bind('keyup mouseup', function () {
     if (isNotEnoughNodes($(this).val())) {
       policySelect.prop('disabled', true);
-      policySelect.val('PROVISIONER_UNSPECIFIED');
+      policySelect.val('PROVIDER_UNSPECIFIED');
     } else {
       policySelect.prop('disabled', false);
     }
