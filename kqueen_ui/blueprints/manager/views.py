@@ -256,7 +256,6 @@ class MemberCreate(KQueenView):
 
     def handle(self, organization_id):
         form_cls = MemberCreateForm
-
         auth_config = self.kqueen_request('configuration', 'auth')
 
         for auth_type, options in auth_config.items():
@@ -280,7 +279,8 @@ class MemberCreate(KQueenView):
                 msg = 'Failed to invite user: Invalid parameters.'
                 user_logger.exception('{}:{}'.format(user_prefix(session), msg))
                 flash(msg, 'danger')
-                render_template('ui/user_invite.html', form=form)
+                return redirect(url_for('manager.organization_detail',
+                                        organization_id=organization_id))
 
             chosen_auth_type = form.auth_method.data
             username_field_descr = auth_config[chosen_auth_type]['ui_parameters']['username']
@@ -298,7 +298,14 @@ class MemberCreate(KQueenView):
                 'metadata': {}
             }
             logger.debug('User {} from {} invited.'.format(user_kw['username'], user_kw['organization']))
-            user = self.kqueen_request('user', 'create', fnkwargs={'payload': user_kw})
+
+            try:
+                user = self.kqueen_request('user', 'create', fnkwargs={'payload': user_kw})
+            except Exception as e:
+                msg = 'Failed to invite user: {}.'.format(str(e))
+                user_logger.exception('{}:{}'.format(user_prefix(session), msg))
+                return redirect(url_for('manager.organization_detail',
+                                        organization_id=organization_id))
 
             # send mail
             notify = username_field_descr.get('notify')

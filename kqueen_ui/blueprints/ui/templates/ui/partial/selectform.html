@@ -1,4 +1,4 @@
-{% macro render_selectform(form, action='') %}
+{% macro render_selectform(form, action='', cancel_link=url_for('ui.index')) %}
  <script src="{{ url_for('static', filename='js/fieldlist.js') }}"></script>
  <script src="//code.simplesvg.com/1/1.0.0-beta5/simple-svg.min.js"></script>
  <form id="switchableForm" method="post" action="{{ action }}" enctype="multipart/form-data">
@@ -22,7 +22,7 @@
     type="button"
     name="cancel"
     class="btn btn-default btn-sm"
-    onclick="window.location.href='{{ url_for('ui.index') }}';"
+    onclick="window.location.href='{{ cancel_link }}';"
   >
     Cancel
   </button>

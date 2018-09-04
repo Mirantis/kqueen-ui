@@ -4,15 +4,17 @@
 
 {% block page_header %}Add Member{% endblock %}
 
+{% set previous_page = url_for('manager.organization_detail', organization_id=organization_id) %}
+
 {% block breadcrumb %}
 <li class="breadcrumb-item">
-  <a href="{{ url_for('manager.organization_detail', organization_id=organization_id) }}">Manage Organization</a>
+  <a href="{{ previous_page }}">Manage Organization</a>
 </li>
 <li class="breadcrumb-item active">Add Member</li>
 {% endblock %}
 
 {% block content %}
 <div class="box">
-  {{ render_selectform(form) }}
+  {{ render_selectform(form, cancel_link=previous_page) }}
 </div>
 {% endblock %}
