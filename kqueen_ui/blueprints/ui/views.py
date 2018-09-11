@@ -3,6 +3,7 @@ from flask import (current_app as app, Blueprint, flash, jsonify, redirect,
                    render_template, request, session, url_for, Response)
 from kqueen_ui.api import get_kqueen_client
 from kqueen_ui.auth import authenticate, confirm_token, generate_confirmation_token
+from kqueen_ui.config import current_config
 from kqueen_ui.exceptions import KQueenAPIException
 from kqueen_ui.generic_views import KQueenView
 from kqueen_ui.utils.email import EmailMessage
@@ -23,6 +24,7 @@ logger = logging.getLogger('kqueen_ui')
 user_logger = logging.getLogger('user')
 
 ui = Blueprint('ui', __name__, template_folder='templates')
+config = current_config().to_dict()
 
 
 def get_pages_count(objects_total, objects_per_page):
@@ -591,10 +593,10 @@ class ProvisionerPage(KQueenView):
 
         total = provisioners['total']
         _, provisioners = sanitize_resource_metadata(session, [], provisioners['items'])
-
+        p_health = self.kqueen_request('provisioner', 'health')
         data = {
             'response': 200,
-            'allowClusterDeploy': bool(provisioners),
+            'allowClusterDeploy': bool(p_health['healthy_percentage']),
             'body': render_template('ui/partial/provisioner_table.html',
                                     provisioners=provisioners,
                                     current_provisioner_page=page,

@@ -12,7 +12,7 @@ test_require = [
     'pytest',
     'pytest-cov',
     'pytest-env',
-    'pytest-flask'
+    'pytest-flask==0.11.0'
 ]
 
 setup(
