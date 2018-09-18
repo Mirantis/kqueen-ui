@@ -96,8 +96,7 @@ class SelectField(SelectableMixin, WTSelectField):
 
 class CheckboxField(SelectableMixin, WTBooleanField):
     def __init__(self, *args, **kwargs):
-        self.checkbox_text = kwargs.pop('checkbox_text', '')
-        super(CheckboxField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class StringField(SelectableMixin, WTStringField):

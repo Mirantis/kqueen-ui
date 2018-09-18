@@ -32,7 +32,7 @@
         date = new Date(date + ' UTC');
         var trailingZero = (number) => number < 10 ? '0' + number : number;
         return (
-          `${months[date.getMonth() + 1]} ` +
+          `${months[date.getMonth()]} ` +
           `${date.getDate()}, ` +
           `${date.getFullYear()}, ` +
           `${date.getHours()}:` +

@@ -68,7 +68,7 @@ class FlaskExtendableForm(FlaskForm):
                 }
                 if field_class == SelectField:
                     field_kwargs['choices'] = field_params.get('choices', [])
-                additional_fields = ['default', 'class_name', 'checkbox_text', 'placeholder']
+                additional_fields = ['default', 'class_name', 'placeholder']
                 for field in additional_fields:
                     if field in field_params:
                         field_kwargs[field] = field_params[field]
