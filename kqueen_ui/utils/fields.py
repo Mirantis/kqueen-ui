@@ -32,6 +32,7 @@ class SelectableMixin:
         self.class_name = kwargs.pop('class_name', '')
         self.placeholder = kwargs.pop('placeholder', '')
         self.help_message = kwargs.pop('help_message', None)
+        self.cluster_field = kwargs.pop('cluster_field', None)
         super(SelectableMixin, self).__init__(*args, **kwargs)
 
 

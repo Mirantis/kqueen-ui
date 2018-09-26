@@ -123,7 +123,8 @@ def test_provisioner_create(client_login):
         'name': 'Pytest Jenkins',
         'engine': 'kqueen.engines.JenkinsEngine',
         'password__Jenkins': 'pytest',
-        'username__Jenkins': 'pytest'
+        'username__Jenkins': 'pytest',
+        'cluster-defaults': 'test'
     }
     response = client_login.post(url_for('ui.provisioner_create'), data=form_data)
     assert response.status_code == 302

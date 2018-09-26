@@ -33,7 +33,7 @@ TYPE_MAP = {
 class FlaskExtendableForm(FlaskForm):
 
     @classmethod
-    def append_fields(cls, ctx, switchtag=None):
+    def append_fields(cls, ctx, switchtag=None, cluster_fields=False):
         '''
             {
                 'username': {
@@ -66,6 +66,12 @@ class FlaskExtendableForm(FlaskForm):
                     'jsvalidators': jsvalidators,
                     'help_message': help_message
                 }
+                if cluster_fields:
+                    field_kwargs['cluster_field'] = True
+                    # Submit form even if not all default values are set for cluster
+                    if 'validators' in field_params:
+                        if 'required' in field_params['validators']:
+                            del field_params['validators']['required']
                 if field_class == SelectField:
                     field_kwargs['choices'] = field_params.get('choices', [])
                 additional_fields = ['default', 'class_name', 'placeholder']
@@ -75,3 +81,11 @@ class FlaskExtendableForm(FlaskForm):
 
                 field = field_class(label=label, **field_kwargs)
                 setattr(cls, field_name, field)
+
+    @classmethod
+    def set_default_values(cls, provisioner_id, fields_with_values):
+        for field_name, value in fields_with_values.items():
+            attr_name = field_name + '__' + provisioner_id
+            form_field = getattr(cls, attr_name, None)
+            if form_field:
+                form_field.kwargs['default'] = value

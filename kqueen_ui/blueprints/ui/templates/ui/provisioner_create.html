@@ -12,4 +12,34 @@
 {% endblock %}
 
 {% block extrajs %}
+  <script>
+    $(document).ready(function () {
+      // Insert link for collapsing cluster fields after provisioners field
+      var manage_cluster_field =
+        "<div class=\"configure-class-params\">\n" +
+        "  <a id=\"configure-class-params\" data-toggle=\"collapse\" href=\".cluster-field\">\n" +
+        "    <i class=\"mdi mdi-settings\"></i>\n" +
+        "      Configure cluster parameters\n" +
+        "  </a>\n" +
+        "</div>";
+
+      var last_provisioner_field = $('div.form-group').not('.hidden').not('.cluster-field').last();
+      $(manage_cluster_field).insertAfter(last_provisioner_field);
+
+      $("select#engine").change(function () {
+        var control_cluster_fields = $('.configure-class-params').detach();
+        var current_last_field =  $('div.form-group').not('.hidden').not('.cluster-field').last();
+        control_cluster_fields.insertAfter(current_last_field);
+      });
+
+      $("#configure-class-params").click(function () {
+        var engine = $("#engine").val();
+        $(".cluster-field").each(function () {
+          if ($(this).attr('data-switchtag') === engine) {
+            $(this).toggle();
+          }
+        });
+      })
+    });
+</script>
 {% endblock %}

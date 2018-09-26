@@ -85,6 +85,7 @@
           },
           "label":"Zone",
           "type":"select",
+          "default": "us-central1-a",
           "choices":[
             [
               "us-central1-a",
@@ -193,6 +194,7 @@
           },
           "label":"Location",
           "type":"select",
+          "default": "eastus",
           "choices":[
             [
               "eastus",

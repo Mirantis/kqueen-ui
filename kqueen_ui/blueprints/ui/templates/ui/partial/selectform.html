@@ -18,15 +18,17 @@
       {% endif %}
     {% endif %}
   {% endfor %}
-  <button
-    type="button"
-    name="cancel"
-    class="btn btn-default btn-sm"
-    onclick="window.location.href='{{ url_for('ui.index') }}';"
-  >
-    Cancel
-  </button>
-  <button type="submit" name="submit" class="btn btn-primary btn-sm">Submit</button>
+   <div class="control-btns">
+   <button
+     type="button"
+     name="cancel"
+     class="btn btn-default btn-sm"
+     onclick="window.location.href='{{ url_for('ui.index') }}';"
+   >
+     Cancel
+   </button>
+   <button type="submit" name="submit" class="btn btn-primary btn-sm">Submit</button>
+   </div>
 </form>
 {% if switch_fields|length > 0 %}
 <script>
@@ -156,7 +158,10 @@ document.addEventListener("DOMContentLoaded", function() {
     {{ render_multi_form_field(field) }}
   {% else %}
     <div
-      class="form-group {% if field.errors %}has-error{% endif %} hidden"
+      class="form-group
+      {% if field.errors %} has-error {% endif %}
+      {% if field.cluster_field %} cluster-field collapse{% endif %}
+       hidden"
       data-switchtag="{{ field.switchtag }}"
     >
       {% if field.type != "CheckboxField" %}
@@ -198,7 +203,9 @@ document.addEventListener("DOMContentLoaded", function() {
 {% macro render_multi_form_field(field) %}
   <div
     id="{{ field.name }}-fieldset"
-    class="form-group {% if field.errors %}has-error{% endif %} hidden"
+    class="form-group{% if field.errors %} has-error{% endif %}
+    {% if field.cluster_field %} cluster-field {% endif %}
+     hidden"
     data-switchtag="{{ field.switchtag }}"
   >
     {{ field.label }}

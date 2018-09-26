@@ -497,21 +497,32 @@ class ProvisionerCreate(KQueenView):
                 for (k, v)
                 in _engine_parameters.items()
             }
+            cluster_parameters = {
+                k + '__' + prettify_engine_name(engine['name']) + '__cluster': v
+                for (k, v)
+                in engine['parameters']['cluster'].items()
+            }
             form_cls.append_fields(engine_parameters, switchtag=engine['name'])
+            form_cls.append_fields(cluster_parameters, switchtag=engine['name'], cluster_fields=True)
 
         # Instantiate form and populate engine choices
         form = form_cls()
         form.engine.choices = [(e['name'], e['verbose_name']) for e in engines]
-
+        parameters = {}
+        cluster_default_values = {}
         if form.validate_on_submit():
             try:
                 # Filter out populated tagged fields and get their data
-                parameters = {
-                    k.split('__')[0]: v.data
-                    for (k, v)
-                    in form._fields.items()
-                    if (hasattr(v, 'switchtag') and v.switchtag) and prettify_engine_name(form.engine.data) in k
-                }
+                for (k, v) in form._fields.items():
+                    if (hasattr(v, 'switchtag') and v.switchtag) and prettify_engine_name(form.engine.data) in k:
+                        if k.endswith('__cluster'):
+                            key = k.split('__')[0]
+                            cluster_default_values[key] = v.data
+                        else:
+                            key = k.split('__')[0]
+                            parameters[key] = v.data
+                if cluster_default_values:
+                    parameters['cluster_defaults'] = cluster_default_values
             except Exception as e:
                 msg = 'Failed to create Provisioner: Invalid parameters.'
                 user_logger.exception('{}:{}'.format(user_prefix(session), msg))
@@ -642,6 +653,9 @@ class ClusterCreate(KQueenView):
                 for [k, v] in _parameters.items()
             }
             form_cls.append_fields(parameters, switchtag=provisioner['id'])
+            if 'cluster_defaults' in provisioner['parameters']:
+                form_cls.set_default_values(provisioner['id'],
+                                            provisioner['parameters']['cluster_defaults'])
 
         # Instantiate form and populate provisioner choices
         form = form_cls()
