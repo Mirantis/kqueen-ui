@@ -28,7 +28,7 @@ setup(
     packages=find_packages(),
     zip_safe=False,
     install_requires=[
-        'Flask==0.12.2',
+        'Flask==1.0',
         'Flask-Babel==0.11.2',
         'Flask-Cache',
         'Flask-WTF',
