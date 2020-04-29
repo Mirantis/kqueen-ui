@@ -21,7 +21,7 @@
     "gulp-util": "^3.0.8",
     "gulp-watch": "^4.3.11",
     "isotope-layout": "^3.0.4",
-    "jquery": "1.9.1 - 2",
+    "jquery": "1.9.1 - 4",
     "jquery-asPieProgress": "^0.4.7",
     "jquery-validation": "^1.17.0",
     "js-yaml": "^3.11.0",
